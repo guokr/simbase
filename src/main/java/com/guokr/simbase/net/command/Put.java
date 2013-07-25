@@ -4,6 +4,7 @@ import java.nio.ByteBuffer;
 import java.util.Map;
 
 import org.wahlque.cmd.Command;
+import org.wahlque.cmd.CommandException;
 import org.wahlque.net.transport.Payload;
 import org.wahlque.net.transport.payload.Bytes;
 import org.wahlque.net.transport.payload.Multiple;
@@ -72,6 +73,10 @@ public class Put implements Command {
 		((SimBase) context.get("simbase"))
 				.update(this.key, this.docid, this.distr);
 		return new OK();
+	}
+
+	@Override
+	public void validate(Payload<?> data) throws CommandException {
 	}
 
 }

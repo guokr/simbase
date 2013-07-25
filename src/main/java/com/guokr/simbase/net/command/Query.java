@@ -3,6 +3,7 @@ package com.guokr.simbase.net.command;
 import java.util.Map;
 
 import org.wahlque.cmd.Command;
+import org.wahlque.cmd.CommandException;
 import org.wahlque.net.transport.Payload;
 
 public class Query implements Command {
@@ -21,6 +22,10 @@ public class Query implements Command {
 
 	public Payload<?> apply(Map<String, Object> context, Payload<?> data) {
 		return null;
+	}
+
+	@Override
+	public void validate(Payload<?> data) throws CommandException {
 	}
 
 }

@@ -23,4 +23,8 @@ public class Shutdown implements Command {
 		return null;
 	}
 
+	@Override
+	public void validate(Payload<?> data) {
+	}
+
 }
