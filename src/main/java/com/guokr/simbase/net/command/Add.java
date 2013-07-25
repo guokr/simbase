@@ -65,11 +65,36 @@ public class Add implements Command {
 		if (context.containsKey("debug")) {
 			debug = ((Boolean) (context.get("debug"))).booleanValue();
 		}
+
+		Multiple multiple = (Multiple) data;
+		Payload<?>[] items = multiple.data();
+
+		Bytes actionBytes = (Bytes) items[0];
+		assert (new String(actionBytes.data()).equals("add"));
+
+		Bytes keyBytes = (Bytes) items[1];
+		this.key = new String(keyBytes.data());
+
+		if (debug) {
+			Bytes docidBytes = (Bytes) items[2];
+			this.docid = Integer.parseInt(new String(docidBytes.data()));
+			
+			int size = items.length - 3;
+			float[] array = new float[size];
+			for (int i = 0; i < size; i++) {
+				Bytes floatBytes = (Bytes)items[i + 3];
+				array[i] = Float.parseFloat(new String(floatBytes.data()));
+			}
+			this.distr = array;
+		} else {
+			
+		}
 	}
 
 	public Payload<?> apply(Map<String, Object> context, Payload<?> data) {
 		this.from(context, data);
-		((SimBase)context.get("simbase")).add(this.key, this.docid, this.distr);
+		((SimBase) context.get("simbase"))
+				.add(this.key, this.docid, this.distr);
 		return new OK();
 	}
 
