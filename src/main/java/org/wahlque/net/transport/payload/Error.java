@@ -11,7 +11,11 @@ public class Error implements Payload<String> {
 
     public static final char discriminator = '-';
     protected String value;
-
+    
+    public Error(String message) {
+    	this.value = message;
+    }
+    
     public char discriminator() {
         return discriminator;
     }

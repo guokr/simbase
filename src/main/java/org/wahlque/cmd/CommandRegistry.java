@@ -8,6 +8,7 @@ import java.util.Map;
 
 import org.wahlque.net.transport.Transport;
 import org.wahlque.net.transport.payload.Multiple;
+import org.wahlque.net.transport.payload.Error;
 import org.wahlque.server.Session;
 
 public class CommandRegistry {
@@ -56,11 +57,18 @@ public class CommandRegistry {
 				if (instance == null) {
 					instance = failback;
 				}
-
+				
 				if (instance != null) {
 					try {
+						instance.validate(multiple);
 						Transport.writePayload(clientSocket.getOutputStream(),
 								instance.apply(context, multiple));
+					} catch (CommandException e) {
+						try {
+							Transport.writePayload(clientSocket.getOutputStream(), new Error(e.getMessage()));
+						} catch (IOException e1) {
+							e1.printStackTrace();
+						}
 					} catch (IOException e) {
 					}
 				}

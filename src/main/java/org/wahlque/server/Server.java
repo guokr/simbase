@@ -36,6 +36,7 @@ public class Server {
 		try {
 			((ServerSocket) this.serverContext.get("serverSocket")).close();
 		} catch (IOException e) {
+			e.printStackTrace();
 		}
 	}
 
@@ -51,7 +52,9 @@ public class Server {
 			}
 
 			serverSocket.close();
-		} catch (IOException e) {}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 
 		System.out.println("Server shutdown!");
 		System.exit(0);
