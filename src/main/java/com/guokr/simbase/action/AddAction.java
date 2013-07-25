@@ -59,6 +59,7 @@ public class AddAction implements Action {
 
 	public Command command(Map<String, Object> context, Payload<?> payload)
 			throws ActionException {
+
 		boolean debug = false;
 		if (context.containsKey("debug")) {
 			debug = ((Boolean) (context.get("debug"))).booleanValue();
@@ -93,7 +94,8 @@ public class AddAction implements Action {
 		return cmd;
 	}
 
-	public Payload<?> apply(Map<String, Object> context, Payload<?> data) throws ActionException {
+	public Payload<?> apply(Map<String, Object> context, Payload<?> data)
+			throws ActionException {
 		Add cmd = (Add) command(context, data);
 		((SimBase) context.get("simbase")).add(cmd.key, cmd.docid, cmd.distr);
 		return new OK();
