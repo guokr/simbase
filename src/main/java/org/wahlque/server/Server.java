@@ -19,7 +19,7 @@ public class Server {
 	public Server(Map<String, Object> context, CommandRegistry registry) {
 		this.serverContext = context;
 		this.registry = registry;
-		
+
 		this.serverContext.put("server", this);
 	}
 
@@ -34,7 +34,7 @@ public class Server {
 
 	public synchronized void shutdown() {
 		try {
-			((ServerSocket)this.serverContext.get("serverSocket")).close();
+			((ServerSocket) this.serverContext.get("serverSocket")).close();
 		} catch (IOException e) {
 		}
 	}
@@ -51,9 +51,7 @@ public class Server {
 			}
 
 			serverSocket.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		} catch (IOException e) {}
 
 		System.out.println("Server shutdown!");
 		System.exit(0);
@@ -69,7 +67,8 @@ public class Server {
 
 		public void run() {
 			try {
-				registry.initiate(new HashMap<String, Object>(serverContext)).execute(this.socket);
+				registry.initiate(new HashMap<String, Object>(serverContext))
+						.execute(this.socket);
 			} catch (Throwable e) {
 				e.printStackTrace();
 			}

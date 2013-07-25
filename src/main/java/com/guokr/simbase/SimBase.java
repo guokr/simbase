@@ -41,6 +41,8 @@ public class SimBase {
 
 	public static void main(String[] args) throws IOException {
 		Map<String, Object> context = new HashMap<String, Object>();
+		context.put("debug", true);
+		
 		SimBase db = new SimBase();
 		context.put("simbase", db);
 
