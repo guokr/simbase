@@ -101,6 +101,7 @@ public class Add implements Command {
 
 	@Override
 	public void validate(Payload<?> data) throws CommandException {
+		
 	}
 
 }
