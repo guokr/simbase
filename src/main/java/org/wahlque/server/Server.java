@@ -37,7 +37,6 @@ public class Server {
 			((ServerSocket)this.serverContext.get("serverSocket")).close();
 		} catch (IOException e) {
 		}
-		System.exit(0);
 	}
 
 	public void run(int port) {
@@ -53,9 +52,11 @@ public class Server {
 
 			serverSocket.close();
 		} catch (IOException e) {
+			e.printStackTrace();
 		}
 
 		System.out.println("Server shutdown!");
+		System.exit(0);
 	}
 
 	public class ServerThread extends Thread {
