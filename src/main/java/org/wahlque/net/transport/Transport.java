@@ -4,6 +4,7 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.ByteBuffer;
 
 import org.wahlque.net.transport.payload.Bytes;
 import org.wahlque.net.transport.payload.Error;
@@ -19,7 +20,8 @@ public class Transport {
 
 	private static final char ZERO = '0';
 
-	public static void writeDiscriminator(OutputStream os, char discriminator) {
+	public static void writeDiscriminator(OutputStream os, char discriminator) throws IOException {
+		os.write((byte) discriminator);
 	}
 
 	/**
@@ -114,13 +116,16 @@ public class Transport {
 	}
 
 	public static void writeBytes(OutputStream os, byte[] value) {
+		
 	}
 
 	public static String readString(InputStream is) {
 		return null;
 	}
 
-	public static void writeString(OutputStream os, String value) {
+	public static void writeString(OutputStream os, String value) throws IOException {
+		os.write(value.getBytes());
+		os.write(CRLF);
 	}
 
 	/**
@@ -140,7 +145,7 @@ public class Transport {
 			payload = new Status(null);
 			break;
 		case Error.discriminator:
-			payload = new Error();
+			payload = new Error(null);
 			break;
 		case Number.discriminator:
 			payload = new Number();

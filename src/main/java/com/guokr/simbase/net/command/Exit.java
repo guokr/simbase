@@ -20,4 +20,8 @@ public class Exit implements Command {
 		return null;
 	}
 
+	@Override
+	public void validate(Payload<?> data) {
+	}
+
 }
