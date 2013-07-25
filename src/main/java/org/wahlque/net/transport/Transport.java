@@ -129,15 +129,15 @@ public class Transport {
 	public static Payload<?> readPayload(InputStream is) throws IOException {
 		Payload<?> payload = null;
 
-		int discr= is.read();
-		System.out.print((char)discr);
+		int discr = is.read();
+		System.out.print((char) discr);
 
 		switch (discr) {
 		case -1:
 			payload = null;
 			break;
 		case Status.discriminator:
-			payload = new Status();
+			payload = new Status(null);
 			break;
 		case Error.discriminator:
 			payload = new Error();
@@ -149,7 +149,7 @@ public class Transport {
 			payload = new Bytes(null);
 			break;
 		case Multiple.discriminator:
-			payload = new Multiple();
+			payload = new Multiple(null);
 			break;
 		default:
 			throw new IOException(String.valueOf((char) discr));
@@ -165,9 +165,11 @@ public class Transport {
 	/**
 	 * Write a Reply to an output stream.
 	 */
-	public void writePayload(OutputStream os, Payload<?> payload)
+	public static void writePayload(OutputStream os, Payload<?> payload)
 			throws IOException {
-		payload.write(os);
+		if (payload != null) {
+			payload.write(os);
+		}
 	}
 
 }

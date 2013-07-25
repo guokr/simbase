@@ -12,7 +12,11 @@ public class Status implements Payload<String> {
     public static final char discriminator = '+';
     protected String value;
 
-    public char discriminator() {
+    public Status(String status) {
+		this.value = status;
+	}
+
+	public char discriminator() {
         return discriminator;
     }
 

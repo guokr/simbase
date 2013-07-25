@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.Socket;
 
-import org.wahlque.net.transport.Command;
+import org.wahlque.cmd.Command;
 import org.wahlque.net.transport.Reply;
 
 /**
@@ -30,7 +30,7 @@ public class ClientConnection {
      */
     public void send(Command command) throws IOException {
         synchronized (this.os) {
-            command.write(os);
+            command.to(null).write(os);
         }
         this.os.flush();
     }

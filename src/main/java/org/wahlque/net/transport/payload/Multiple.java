@@ -12,6 +12,10 @@ public class Multiple implements Payload<Payload<?>[]> {
     public static final char discriminator = '*';
     protected Payload<?>[] value;
 
+    public Multiple(Payload<?>[] data) {
+    	this.value = data;
+    }
+
     public char discriminator() {
         return discriminator;
     }

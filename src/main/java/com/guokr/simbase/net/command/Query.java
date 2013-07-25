@@ -1,24 +1,26 @@
 package com.guokr.simbase.net.command;
 
-import java.nio.ByteBuffer;
+import java.util.Map;
 
-import org.wahlque.net.transport.Command;
-import org.wahlque.net.transport.payload.Bytes;
+import org.wahlque.cmd.Command;
+import org.wahlque.net.transport.Payload;
 
-public class Query extends Command {
+public class Query implements Command {
 
-	private static final String ACTION = "query";
+	public static final String ACTION = "query";
 
-	public Query(int docid) {
-		super(ACTION);
+	public void data(int docid) {
+	}
 
-		this.value = new Bytes[2];
+	public void from(Map<String, Object> context, Payload<?> data) {
+	}
 
-		this.value[0] = new Bytes("query".getBytes());
+	public Payload<?> to(Map<String, Object> context) {
+		return null;
+	}
 
-		ByteBuffer bb = ByteBuffer.allocate(4);
-		bb.putInt(docid);
-		this.value[1] = new Bytes(bb.array());
+	public Payload<?> apply(Map<String, Object> context, Payload<?> data) {
+		return null;
 	}
 
 }

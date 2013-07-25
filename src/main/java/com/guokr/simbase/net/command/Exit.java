@@ -4,12 +4,10 @@ import java.util.Map;
 
 import org.wahlque.cmd.Command;
 import org.wahlque.net.transport.Payload;
-import org.wahlque.net.transport.payload.Multiple;
-import org.wahlque.server.Server;
 
-public class Shutdown implements Command {
+public class Exit implements Command {
 
-	public static final String ACTION = "shutdown";
+	public static final String ACTION = "exit";
 
 	public void from(Map<String, Object> context, Payload<?> data) {
 	}
@@ -19,7 +17,6 @@ public class Shutdown implements Command {
 	}
 
 	public Payload<?> apply(Map<String, Object> context, Payload<?> data) {
-		((Server)context.get("server")).shutdown();
 		return null;
 	}
 
