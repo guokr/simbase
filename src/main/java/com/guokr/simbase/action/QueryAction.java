@@ -58,7 +58,7 @@ public class QueryAction implements Action {
 		Payload<?>[] items = multiple.data();
 
 		Bytes actionBytes = (Bytes) items[0];
-		assert (new String(actionBytes.data()).equals("add"));
+		assert (new String(actionBytes.data()).equals(ACTION));
 
 		Bytes keyBytes = (Bytes) items[1];
 		cmd.key = new String(keyBytes.data());
