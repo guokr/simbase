@@ -1,4 +1,4 @@
-package com.guokr.simbase.net.reply;
+package com.guokr.simbase.reply;
 
 import java.nio.ByteBuffer;
 import java.util.SortedMap;

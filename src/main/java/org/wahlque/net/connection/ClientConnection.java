@@ -5,8 +5,12 @@ import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.util.Map;
 
-import org.wahlque.cmd.Command;
+import org.wahlque.net.action.Action;
+import org.wahlque.net.action.ActionException;
+import org.wahlque.net.action.ActionRegistry;
+import org.wahlque.net.action.Command;
 import org.wahlque.net.transport.Reply;
 
 /**
@@ -16,13 +20,15 @@ public class ClientConnection {
 
     private final BufferedInputStream is;
     private final OutputStream os;
+	private Map<String, Object> context;
 
     /**
      * Create a new connection from a socket connection.
      */
-    public ClientConnection(Socket socket) throws IOException {
+    public ClientConnection(Map<String, Object> context, Socket socket) throws IOException {
         this.is = new BufferedInputStream(socket.getInputStream());
         this.os = new BufferedOutputStream(socket.getOutputStream());
+        this.context = context;
     }
 
     /**
@@ -30,7 +36,13 @@ public class ClientConnection {
      */
     public void send(Command command) throws IOException {
         synchronized (this.os) {
-            command.to(null).write(os);
+        	String name = command.actionName();
+        	Action action = ActionRegistry.getInstance().get(name);
+            try {
+				action.payload(this.context, command).write(os);
+			} catch (ActionException e) {
+				e.printStackTrace();
+			}
         }
         this.os.flush();
     }

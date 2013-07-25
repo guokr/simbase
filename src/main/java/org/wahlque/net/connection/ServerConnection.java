@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.Socket;
 
-import org.wahlque.cmd.Command;
+import org.wahlque.net.action.Action;
 import org.wahlque.net.transport.Reply;
 
 /**
@@ -28,7 +28,7 @@ public class ServerConnection {
     /**
      * Wait for a reply on the input stream.
      */
-    public Command receive() throws IOException {
+    public Action receive() throws IOException {
         synchronized (this.is) {
             return null;
         }

@@ -1,4 +1,4 @@
-package com.guokr.simbase.net.reply;
+package com.guokr.simbase.reply;
 
 import org.wahlque.net.transport.Reply;
 import org.wahlque.net.transport.payload.Status;

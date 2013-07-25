@@ -1,4 +1,4 @@
-package org.wahlque.server;
+package org.wahlque.net.server;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -6,7 +6,7 @@ import java.net.Socket;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.wahlque.cmd.CommandRegistry;
+import org.wahlque.net.action.ActionRegistry;
 import org.wahlque.net.transport.Transport;
 import org.wahlque.net.transport.payload.Multiple;
 
@@ -14,9 +14,9 @@ public class Server {
 
 	private boolean listening = true;
 	private final Map<String, Object> serverContext;
-	private final CommandRegistry registry;
+	private final ActionRegistry registry;
 
-	public Server(Map<String, Object> context, CommandRegistry registry) {
+	public Server(Map<String, Object> context, ActionRegistry registry) {
 		this.serverContext = context;
 		this.registry = registry;
 

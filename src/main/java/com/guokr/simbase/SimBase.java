@@ -5,14 +5,14 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.SortedMap;
 
-import org.wahlque.cmd.CommandRegistry;
-import org.wahlque.server.Server;
+import org.wahlque.net.action.ActionRegistry;
+import org.wahlque.net.server.Server;
 
-import com.guokr.simbase.net.command.Add;
-import com.guokr.simbase.net.command.Exit;
-import com.guokr.simbase.net.command.Put;
-import com.guokr.simbase.net.command.Query;
-import com.guokr.simbase.net.command.Shutdown;
+import com.guokr.simbase.action.AddAction;
+import com.guokr.simbase.action.ExitAction;
+import com.guokr.simbase.action.PutAction;
+import com.guokr.simbase.action.QueryAction;
+import com.guokr.simbase.action.ShutdownAction;
 
 public class SimBase {
 
@@ -46,12 +46,12 @@ public class SimBase {
 		SimBase db = new SimBase();
 		context.put("simbase", db);
 
-		CommandRegistry registry = new CommandRegistry();
-		registry.register(Add.class);
-		registry.register(Put.class);
-		registry.register(Query.class);
-		registry.register(Exit.class);
-		registry.register(Shutdown.class);
+		ActionRegistry registry = ActionRegistry.getInstance();
+		registry.register(AddAction.class);
+		registry.register(PutAction.class);
+		registry.register(QueryAction.class);
+		registry.register(ExitAction.class);
+		registry.register(ShutdownAction.class);
 
 		Server server = new Server(context, registry);
 		server.run(7654);
