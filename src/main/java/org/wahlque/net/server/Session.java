@@ -43,26 +43,28 @@ public class Session {
 			instance = registry.failback();
 		}
 
-		if (instance != null) {
+		Exception err = null;
+		try {
+			Transport.writePayload(clientSocket.getOutputStream(),
+					instance.apply(context, multiple));
+		} catch (Exception e) {
+			e.printStackTrace();
+			err = e;
+		}
+
+		if (err != null) {
 			try {
 				Transport.writePayload(clientSocket.getOutputStream(),
-						instance.apply(context, multiple));
-			} catch (ActionException e) {
-				try {
-					Transport.writePayload(clientSocket.getOutputStream(),
-							new Error(e.getMessage()));
-				} catch (IOException e1) {
-					e1.printStackTrace();
-				}
-			} catch (IOException e) {
+						new Error(err.getMessage()));
+			} catch (Exception e) {
 				e.printStackTrace();
-			} finally {
-				try {
-					clientSocket.close();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
 			}
+		}
+
+		try {
+			clientSocket.close();
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 
 	}
