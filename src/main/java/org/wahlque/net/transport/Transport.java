@@ -115,8 +115,9 @@ public class Transport {
 		return bytes;
 	}
 
-	public static void writeBytes(OutputStream os, byte[] value) {
-		
+	public static void writeBytes(OutputStream os, byte[] value) throws IOException {
+		os.write(value);
+		os.write(CRLF);
 	}
 
 	public static String readString(InputStream is) {
