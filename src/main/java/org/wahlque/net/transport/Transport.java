@@ -4,7 +4,6 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.nio.ByteBuffer;
 
 import org.wahlque.net.transport.payload.Bytes;
 import org.wahlque.net.transport.payload.Error;

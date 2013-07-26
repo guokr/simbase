@@ -7,7 +7,6 @@ import org.wahlque.net.action.ActionException;
 import org.wahlque.net.action.Command;
 import org.wahlque.net.server.Server;
 import org.wahlque.net.transport.Payload;
-import org.wahlque.net.transport.payload.Multiple;
 
 public class ShutdownAction implements Action {
 
