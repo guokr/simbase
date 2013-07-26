@@ -5,6 +5,11 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.RejectedExecutionHandler;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import org.wahlque.net.action.ActionRegistry;
 
@@ -13,6 +18,9 @@ public class Server {
 	private boolean listening = true;
 	private final Map<String, Object> serverContext;
 	private final ActionRegistry registry;
+	private final ThreadPoolExecutor serverThreadPool = new ThreadPoolExecutor(
+			10, 50, 60, TimeUnit.SECONDS, new ArrayBlockingQueue<Runnable>(10),
+			new ServerThreadFactory(), new RejectedHandler());
 
 	public Server(Map<String, Object> context, ActionRegistry registry) {
 		this.serverContext = context;
@@ -47,14 +55,30 @@ public class Server {
 
 			while (up()) {
 				if (!serverSocket.isClosed()) {
-					Socket socket = null;
+					final Socket socket;
 					try {
 						socket = serverSocket.accept();
 					} catch (IOException e) {
 						throw new ServerExcpetion();
 					}
 					if (socket != null && !socket.isClosed()) {
-						new ServerThread(socket).start();
+						serverThreadPool.execute(new Runnable() {
+							public void run() {
+								Session session = registry.initiate(
+										new HashMap<String, Object>(
+												serverContext), socket);
+								((ServerThread)Thread.currentThread()).setSeesion(session);
+								try {
+									while (true) {
+										if (!session.isClosed()) {
+											session.execute();
+										}
+									}
+								} catch (Throwable e) {
+									e.printStackTrace();
+								}
+							}
+						});
 					}
 				}
 			}
@@ -73,28 +97,34 @@ public class Server {
 		private Socket socket = null;
 		private Session session = null;
 
-		public ServerThread(Socket socket) {
-			super("ServerThread");
-			this.socket = socket;
-			this.session = registry.initiate(new HashMap<String, Object>(
-					serverContext), this.socket);
+		public ServerThread(Runnable r) {
+			super(r);
 		}
+
+		public void setSeesion(Session session) {
+			this.session = session;
+	    }
 
 		public void closeSession() {
 			this.session.close();
 		}
+	}
 
-		public void run() {
-			try {
-				while (true) {
-					if (!this.session.isClosed()) {
-						this.session.execute();
-					}
-				}
-			} catch (Throwable e) {
-				e.printStackTrace();
-			}
+	public class ServerThreadFactory implements ThreadFactory {
+
+		@Override
+		public Thread newThread(Runnable r) {
+			return new ServerThread(r);
 		}
+
+	}
+
+	public class RejectedHandler implements RejectedExecutionHandler {
+
+		@Override
+		public void rejectedExecution(Runnable r, ThreadPoolExecutor executor) {
+		}
+
 	}
 
 }
