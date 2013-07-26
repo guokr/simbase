@@ -11,7 +11,7 @@ import org.wahlque.net.server.Server;
 import com.guokr.simbase.action.AddAction;
 import com.guokr.simbase.action.ExitAction;
 import com.guokr.simbase.action.PutAction;
-import com.guokr.simbase.action.QueryAction;
+import com.guokr.simbase.action.GetAction;
 import com.guokr.simbase.action.ShutdownAction;
 
 public class SimBase {
@@ -49,7 +49,7 @@ public class SimBase {
 		ActionRegistry registry = ActionRegistry.getInstance();
 		registry.register(AddAction.class);
 		registry.register(PutAction.class);
-		registry.register(QueryAction.class);
+		registry.register(GetAction.class);
 		registry.register(ExitAction.class);
 		registry.register(ShutdownAction.class);
 

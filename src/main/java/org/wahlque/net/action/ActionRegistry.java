@@ -1,6 +1,7 @@
 package org.wahlque.net.action;
 
 import java.lang.reflect.Field;
+import java.net.Socket;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -37,8 +38,8 @@ public class ActionRegistry {
 		}
 	}
 
-	public Session initiate(final Map<String, Object> context) {
-		return new Session(this, context);
+	public Session initiate(final Map<String, Object> context, Socket clientSocket) {
+		return new Session(this, context, clientSocket);
 	}
 
 	public Action get(String action) {

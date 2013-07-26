@@ -7,8 +7,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.wahlque.net.action.ActionRegistry;
-import org.wahlque.net.transport.Transport;
-import org.wahlque.net.transport.payload.Multiple;
 
 public class Server {
 
@@ -48,12 +46,23 @@ public class Server {
 			this.serverContext.put("serverSocket", serverSocket);
 
 			while (up()) {
-				new ServerThread(serverSocket.accept()).start();
+				if (!serverSocket.isClosed()) {
+					Socket socket = null;
+					try {
+						socket = serverSocket.accept();
+					} catch (IOException e) {
+						throw new ServerExcpetion();
+					}
+					if (socket != null && !socket.isClosed()) {
+						new ServerThread(socket).start();
+					}
+				}
 			}
 
 			serverSocket.close();
 		} catch (IOException e) {
 			e.printStackTrace();
+		} catch (ServerExcpetion e) {
 		}
 
 		System.out.println("Server shutdown!");
@@ -62,16 +71,24 @@ public class Server {
 
 	public class ServerThread extends Thread {
 		private Socket socket = null;
+		private Session session = null;
 
 		public ServerThread(Socket socket) {
 			super("ServerThread");
 			this.socket = socket;
+			this.session = registry.initiate(new HashMap<String, Object>(
+					serverContext), this.socket);
+		}
+
+		public void closeSession() {
+			this.session.close();
 		}
 
 		public void run() {
 			try {
-				registry.initiate(new HashMap<String, Object>(serverContext))
-						.execute(this.socket);
+				while (true) {
+					this.session.execute();
+				}
 			} catch (Throwable e) {
 				e.printStackTrace();
 			}

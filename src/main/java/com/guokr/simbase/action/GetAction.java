@@ -12,12 +12,12 @@ import org.wahlque.net.transport.payload.Bytes;
 import org.wahlque.net.transport.payload.Multiple;
 
 import com.guokr.simbase.SimBase;
-import com.guokr.simbase.command.Query;
+import com.guokr.simbase.command.Get;
 import com.guokr.simbase.reply.Result;
 
-public class QueryAction implements Action {
+public class GetAction implements Action {
 
-	public static final String ACTION = "query";
+	public static final String ACTION = "get";
 
 	public Payload<?> payload(Map<String, Object> context, Command command) throws ActionException {
 
@@ -26,7 +26,7 @@ public class QueryAction implements Action {
 			debug = ((Boolean) (context.get("debug"))).booleanValue();
 		}
 
-		Query cmd = (Query) command;
+		Get cmd = (Get) command;
 
 		Bytes[] value = new Bytes[3];
 
@@ -52,7 +52,7 @@ public class QueryAction implements Action {
 			debug = ((Boolean) (context.get("debug"))).booleanValue();
 		}
 
-		Query cmd = new Query();
+		Get cmd = new Get();
 
 		Multiple multiple = (Multiple) payload;
 		Payload<?>[] items = multiple.data();
@@ -74,7 +74,7 @@ public class QueryAction implements Action {
 	}
 
 	public Payload<?> apply(Map<String, Object> context, Payload<?> data) throws ActionException {
-		Query cmd = (Query)command(context, data);
+		Get cmd = (Get)command(context, data);
 		SortedMap<Integer, Float> result = ((SimBase) context.get("simbase")).retrieve(cmd.key, cmd.docid);
 		return new Result(result);
 	}

@@ -1,11 +1,12 @@
 package org.wahlque.net.server;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.Socket;
 import java.util.Map;
 
 import org.wahlque.net.action.Action;
-import org.wahlque.net.action.ActionException;
 import org.wahlque.net.action.ActionRegistry;
 import org.wahlque.net.transport.Transport;
 import org.wahlque.net.transport.payload.Error;
@@ -16,20 +17,35 @@ public class Session {
 	private Map<String, Object> context;
 	private ActionRegistry registry;
 
-	public Session(ActionRegistry registry, Map<String, Object> context) {
+	public Session(ActionRegistry registry, Map<String, Object> context,
+			Socket clientSocket) {
 		this.context = context;
 		this.registry = registry;
+		if (!context.containsKey("clientSocket")) {
+			context.put("clientSocket", clientSocket);
+		}
+		try {
+			if (!context.containsKey("inputStream")) {
+				context.put("inputStream", clientSocket.getInputStream());
+			}
+			if (!context.containsKey("outputStream")) {
+				context.put("outputStream", clientSocket.getOutputStream());
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
-	public void execute(Socket clientSocket) {
+	public void execute() {
 
-		context.put("clientSocket", clientSocket);
+		InputStream ins = (InputStream) this.context.get("inputStream");
+		OutputStream outs = (OutputStream) this.context.get("outputStream");
 
 		Multiple multiple = null;
 		try {
-			multiple = (Multiple) (Transport.readPayload(clientSocket
-					.getInputStream()));
+			multiple = (Multiple) (Transport.readPayload(ins));
 		} catch (IOException e) {
+			e.printStackTrace();
 		}
 
 		String action = "exit";
@@ -45,8 +61,8 @@ public class Session {
 
 		Exception err = null;
 		try {
-			Transport.writePayload(clientSocket.getOutputStream(),
-					instance.apply(context, multiple));
+			Transport.writePayload(outs, instance.apply(context, multiple));
+			outs.flush();
 		} catch (Exception e) {
 			e.printStackTrace();
 			err = e;
@@ -54,19 +70,30 @@ public class Session {
 
 		if (err != null) {
 			try {
-				Transport.writePayload(clientSocket.getOutputStream(),
-						new Error(err.getMessage()));
+				Transport.writePayload(outs, new Error(err.getMessage()));
+				outs.flush();
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		}
 
+
+	}
+
+	public void close() {
 		try {
+			Socket clientSocket = (Socket)this.context.remove("clientSocket");
+			InputStream ins = (InputStream) this.context.remove("inputStream");
+			OutputStream outs = (OutputStream) this.context.remove("outputStream");
+			ins.close();
+			if (outs != null) {
+				outs.flush();
+				outs.close();
+			}
 			clientSocket.close();
-		} catch (IOException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
-
 	}
 
 }
