@@ -13,19 +13,23 @@ public class Result extends Multiple implements Reply<Payload<?>[]> {
 	public Result(SortedMap<Integer, Float> result) {
 		super(null);
 		
-		int len = 2 * result.size() + 1;
+		int len = 2 * result.size();
 		this.value = new Bytes[len];
-		this.value[0] = new Bytes("result".getBytes());
-
-		ByteBuffer bb = null;
+		//this.value[0] = new Bytes("result".getBytes());
+		
+		//ByteBuffer bb = null;
+		int i = 0;
 		for (int docid : result.keySet()) {
-			bb = ByteBuffer.allocate(4);
-			bb.putFloat(result.get(docid));
-			this.value[--len] = new Bytes(bb.array());
-
-			bb = ByteBuffer.allocate(4);
-			bb.putInt(docid);
-			this.value[--len] = new Bytes(bb.array());
+//			bb = ByteBuffer.allocate(4);
+//			bb.putFloat(result.get(docid));
+//			this.value[--len] = new Bytes(bb.array());
+//
+//			bb = ByteBuffer.allocate(4);
+//			bb.putInt(docid);
+//			this.value[--len] = new Bytes(bb.array());
+			//debug
+			this.value[i++] = new Bytes(String.valueOf(docid).getBytes());
+			this.value[i++] = new Bytes(String.valueOf(result.get(docid)).getBytes());
 		}
 
 	}

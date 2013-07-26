@@ -35,9 +35,12 @@ public class Multiple implements Payload<Payload<?>[]> {
     public void write(OutputStream os) throws IOException {
         Transport.writeDiscriminator(os, discriminator);
         Transport.writeSize(os, value.length);
+        Transport.writeCRLF(os);
+
         for (int i = 0; i < value.length; i++) {
+        	System.out.print(new String((byte[]) value[i].data()));
         	value[i].write(os);
-        	os.write(Transport.CRLF);
+        	Transport.writeCRLF(os);
         }
     }
 

@@ -30,6 +30,8 @@ public class Bytes implements Payload<byte[]> {
 
 	public void write(OutputStream os) throws IOException {
 		Transport.writeDiscriminator(os, discriminator);
+		Transport.writeSize(os, value.length);
+		Transport.writeCRLF(os);
 		Transport.writeBytes(os, value);
 	}
 
