@@ -62,6 +62,7 @@ public class Transport {
 	 * Write a signed integer to the output stream.
 	 */
 	public static void writeNumber(OutputStream os, long value) {
+		
 	}
 
 	/**
@@ -82,6 +83,7 @@ public class Transport {
 	}
 
 	public static void writeSize(OutputStream os, int length) {
+		writeNumber(os, length);
 	}
 
 	/**
@@ -116,7 +118,6 @@ public class Transport {
 
 	public static void writeBytes(OutputStream os, byte[] value) throws IOException {
 		os.write(value);
-		os.write(CRLF);
 	}
 
 	public static String readString(InputStream is) {
@@ -124,7 +125,8 @@ public class Transport {
 	}
 
 	public static void writeString(OutputStream os, String value) throws IOException {
-		os.write(value.getBytes());
+		byte[] bytes = value.getBytes();
+		os.write(bytes);
 		os.write(CRLF);
 	}
 

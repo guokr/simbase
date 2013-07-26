@@ -37,6 +37,7 @@ public class Multiple implements Payload<Payload<?>[]> {
         Transport.writeSize(os, value.length);
         for (int i = 0; i < value.length; i++) {
         	value[i].write(os);
+        	os.write(Transport.CRLF);
         }
     }
 

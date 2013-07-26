@@ -76,6 +76,7 @@ public class GetAction implements Action {
 	public Payload<?> apply(Map<String, Object> context, Payload<?> data) throws ActionException {
 		Get cmd = (Get)command(context, data);
 		SortedMap<Integer, Float> result = ((SimBase) context.get("simbase")).retrieve(cmd.key, cmd.docid);
+		System.out.println(result);
 		return new Result(result);
 	}
 
