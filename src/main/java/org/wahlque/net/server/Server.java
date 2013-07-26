@@ -72,6 +72,8 @@ public class Server {
 									while (true) {
 										if (!session.isClosed()) {
 											session.execute();
+										} else {
+											break;
 										}
 									}
 								} catch (Throwable e) {
