@@ -1,6 +1,5 @@
 package com.guokr.simbase.reply;
 
-import java.nio.ByteBuffer;
 import java.util.SortedMap;
 
 import org.wahlque.net.transport.Payload;

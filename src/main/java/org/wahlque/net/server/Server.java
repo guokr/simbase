@@ -87,7 +87,9 @@ public class Server {
 		public void run() {
 			try {
 				while (true) {
-					this.session.execute();
+					if (!this.session.isClosed()) {
+						this.session.execute();
+					}
 				}
 			} catch (Throwable e) {
 				e.printStackTrace();

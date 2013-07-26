@@ -38,7 +38,7 @@ public class Multiple implements Payload<Payload<?>[]> {
         Transport.writeCRLF(os);
 
         for (int i = 0; i < value.length; i++) {
-        	System.out.print(new String((byte[]) value[i].data()));
+        	//System.out.print(new String((byte[]) value[i].data()));
         	value[i].write(os);
         	Transport.writeCRLF(os);
         }

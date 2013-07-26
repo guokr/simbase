@@ -21,10 +21,10 @@ public class Session {
 			Socket clientSocket) {
 		this.context = context;
 		this.registry = registry;
-		if (!context.containsKey("clientSocket")) {
-			context.put("clientSocket", clientSocket);
-		}
 		try {
+			if (!context.containsKey("clientSocket")) {
+				context.put("clientSocket", clientSocket);
+			}
 			if (!context.containsKey("inputStream")) {
 				context.put("inputStream", clientSocket.getInputStream());
 			}
@@ -77,14 +77,23 @@ public class Session {
 			}
 		}
 
+	}
 
+	public boolean isClosed() {
+		Socket clientSocket = (Socket) context.get("clientSocket");
+		if (clientSocket == null) {
+			return true;
+		} else {
+			return clientSocket.isClosed();
+		}
 	}
 
 	public void close() {
 		try {
-			Socket clientSocket = (Socket)this.context.remove("clientSocket");
+			Socket clientSocket = (Socket) context.remove("clientSocket");
 			InputStream ins = (InputStream) this.context.remove("inputStream");
-			OutputStream outs = (OutputStream) this.context.remove("outputStream");
+			OutputStream outs = (OutputStream) this.context
+					.remove("outputStream");
 			ins.close();
 			if (outs != null) {
 				outs.flush();
