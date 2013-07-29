@@ -9,7 +9,8 @@
             :comments "same as Clojure"}
 
     :dependencies [[org.clojure/clojure "1.5.1"]
-	           [net.sf.trove4j/trove4j "3.0.3"]]
+                   [com.taoensso/carmine "2.0.0"]
+                   [net.sf.trove4j/trove4j "3.0.3"]]
 
     :source-paths ["src/main/clojure"]
     :java-source-paths ["src/main/java"]
