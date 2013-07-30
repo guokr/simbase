@@ -2,11 +2,11 @@
   {:author "Peter Taoussanis"}
   (:refer-clojure :exclude [time get set keys type sync sort eval])
   (:require [clojure.string :as str]
+            [simbase.commands :as commands]
             [taoensso.carmine
              (utils       :as utils)
              (protocol    :as protocol)
-             (connections :as conns)
-             (commands    :as commands)]
+             (connections :as conns)]
             [taoensso.timbre      :as timbre]
             [taoensso.nippy.tools :as nippy-tools]))
 

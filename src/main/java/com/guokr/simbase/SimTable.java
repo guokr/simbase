@@ -19,7 +19,9 @@ public class SimTable {
 			range = new TreeMap<Integer, Float>();
 			scores.put(src, range);
 		}
-		range.put(tgt, score);
+        if (src != tgt) {
+		    range.put(tgt, score);
+        }
 		while (range.size() > maxlimit) {
 			range.remove(range.firstKey());
 		}
