@@ -1,6 +1,5 @@
 package com.guokr.simbase.tests;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
@@ -42,7 +41,7 @@ public class SimEngineTests {
 				.similarity(3, 13)));
 		assertTrue((int) (1000 * engine.similarity(2, 13)) == (int) (1000 * engine
 				.similarity(5, 7)));
-		
+
 		engine.add(2, new float[] { 0f, 0.1f, 0.9f });
 		engine.add(3, new float[] { 0.1f, 0f, 0.9f });
 		engine.add(5, new float[] { 0f, 0.9f, 0.1f });
