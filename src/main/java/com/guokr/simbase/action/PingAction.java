@@ -5,8 +5,8 @@ import java.util.Map;
 import org.wahlque.net.action.Action;
 import org.wahlque.net.action.ActionException;
 import org.wahlque.net.action.Command;
-import org.wahlque.net.server.Server;
 import org.wahlque.net.transport.Payload;
+
 import com.guokr.simbase.reply.Pong;
 
 public class PingAction implements Action {
