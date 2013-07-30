@@ -9,6 +9,7 @@ import java.util.TreeMap;
 import org.wahlque.net.action.ActionRegistry;
 import org.wahlque.net.server.Server;
 
+import com.guokr.simbase.action.PingAction;
 import com.guokr.simbase.action.AddAction;
 import com.guokr.simbase.action.ExitAction;
 import com.guokr.simbase.action.PutAction;
@@ -54,6 +55,7 @@ public class SimBase {
 		context.put("simbase", db);
 
 		ActionRegistry registry = ActionRegistry.getInstance();
+		registry.register(PingAction.class);
 		registry.register(AddAction.class);
 		registry.register(PutAction.class);
 		registry.register(GetAction.class);
