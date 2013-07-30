@@ -96,7 +96,6 @@ public class Server {
 	}
 
 	public class ServerThread extends Thread {
-		private Socket socket = null;
 		private Session session = null;
 
 		public ServerThread(Runnable r) {
