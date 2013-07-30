@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.SortedMap;
+import java.util.SortedSet;
 import java.util.TreeMap;
 
 import org.wahlque.net.action.ActionRegistry;
@@ -37,12 +38,12 @@ public class SimBase {
 		base.get(key).update(docid, distr);
 	}
 
-	public SortedMap<Integer, Float> retrieve(String key, int docid) {
-        SortedMap<Integer, Float> result = null;
+	public SortedSet<Map.Entry<Integer, Float>> retrieve(String key, int docid) {
+		SortedSet<Map.Entry<Integer, Float>> result = null;
         if (base.containsKey(key)) {
             result = base.get(key).retrieve(docid);
         } else {
-            result = new TreeMap<Integer, Float>();
+            result = SimTable.entriesSortedByValues(new TreeMap<Integer, Float>());
         }
 		return result;
 	}

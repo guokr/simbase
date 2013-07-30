@@ -1,6 +1,7 @@
 package com.guokr.simbase.reply;
 
-import java.util.SortedMap;
+import java.util.Map;
+import java.util.SortedSet;
 
 import org.wahlque.net.transport.Payload;
 import org.wahlque.net.transport.Reply;
@@ -9,7 +10,7 @@ import org.wahlque.net.transport.payload.Multiple;
 
 public class Result extends Multiple implements Reply<Payload<?>[]> {
 
-	public Result(SortedMap<Integer, Float> result) {
+	public Result(SortedSet<Map.Entry<Integer, Float>> result) {
 		super(null);
 
 		int len = 2 * result.size();
@@ -18,7 +19,7 @@ public class Result extends Multiple implements Reply<Payload<?>[]> {
 
 		// ByteBuffer bb = null;
 		int i = 0;
-		for (int docid : result.keySet()) {
+		for (Map.Entry<Integer, Float> entry : result) {
 			// bb = ByteBuffer.allocate(4);
 			// bb.putFloat(result.get(docid));
 			// this.value[--len] = new Bytes(bb.array());
@@ -27,8 +28,9 @@ public class Result extends Multiple implements Reply<Payload<?>[]> {
 			// bb.putInt(docid);
 			// this.value[--len] = new Bytes(bb.array());
 			// debug
-			this.value[i++] = new Bytes(String.valueOf(docid).getBytes());
-			this.value[i++] = new Bytes(String.valueOf(result.get(docid))
+			this.value[i++] = new Bytes(String.valueOf(entry.getKey())
+					.getBytes());
+			this.value[i++] = new Bytes(String.valueOf(entry.getValue())
 					.getBytes());
 		}
 

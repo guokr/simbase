@@ -1,6 +1,8 @@
 package com.guokr.simbase;
 
+import java.util.Map;
 import java.util.SortedMap;
+import java.util.SortedSet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -33,7 +35,7 @@ public class SimEngine {
 		});
 	}
 
-	public SortedMap<Integer, Float> retrieve(int docid) {
+	public SortedSet<Map.Entry<Integer, Float>> retrieve(int docid) {
 		return table.retrieve(docid);
 	}
 
