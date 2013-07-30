@@ -2,6 +2,8 @@ package com.guokr.simbase;
 
 import gnu.trove.list.TFloatList;
 import gnu.trove.list.array.TFloatArrayList;
+import gnu.trove.map.TIntIntMap;
+import gnu.trove.map.hash.TIntIntHashMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 
 import java.util.SortedMap;
@@ -11,6 +13,7 @@ public class SimTable {
 
 	private int maxlimit = 20;
 	private TFloatList probs = new TFloatArrayList();
+	private TIntIntMap indexer = new TIntIntHashMap();
 	private TIntObjectHashMap<SortedMap<Integer, Float>> scores = new TIntObjectHashMap<SortedMap<Integer, Float>>();
 
 	private void addScore(int src, int tgt, float score) {
@@ -29,13 +32,27 @@ public class SimTable {
 
 	public void add(int docid, float[] distr) {
 		float length = 0;
-		int start = probs.size();
-		for (float val : distr) {
-			probs.add(val);
-			length += val * val;
+		int start;
+		if (indexer.containsKey(docid)) {
+			start = indexer.get(docid);
+			int cursor = start;
+			for (float val : distr) {
+				probs.set(cursor, val);
+				length += val * val;
+				cursor++;
+			}
+			probs.set(cursor++,(float) (docid + 1));
+			probs.set(cursor, length);
+		} else {
+		    start = probs.size();
+			indexer.put(docid, start);
+			for (float val : distr) {
+				probs.add(val);
+				length += val * val;
+			}
+			probs.add((float) (docid + 1));
+			probs.add(length);
 		}
-		probs.add((float) (docid + 1));
-		probs.add(length);
 		int end = probs.size();
 
 		float score = 0;
@@ -60,7 +77,7 @@ public class SimTable {
 	}
 
 	public void update(int docid, float[] distr) {
-
+		add(docid, distr);
 	}
 
 	public void delete(int docid) {
