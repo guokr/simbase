@@ -83,6 +83,6 @@ public class GetAction implements Action {
             result = ((SimBase) context.get("simbase")).retrieve(cmd.key, cmd.docid);
         }
 //        System.out.println(result);
-        return new Result(result);
+		return new Result(result);
     }
 }

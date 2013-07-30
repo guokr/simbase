@@ -19,9 +19,9 @@ public class SimTable {
 			range = new TreeMap<Integer, Float>();
 			scores.put(src, range);
 		}
-        if (src != tgt) {
-		    range.put(tgt, score);
-        }
+		if (src != tgt) {
+			range.put(tgt, score);
+		}
 		while (range.size() > maxlimit) {
 			range.remove(range.firstKey());
 		}
@@ -58,9 +58,9 @@ public class SimTable {
 			}
 		}
 	}
-	
+
 	public void update(int docid, float[] distr) {
-		
+
 	}
 
 	public void delete(int docid) {
@@ -73,7 +73,11 @@ public class SimTable {
 	}
 
 	public SortedMap<Integer, Float> retrieve(int docid) {
-		return scores.get(docid);
+		if (scores.containsKey(docid)) {
+			return scores.get(docid);
+		} else {
+			return new TreeMap<Integer, Float>();
+		}
 	}
 
 	public float similarity(int docid1, int docid2) {

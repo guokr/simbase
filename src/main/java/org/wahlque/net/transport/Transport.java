@@ -21,13 +21,13 @@ public class Transport {
 
 	public static void writeCRLF(OutputStream os) throws IOException {
 		os.write(CRLF);
-//		System.out.println();
+		// System.out.println();
 	}
 
 	public static void writeDiscriminator(OutputStream os, char discriminator)
 			throws IOException {
 		os.write((byte) discriminator);
-//		System.out.print(discriminator);
+		// System.out.print(discriminator);
 	}
 
 	/**
@@ -67,11 +67,13 @@ public class Transport {
 
 	/**
 	 * Write a signed integer to the output stream.
-	 * @throws IOException 
+	 * 
+	 * @throws IOException
 	 */
-	public static void writeNumber(OutputStream os, long value) throws IOException {
+	public static void writeNumber(OutputStream os, long value)
+			throws IOException {
 		String s = String.valueOf(value);
-		//System.out.print(s.getBytes());
+		// System.out.print(s.getBytes());
 		os.write(s.getBytes());
 	}
 
@@ -92,9 +94,10 @@ public class Transport {
 		return (int) size;
 	}
 
-	public static void writeSize(OutputStream os, int length) throws IOException {
+	public static void writeSize(OutputStream os, int length)
+			throws IOException {
 		writeNumber(os, length);
-//		System.out.print(length);
+		// System.out.print(length);
 	}
 
 	/**
@@ -130,7 +133,7 @@ public class Transport {
 	public static void writeBytes(OutputStream os, byte[] value)
 			throws IOException {
 		os.write(value);
-//		System.out.print(new String(value));
+		// System.out.print(new String(value));
 	}
 
 	public static String readString(InputStream is) {
@@ -139,7 +142,12 @@ public class Transport {
 
 	public static void writeString(OutputStream os, String value)
 			throws IOException {
-		byte[] bytes = value.getBytes();
+		byte[] bytes;
+		if (value != null) {
+			bytes = value.getBytes();
+		} else {
+			bytes = new byte[0];
+		}
 		os.write(bytes);
 		os.write(CRLF);
 	}
@@ -151,7 +159,7 @@ public class Transport {
 		Payload<?> payload = null;
 
 		int discr = is.read();
-		//System.out.print((char) discr);
+		// System.out.print((char) discr);
 
 		switch (discr) {
 		case -1:
