@@ -1,5 +1,6 @@
 package com.guokr.simbase;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -14,6 +15,7 @@ import com.guokr.simbase.action.ExitAction;
 import com.guokr.simbase.action.GetAction;
 import com.guokr.simbase.action.PingAction;
 import com.guokr.simbase.action.PutAction;
+import com.guokr.simbase.action.SaveAction;
 import com.guokr.simbase.action.ShutdownAction;
 
 public class SimBase {
@@ -21,6 +23,17 @@ public class SimBase {
 	private Map<String, SimEngine> base = new HashMap<String, SimEngine>();
 
 	public SimBase() {
+	}
+
+	public void save(String key) {
+		if (!base.containsKey(key)) {
+			base.put(key, new SimEngine());
+		}
+		try {
+			base.get(key).save();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
 	}
 
 	public void add(String key, int docid, float[] distr) {
@@ -39,18 +52,19 @@ public class SimBase {
 
 	public SortedSet<Map.Entry<Integer, Float>> retrieve(String key, int docid) {
 		SortedSet<Map.Entry<Integer, Float>> result = null;
-        if (base.containsKey(key)) {
-            result = base.get(key).retrieve(docid);
-        } else {
-            result = SimTable.entriesSortedByValues(new TreeMap<Integer, Float>());
-        }
+		if (base.containsKey(key)) {
+			result = base.get(key).retrieve(docid);
+		} else {
+			result = SimTable
+					.entriesSortedByValues(new TreeMap<Integer, Float>());
+		}
 		return result;
 	}
 
 	public static void main(String[] args) throws IOException {
 		Map<String, Object> context = new HashMap<String, Object>();
 		context.put("debug", true);
-		
+
 		SimBase db = new SimBase();
 		context.put("simbase", db);
 
@@ -59,6 +73,7 @@ public class SimBase {
 		registry.register(AddAction.class);
 		registry.register(PutAction.class);
 		registry.register(GetAction.class);
+		registry.register(SaveAction.class);
 		registry.register(ExitAction.class);
 		registry.register(ShutdownAction.class);
 
