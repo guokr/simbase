@@ -103,13 +103,15 @@ public class SimTable {
 	}
 
 	public void delete(int docid) {
-		int cursor = indexer.get(docid);
-		while (true) {
-			float val = probs.get(cursor);
-			if ((val < 0f) && (val > 1f)) {
-				break;
+		if (indexer.containsKey(docid)) {
+			int cursor = indexer.get(docid);
+			while (true) {
+				float val = probs.get(cursor);
+				if ((val < 0f) && (val > 1f)) {
+					break;
+				}
+				probs.set(cursor, - val);
 			}
-			probs.set(cursor, - val);
 		}
 		indexer.remove(docid);
 	}
@@ -124,6 +126,14 @@ public class SimTable {
 
 	public float similarity(int docid1, int docid2) {
 		return scores.get(docid1).get(docid2);
+	}
+
+	public SimTable clone() {
+		SimTable peer = new SimTable();
+		peer.probs = new TFloatArrayList(this.probs);
+		peer.indexer = new TIntIntHashMap(this.indexer);
+		peer.scores = new TIntObjectHashMap<SortedMap<Integer, Float>>(this.scores);
+		return peer;
 	}
 
 }

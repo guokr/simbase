@@ -10,7 +10,8 @@
 
     :dependencies [[org.clojure/clojure "1.5.1"]
                    [com.taoensso/carmine "2.0.0"]
-                   [net.sf.trove4j/trove4j "3.0.3"]]
+                   [net.sf.trove4j/trove4j "3.0.3"]
+                   [com.esotericsoftware.kryo/kryo "2.21"]]
 
     :source-paths ["src/main/clojure"]
     :java-source-paths ["src/main/java"]
