@@ -20,7 +20,8 @@ public class SimTable {
 		SortedSet<Map.Entry<Integer, Float>> sortedEntries = new TreeSet<Map.Entry<Integer, Float>>(
 				new Comparator<Map.Entry<Integer, Float>>() {
 					@Override
-					public int compare(Map.Entry<Integer, Float> e1, Map.Entry<Integer, Float> e2) {
+					public int compare(Map.Entry<Integer, Float> e1,
+							Map.Entry<Integer, Float> e2) {
 						return (int) Math.signum(e2.getValue() - e1.getValue());
 					}
 				});
@@ -77,19 +78,22 @@ public class SimTable {
 		int base = 0;
 		for (int offset = 0; offset < end; offset++) {
 			float val = probs.get(offset);
-			if (val < 1) {
-				int idx = offset - base;
-				if (idx < end - start - 1) {
-					float another = distr[idx];
-					score += another * val;
+			if (val >= 0) {
+				if (val < 1) {
+					int idx = offset - base;
+					if (idx < end - start - 1) {
+						float another = distr[idx];
+						score += another * val;
+					}
+				} else {
+					float cosine = score * score / length
+							/ probs.get(offset + 1);
+					addScore(docid, (int) val - 1, cosine);
+					addScore((int) val - 1, docid, cosine);
+					score = 0;
+					offset = offset + 1;
+					base = offset + 1;
 				}
-			} else {
-				float cosine = score * score / length / probs.get(offset + 1);
-				addScore(docid, (int) val - 1, cosine);
-				addScore((int) val - 1, docid, cosine);
-				score = 0;
-				offset = offset + 1;
-				base = offset + 1;
 			}
 		}
 	}
@@ -99,12 +103,15 @@ public class SimTable {
 	}
 
 	public void delete(int docid) {
-		scores.remove(docid);
-		int base = probs.indexOf((float) (docid + 1));
-		while (probs.get(base + 1) < 1) {
-			probs.remove(base + 1);
+		int cursor = indexer.get(docid);
+		while (true) {
+			float val = probs.get(cursor);
+			if ((val < 0f) && (val > 1f)) {
+				break;
+			}
+			probs.set(cursor, - val);
 		}
-		probs.remove(base);
+		indexer.remove(docid);
 	}
 
 	public SortedSet<Map.Entry<Integer, Float>> retrieve(int docid) {

@@ -1,7 +1,6 @@
 package com.guokr.simbase;
 
 import java.util.Map;
-import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
