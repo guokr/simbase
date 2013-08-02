@@ -13,6 +13,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.wahlque.net.action.ActionRegistry;
 
+
 public class Server {
 
 	private boolean listening = true;
@@ -90,7 +91,7 @@ public class Server {
 			e.printStackTrace();
 		} catch (ServerExcpetion e) {
 		}
-
+		
 		System.out.println("Server shutdown!");
 		System.exit(0);
 	}

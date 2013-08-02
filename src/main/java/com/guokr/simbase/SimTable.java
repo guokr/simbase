@@ -1,5 +1,6 @@
 package com.guokr.simbase;
 
+import gnu.trove.iterator.TIntIterator;
 import gnu.trove.list.TFloatList;
 import gnu.trove.list.array.TFloatArrayList;
 import gnu.trove.map.TIntIntMap;
@@ -13,7 +14,13 @@ import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-public class SimTable {
+import com.esotericsoftware.kryo.Kryo;
+import com.esotericsoftware.kryo.KryoSerializable;
+import com.esotericsoftware.kryo.io.Input;
+import com.esotericsoftware.kryo.io.Output;
+
+public class SimTable implements KryoSerializable{
+   
 
 	public static SortedSet<Map.Entry<Integer, Float>> entriesSortedByValues(
 			Map<Integer, Float> map) {
@@ -135,5 +142,56 @@ public class SimTable {
 		peer.scores = new TIntObjectHashMap<SortedMap<Integer, Float>>(this.scores);
 		return peer;
 	}
+	
+	public void reload(SimTable table) {
+		this.probs = table.probs;
+		this.indexer = table.indexer;
+		this.scores = table.scores;
+	}
 
+	@Override//重载序列化代码
+	public void read(Kryo kryo, Input input) {
+		System.out.println("loading...");
+		this.probs = kryo.readObject(input, TFloatArrayList.class);
+		this.indexer = kryo.readObject(input, TIntIntHashMap.class);
+		
+		int scoresize = kryo.readObject(input, int.class);
+		while(scoresize > 0){
+			Integer docid = kryo.readObject(input, Integer.class);	
+			SortedMap<Integer, Float> range = null;
+			range = new TreeMap<Integer, Float>();
+			this.scores.put(docid, range);
+			int Listsize = kryo.readObject(input,int.class);
+			while(Listsize >0){
+				Integer key = kryo.readObject(input,Integer.class);
+				Float score = kryo.readObject(input,Float.class);
+				range.put(key, score);
+				Listsize--;
+			}
+			scoresize--;
+		}
+		System.out.println("load finish");
+	}
+
+	@Override
+	public void write(Kryo kryo, Output output) {
+		kryo.writeObject(output, this.probs);
+		kryo.writeObject(output, this.indexer);
+		TIntIterator iter =  this.scores.keySet().iterator();
+		kryo.writeObject(output, this.scores.size());
+		while(iter.hasNext()){
+			Integer docid = iter.next();
+			kryo.writeObject(output, docid);
+			SortedMap<Integer, Float> scoreList = scores.get(docid);
+			kryo.writeObject(output, scoreList.size());
+			for(Integer key : scoreList.keySet()){
+				Float score = scoreList.get(key);
+				kryo.writeObject(output, key);
+				kryo.writeObject(output, score);
+			}
+		}
+	}
+
+		
+	
 }
