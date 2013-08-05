@@ -3,11 +3,15 @@
 	<classpathentry kind="src" path="src/main/java"/>
 	<classpathentry kind="src" path="src/main/clojure"/>
 	<classpathentry kind="src" path="src/tests/java"/>
+	<classpathentry kind="src" path="trove"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry exported="true" kind="con" path="ccw.LEININGEN_CONTAINER">
 		<attributes>
 			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="simbase/target/native/macosx/x86_64"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry kind="lib" path="/home/zhutou/下载/quartz-2.2.0/src"/>
+	<classpathentry kind="lib" path="/home/zhutou/下载/slf4j-1.7.5/slf4j-api-1.7.5.jar"/>
+	<classpathentry kind="lib" path="/home/zhutou/下载/slf4j-1.7.5/slf4j-jdk14-1.7.5.jar"/>
 	<classpathentry kind="output" path="targets"/>
 </classpath>
