@@ -131,7 +131,7 @@ public class SimBase {
 	}
 
 	public static void main(String[] args) throws IOException {
-//		try {
+		try {
 			Map<String, Object> context = new HashMap<String, Object>();
 			context.put("debug", true);
 
@@ -150,9 +150,9 @@ public class SimBase {
 			Server server = new Server(context, registry);
 			server.cron();
 			server.run(7654);
-//		} catch (Throwable e) {
-//			logger.error("Server Error!", e);
-//		}
+		} catch (Throwable e) {
+			logger.error("Server Error!", e);
+		}
 
 	}
 }
