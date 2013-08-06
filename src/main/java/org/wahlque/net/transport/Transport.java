@@ -65,8 +65,6 @@ public class Transport {
 		return number;
 	}
 
-
-
 	/**
 	 * Write a signed integer to the output stream.
 	 * 
@@ -76,6 +74,40 @@ public class Transport {
 			throws IOException {
 		String s = String.valueOf(value);
 		// System.out.print(s.getBytes());
+		os.write(s.getBytes());
+	}
+
+	public static float readFloat(InputStream is) throws IOException {
+		int next = is.read();
+		String string = "";
+		float number = 0;
+		
+		while (true) {
+			if (next == -1) {
+				throw new EOFException("Unexpected end");
+			} else if (next == CR) {
+				if (is.read() == LF) {
+					break;
+				}
+			}
+
+			int digit = next - ZERO;
+			if (digit >= 0 && digit < 10) {
+				number = number * 10 + digit;
+			} else {
+				throw new IOException(
+						"Invalid character in the section for size");
+			}
+			next = is.read();
+		}
+		
+		number = Float.parseFloat(string);
+		return number;
+	}
+
+	public static void writeFloat(OutputStream os, float value)
+			throws IOException {
+		String s = String.valueOf(value);
 		os.write(s.getBytes());
 	}
 

@@ -140,7 +140,7 @@ public class SimTable implements KryoSerializable {
 		return scores.get(docid1).get(docid2);
 	}
 
-	public synchronized SimTable clone() {
+	public SimTable clone() {
 		SimTable peer = new SimTable();
 		peer.probs = new TFloatArrayList(this.probs);
 		for (int key : this.indexer.keys()) {
