@@ -21,6 +21,7 @@ public class ShutdownAction implements Action {
 	}
 
 	public Payload<?> apply(Map<String, Object> context, Payload<?> data) throws ActionException {
+
 		((Server)context.get("server")).shutdown();
 		return null;
 	}

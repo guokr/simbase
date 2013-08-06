@@ -1,12 +1,17 @@
 package com.guokr.simbase;
 
+import java.io.BufferedReader;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeMap;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.wahlque.net.action.ActionRegistry;
 import org.wahlque.net.server.Server;
 
@@ -20,9 +25,71 @@ import com.guokr.simbase.action.ShutdownAction;
 
 public class SimBase {
 
+	private static final String dir = System.getProperty("user.dir")
+			+ System.getProperty("file.separator");
+	private static final String idxFilePath = dir + "keys.idx";
+	private static final Logger logger = LoggerFactory.getLogger(SimBase.class);
+
 	private Map<String, SimEngine> base = new HashMap<String, SimEngine>();
 
-	public SimBase() {
+	public SimBase() throws IOException {
+		this.load();// 新建时加载磁盘数据
+
+	}
+
+	public void load() {// 只有全局读取的时候读取文件里的map
+		try {
+			BufferedReader input = new BufferedReader(new FileReader(
+					idxFilePath));
+			String[] keys = input.readLine().split("\\|");
+			for (String key : keys) {
+				logger.info("Loading key-- " + key);//只有存储才有多进程的情况
+				this.load(key);
+			}
+			input.close();
+		} catch (FileNotFoundException e) {
+			logger.warn("Backup file not found.Do you have Backup?");
+			return;
+		} catch (Throwable e) {
+			throw new SimbaseException(e);
+		}
+	}
+
+	public void load(String key) {
+		if (!base.containsKey(key)) {
+			base.put(key, new SimEngine());
+		}
+		try {
+			base.get(key).load(key);
+		} catch (FileNotFoundException e) {
+			logger.warn("File not found,do you have saved?");
+			return;
+			}
+		catch (Throwable e) {
+			throw new SimbaseException(e);
+		}
+	}
+
+	public void save() {// 只有全局保存的时候把map写到文件里
+		FileWriter output;
+		try {
+			output = new FileWriter(idxFilePath);
+			String keys = "";
+			if(!base.keySet().isEmpty())
+			{
+				for (String key : base.keySet()) {
+					keys += key + "|";
+					logger.info("Push task:Save key-- " + key+" to queue");
+					this.save(key);
+					logger.info("Push finish");
+				}
+			}
+			keys = keys.substring(0, keys.length() - 1);
+			output.write(keys, 0, keys.length());
+			output.close();
+		} catch (Throwable e) {
+			throw new SimbaseException(e);
+		}
 	}
 
 	public void save(String key) {
@@ -30,9 +97,9 @@ public class SimBase {
 			base.put(key, new SimEngine());
 		}
 		try {
-			base.get(key).save();
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
+			base.get(key).save(key);
+		} catch (Throwable e) {
+			throw new SimbaseException(e);
 		}
 	}
 
@@ -62,22 +129,28 @@ public class SimBase {
 	}
 
 	public static void main(String[] args) throws IOException {
-		Map<String, Object> context = new HashMap<String, Object>();
-		context.put("debug", true);
+		try {
+			Map<String, Object> context = new HashMap<String, Object>();
+			context.put("debug", true);
 
-		SimBase db = new SimBase();
-		context.put("simbase", db);
+			SimBase db = new SimBase();
+			context.put("simbase", db);
 
-		ActionRegistry registry = ActionRegistry.getInstance();
-		registry.register(PingAction.class);
-		registry.register(AddAction.class);
-		registry.register(PutAction.class);
-		registry.register(GetAction.class);
-		registry.register(SaveAction.class);
-		registry.register(ExitAction.class);
-		registry.register(ShutdownAction.class);
+			ActionRegistry registry = ActionRegistry.getInstance();
+			registry.register(PingAction.class);
+			registry.register(AddAction.class);
+			registry.register(PutAction.class);
+			registry.register(GetAction.class);
+			registry.register(SaveAction.class);
+			registry.register(ExitAction.class);
+			registry.register(ShutdownAction.class);
 
-		Server server = new Server(context, registry);
-		server.run(7654);
+			Server server = new Server(context, registry);
+			server.cron();
+			server.run(7654);
+		} catch (Throwable e) {
+			logger.error("Server Error!", e);
+		}
+
 	}
 }
