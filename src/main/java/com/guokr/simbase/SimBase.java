@@ -8,8 +8,6 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.SortedSet;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.TreeMap;
 
 import org.slf4j.Logger;
@@ -30,7 +28,7 @@ public class SimBase {
 	private static final String dir = System.getProperty("user.dir")
 			+ System.getProperty("file.separator");
 	private static final String idxFilePath = dir + "keys.idx";
-	private static final Logger logger = LoggerFactory.getLogger(Server.class);
+	private static final Logger logger = LoggerFactory.getLogger(SimBase.class);
 
 	private Map<String, SimEngine> base = new HashMap<String, SimEngine>();
 

@@ -11,6 +11,8 @@
     :dependencies [[org.clojure/clojure "1.5.1"]
                    [com.taoensso/carmine "2.0.0"]
                    [net.sf.trove4j/trove4j "3.0.3"]
+                   [org.slf4j/slf4j-api "1.7.5"]
+                   [org.slf4j/slf4j-log4j12 "1.7.5"]
                    [com.esotericsoftware.kryo/kryo "2.21"]];;TODO:add org.slf4j 
 ;    :dev-dependencies [[net.sf.trove4j/trove4j "3.0.3" :classifier "sources"]]
     :source-paths ["src/main/clojure" "trove"]

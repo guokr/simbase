@@ -16,7 +16,6 @@ import java.util.TreeSet;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wahlque.net.server.Server;
 
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.KryoSerializable;
@@ -43,7 +42,7 @@ public class SimTable implements KryoSerializable {
 	private TFloatList probs = new TFloatArrayList();
 	private TIntIntMap indexer = new TIntIntHashMap();
 	private TIntObjectHashMap<SortedMap<Integer, Float>> scores = new TIntObjectHashMap<SortedMap<Integer, Float>>();
-	private static final Logger logger = LoggerFactory.getLogger(Server.class);
+	private static final Logger logger = LoggerFactory.getLogger(SimTable.class);
 
 	private void addScore(int src, int tgt, float score) {
 		SortedMap<Integer, Float> range = scores.get(src);
@@ -141,7 +140,6 @@ public class SimTable implements KryoSerializable {
 		return scores.get(docid1).get(docid2);
 	}
 
-	@SuppressWarnings("null")
 	public synchronized SimTable clone() {
 		SimTable peer = new SimTable();
 		peer.probs = new TFloatArrayList(this.probs);
