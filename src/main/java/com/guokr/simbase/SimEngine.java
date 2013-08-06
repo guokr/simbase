@@ -32,8 +32,6 @@ public class SimEngine {
 		try {
 			input = new Input(new FileInputStream(path));
 			table.read(kryo, input);
-			// kryo.readObject(input, SimTable.class);
-			// table.reload(newTable);
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		} finally {
@@ -51,12 +49,10 @@ public class SimEngine {
 				Runnable runner = new Runnable() {
 					@Override
 					public void run() {
-
 						Output output = null;
 						String path = dir + key + ".dmp";
 						try {
 							output = new Output(new FileOutputStream(path));
-							// kryo.writeObject(output, data);
 							data.write(kryo, output);
 						} catch (Throwable e) {
 							throw new SimBaseException(e);

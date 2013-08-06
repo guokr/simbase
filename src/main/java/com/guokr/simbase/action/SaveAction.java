@@ -50,13 +50,12 @@ public class SaveAction implements Action {
 	public Payload<?> apply(Map<String, Object> context, Payload<?> data)
 			throws ActionException {
 		Save cmd = (Save) command(context, data);
-		SimBase test = ((SimBase) context.get("simbase"));
-	    if(cmd.key.equals("all")){
-	    	test.save();
+		SimBase base = ((SimBase) context.get("simbase"));
+		if (cmd.key.equals("all")) {
+			base.save();
+		} else {
+			base.save(cmd.key);
 		}
-	    else{
-	    	test.save(cmd.key);
-	    }
 		return new OK();
 	}
 

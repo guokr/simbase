@@ -1,5 +1,6 @@
 package com.guokr.simbase;
 
+import gnu.trove.iterator.TFloatIterator;
 import gnu.trove.iterator.TIntIterator;
 import gnu.trove.list.TFloatList;
 import gnu.trove.list.array.TFloatArrayList;
@@ -38,13 +39,15 @@ public class SimTable implements KryoSerializable {
 		return sortedEntries;
 	}
 
-	private int maxlimit = 20;
+	private static final double LOADFACTOR = 0.75;
+	private static final int MAXLIMITS = 20;
+    private static final Logger logger = LoggerFactory.getLogger(SimTable.class);
+
 	private TFloatList probs = new TFloatArrayList();
 	private TIntIntMap indexer = new TIntIntHashMap();
 	private TIntObjectHashMap<SortedMap<Integer, Float>> scores = new TIntObjectHashMap<SortedMap<Integer, Float>>();
-	private static final Logger logger = LoggerFactory.getLogger(SimTable.class);
 
-	private void addScore(int src, int tgt, float score) {
+	private void setscore(int src, int tgt, float score) {
 		SortedMap<Integer, Float> range = scores.get(src);
 		if (range == null) {
 			range = new TreeMap<Integer, Float>();
@@ -55,7 +58,7 @@ public class SimTable implements KryoSerializable {
 		if (src != tgt) {
 			range.put(tgt, score);
 		}
-		while (range.size() > maxlimit) {
+		while (range.size() > MAXLIMITS) {
 			SortedSet<Map.Entry<Integer, Float>> entries = entriesSortedByValues(range);
 			range.remove(entries.last().getKey());
 		}
@@ -100,8 +103,8 @@ public class SimTable implements KryoSerializable {
 				} else {
 					float cosine = score * score / length
 							/ probs.get(offset + 1);
-					addScore(docid, (int) val - 1, cosine);
-					addScore((int) val - 1, docid, cosine);
+					setscore(docid, (int) val - 1, cosine);
+					setscore((int) val - 1, docid, cosine);
 					score = 0;
 					offset = offset + 1;
 					base = offset + 1;
@@ -142,15 +145,33 @@ public class SimTable implements KryoSerializable {
 
 	public SimTable clone() {
 		SimTable peer = new SimTable();
-		peer.probs = new TFloatArrayList(this.probs);
-		for (int key : this.indexer.keys()) {
-			int value = this.indexer.get(key);
-			peer.indexer.put(key, value);
+
+		int cursor = 0, start = 0;
+		TFloatIterator piter = this.probs.iterator();
+		peer.probs = new TFloatArrayList((int) (this.probs.size() / LOADFACTOR));
+		while (piter.hasNext()) {
+			float value = piter.next();
+			if (value < 0) {
+				continue;
+			} else {
+				if (value > 1) {
+					peer.indexer.put((int) value - 1, start);
+
+					peer.probs.set(cursor, value);
+					cursor++;
+					peer.probs.set(cursor, piter.next());
+					cursor++;
+					start = cursor + 1;
+				} else {
+					peer.probs.set(cursor, value);
+				}
+			}
+			cursor++;
 		}
 
-		TIntIterator iter = this.scores.keySet().iterator();
-		while (iter.hasNext()) {
-			Integer docid = iter.next();
+		TIntIterator siter = this.scores.keySet().iterator();
+		while (siter.hasNext()) {
+			Integer docid = siter.next();
 			SortedMap<Integer, Float> thisscores = this.scores.get(docid);
 			SortedMap<Integer, Float> peerscores = null;
 			peerscores = new TreeMap<Integer, Float>();
@@ -162,6 +183,7 @@ public class SimTable implements KryoSerializable {
 				}
 			}
 		}
+
 		return peer;
 	}
 

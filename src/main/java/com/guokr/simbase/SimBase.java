@@ -34,7 +34,6 @@ public class SimBase {
 
 	public SimBase() throws IOException {
 		this.load();// 新建时加载磁盘数据
-
 	}
 
 	public void load() {// 只有全局读取的时候读取文件里的map
@@ -148,6 +147,7 @@ public class SimBase {
 			server.run(7654);
 		} catch (Throwable e) {
 			logger.error("Server Error!", e);
+			System.exit(-1);
 		}
 
 	}
