@@ -59,7 +59,7 @@ public class SimEngine {
 							// kryo.writeObject(output, data);
 							data.write(kryo, output);
 						} catch (Throwable e) {
-							throw new SimbaseException(e);
+							throw new SimBaseException(e);
 						} finally {
 							if (output != null) {
 								output.close();

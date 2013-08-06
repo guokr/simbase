@@ -43,7 +43,7 @@ public class SimBase {
 					idxFilePath));
 			String[] keys = input.readLine().split("\\|");
 			for (String key : keys) {
-				logger.info("Loading key-- " + key);//只有存储才有多进程的情况
+				logger.info("Loading key-- " + key);// 只有存储才有多进程的情况
 				this.load(key);
 			}
 			input.close();
@@ -51,7 +51,7 @@ public class SimBase {
 			logger.warn("Backup file not found.Do you have Backup?");
 			return;
 		} catch (Throwable e) {
-			throw new SimbaseException(e);
+			throw new SimBaseException(e);
 		}
 	}
 
@@ -64,9 +64,8 @@ public class SimBase {
 		} catch (FileNotFoundException e) {
 			logger.warn("File not found,do you have saved?");
 			return;
-			}
-		catch (Throwable e) {
-			throw new SimbaseException(e);
+		} catch (Throwable e) {
+			throw new SimBaseException(e);
 		}
 	}
 
@@ -75,11 +74,10 @@ public class SimBase {
 		try {
 			output = new FileWriter(idxFilePath);
 			String keys = "";
-			if(!base.keySet().isEmpty())
-			{
+			if (!base.keySet().isEmpty()) {
 				for (String key : base.keySet()) {
 					keys += key + "|";
-					logger.info("Push task:Save key-- " + key+" to queue");
+					logger.info("Push task:Save key-- " + key + " to queue");
 					this.save(key);
 					logger.info("Push finish");
 				}
@@ -88,7 +86,7 @@ public class SimBase {
 			output.write(keys, 0, keys.length());
 			output.close();
 		} catch (Throwable e) {
-			throw new SimbaseException(e);
+			throw new SimBaseException(e);
 		}
 	}
 
@@ -99,7 +97,7 @@ public class SimBase {
 		try {
 			base.get(key).save(key);
 		} catch (Throwable e) {
-			throw new SimbaseException(e);
+			throw new SimBaseException(e);
 		}
 	}
 
