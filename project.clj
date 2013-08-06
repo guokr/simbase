@@ -16,7 +16,7 @@
                    [log4j/log4j "1.2.17"]
                    [com.esotericsoftware.kryo/kryo "2.21"]]
     :source-paths ["src/main/clojure"]
-    :java-source-paths ["src/main/java"]
+    :java-source-paths ["src/main/java" "trove"]
     :resource-paths ["src/main/resources"]
 
     :test-paths ["src/test/clojure" "src/test/java"]

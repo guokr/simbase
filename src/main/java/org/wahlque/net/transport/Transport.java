@@ -78,10 +78,10 @@ public class Transport {
 	}
 
 	public static float readFloat(InputStream is) throws IOException {
-		int sign = 1,next = is.read();
-		boolean flag = True;//是否还没有出现过小数点
-		String string = "";
+		int sign = 1, next = is.read();
+		boolean flag = true;// 是否还没有出现过小数点,只允许一个小数点
 		float number = 0;
+		float tailnumber = 0;
 		if (next == '-') {
 			next = is.read();
 			sign = -1;
@@ -91,24 +91,39 @@ public class Transport {
 				throw new EOFException("Unexpected end");
 			} else if (next == CR) {
 				if (is.read() == LF) {
-					number = number * sign;
+					while(tailnumber>=1){
+						tailnumber/=10;
+					}
+					number = (number+tailnumber) * sign;
 					break;
 				}
 			}
-			if (next == '.') {
-				
-			}
-			int digit = next - ZERO;
-			if (digit >= 0 && digit < 10) {
-				number = number * 10 + digit;
+			if (next == '.') {//遇到小数点的处理
+				if(flag){
+					flag = false;
+				}
+				else{
+					throw new IOException(
+							"Invalid character in the section for size");
+				}
+				continue;
 			} else {
-				throw new IOException(
-						"Invalid character in the section for size");
+				int digit = next - ZERO;
+				if (digit >= 0 && digit < 10) {
+					if (flag){//没有遇到小数点的时候按照数字进行处理
+						number = number * 10 + digit;
+					}
+					else {//遇到了小数点丢给尾数
+						tailnumber = tailnumber*10 +digit;
+					}
+				}
+				else{
+					throw new IOException(
+							"Invalid character in the section for size");
+				}
 			}
 			next = is.read();
 		}
-		
-		number = Float.parseFloat(string);
 		return number;
 	}
 

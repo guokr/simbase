@@ -41,7 +41,8 @@ public class SimTable implements KryoSerializable {
 
 	private static final double LOADFACTOR = 0.75;
 	private static final int MAXLIMITS = 20;
-    private static final Logger logger = LoggerFactory.getLogger(SimTable.class);
+	private static final Logger logger = LoggerFactory
+			.getLogger(SimTable.class);
 
 	private TFloatList probs = new TFloatArrayList();
 	private TIntIntMap indexer = new TIntIntHashMap();
@@ -122,13 +123,18 @@ public class SimTable implements KryoSerializable {
 			int cursor = indexer.get(docid);
 			while (true) {
 				float val = probs.get(cursor);
-				if ((val < 0f) && (val > 1f)) {
+				if ((val < 0f) || (val >= 1f)) {
 					break;
 				}
 				probs.set(cursor, -val);
+				cursor++;
 			}
+			indexer.remove(docid);
+			scores.remove(docid);
 		}
-		indexer.remove(docid);
+		indexer.remove(docid);//HashMap里没有这个键了也可以用= =
+		scores.remove(docid);
+		
 	}
 
 	public SortedSet<Map.Entry<Integer, Float>> retrieve(int docid) {
@@ -156,14 +162,13 @@ public class SimTable implements KryoSerializable {
 			} else {
 				if (value > 1) {
 					peer.indexer.put((int) value - 1, start);
-
-					peer.probs.set(cursor, value);
+					peer.probs.add(value);
 					cursor++;
-					peer.probs.set(cursor, piter.next());
+					peer.probs.add(piter.next());
 					cursor++;
-					start = cursor + 1;
+					start = cursor;
 				} else {
-					peer.probs.set(cursor, value);
+					peer.probs.add(value);
 				}
 			}
 			cursor++;

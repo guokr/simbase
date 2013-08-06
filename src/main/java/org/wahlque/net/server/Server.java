@@ -5,8 +5,6 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.ThreadFactory;
@@ -17,8 +15,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wahlque.net.action.ActionRegistry;
 
-import com.guokr.simbase.SimBase;
-
 public class Server {
 
 	private boolean listening = true;
@@ -28,7 +24,7 @@ public class Server {
 			10, 50, 60, TimeUnit.SECONDS, new ArrayBlockingQueue<Runnable>(10),
 			new ServerThreadFactory(), new RejectedHandler());
 
-	private static final long timeInterval = 120000L;
+	
 	private static final Logger log = LoggerFactory.getLogger(Server.class);
 
 	public Server(Map<String, Object> context, ActionRegistry registry) {
@@ -55,19 +51,7 @@ public class Server {
 		}
 	}
 
-	public void cron() {
-		// 创建一个cron任务
-		Timer cron = new Timer();
-		TimerTask task = new TimerTask() {
-			public void run() {
-				SimBase simbase = ((SimBase) serverContext.get("simbase"));
-				simbase.save();
-			}
 
-		};
-		cron.schedule(task, timeInterval,
-				timeInterval);
-	}
 
 	public void run(int port) {
 		ServerSocket serverSocket = null;
