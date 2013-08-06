@@ -16,14 +16,16 @@ import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
 
 public class SimEngine {
-
-	private ExecutorService service = Executors.newSingleThreadExecutor();
-	private final SimTable table = new SimTable();
-	private Kryo kryo = new Kryo();
-	private String dir = System.getProperty("user.dir")
+	
+	private static String dir = System.getProperty("user.dir")
 			+ System.getProperty("file.separator");
 	private static final Logger logger = LoggerFactory
 			.getLogger(SimEngine.class);
+
+	private ExecutorService service = Executors.newSingleThreadExecutor();
+	private final SimTable table = new SimTable();
+	private final Kryo kryo = new Kryo();
+	private int counter = 0;
 
 	public void load(final String key) throws FileNotFoundException {
 		Input input = null;
@@ -41,11 +43,21 @@ public class SimEngine {
 		}
 	}
 
+	public void clear() {
+		service.execute(new Runnable() {
+			public void run() {
+				System.out.print("!");
+				final SimTable data = table.clone();
+				table.reload(data);
+			}
+		});
+	}
+
 	public void save(final String key) throws FileNotFoundException {
 		service.execute(new Runnable() {
-			private final SimTable data = table.clone();
-
 			public void run() {
+				System.out.print("$");
+				final SimTable data = table.clone();
 				Runnable runner = new Runnable() {
 					@Override
 					public void run() {
@@ -71,6 +83,11 @@ public class SimEngine {
 	public void add(final int docid, final float[] distr) {
 		service.execute(new Runnable() {
 			public void run() {
+				counter++;
+				if (counter % 100 == 0) {
+				    System.out.print(".");
+				    counter = 0;
+				}
 				try {
 					table.add(docid, distr);
 				} catch (Throwable e) {
@@ -83,6 +100,11 @@ public class SimEngine {
 	public void update(final int docid, final float[] distr) {
 		service.execute(new Runnable() {
 			public void run() {
+				counter++;
+				if (counter % 100 == 0) {
+				    System.out.print(".");
+				    counter = 0;
+				}
 				try {
 					table.update(docid, distr);
 				} catch (Throwable e) {
@@ -95,6 +117,7 @@ public class SimEngine {
 	public void delete(final int docid) {
 		service.execute(new Runnable() {
 			public void run() {
+				System.out.print("*");
 				try {
 					table.delete(docid);
 				} catch (Throwable e) {
