@@ -78,19 +78,26 @@ public class Transport {
 	}
 
 	public static float readFloat(InputStream is) throws IOException {
-		int next = is.read();
+		int sign = 1,next = is.read();
+		boolean flag = True;//是否还没有出现过小数点
 		String string = "";
 		float number = 0;
-		
+		if (next == '-') {
+			next = is.read();
+			sign = -1;
+		}
 		while (true) {
 			if (next == -1) {
 				throw new EOFException("Unexpected end");
 			} else if (next == CR) {
 				if (is.read() == LF) {
+					number = number * sign;
 					break;
 				}
 			}
-
+			if (next == '.') {
+				
+			}
 			int digit = next - ZERO;
 			if (digit >= 0 && digit < 10) {
 				number = number * 10 + digit;
