@@ -5,7 +5,10 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
 import java.util.Timer;
@@ -41,7 +44,13 @@ public class SimBase {
 		this.cron();// 设置定时任务
 	}
 
-	public void load() {// 只有全局读取的时候读取文件里的map
+	public void clear() {
+		List<String> list = new ArrayList<String>(base.keySet());
+		Collections.shuffle(list);
+		base.get(list.get(0)).clear();
+	}
+
+    public void load() {// 只有全局读取的时候读取文件里的map
 		try {
 			BufferedReader input = new BufferedReader(new FileReader(
 					idxFilePath));
@@ -139,13 +148,20 @@ public class SimBase {
 	public void cron() {
 		// 创建一个cron任务
 		Timer cron = new Timer();
-		TimerTask task = new TimerTask() {
+		
+		TimerTask cleartask = new TimerTask() {
+			public void run() {
+				clear();
+			}
+		};
+		cron.schedule(cleartask, timeInterval/2, timeInterval);
+		
+		TimerTask savetask = new TimerTask() {
 			public void run() {
 				save();
 			}
-
 		};
-		cron.schedule(task, timeInterval, timeInterval);
+		cron.schedule(savetask, timeInterval, timeInterval);
 	}
 
 	public SortedSet<Map.Entry<Integer, Float>> retrieve(String key, int docid) {
