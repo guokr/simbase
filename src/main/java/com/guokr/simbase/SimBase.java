@@ -52,7 +52,10 @@ public class SimBase {
 			}
 			input.close();
 		} catch (FileNotFoundException e) {
-			logger.warn("Backup file not found.Do you have Backup?");
+			logger.warn("Backup .idx file not found.Please examine your backup file");
+			return;
+		} catch (NullPointerException e) {
+			logger.warn("Backup .idx file is empty.Please examine your backup file");
 			return;
 		} catch (Throwable e) {
 			throw new SimBaseException(e);
@@ -66,7 +69,7 @@ public class SimBase {
 		try {
 			base.get(key).load(key);
 		} catch (FileNotFoundException e) {
-			logger.warn("File not found,do you have saved?");
+			logger.warn("Backup .dmp file not found,Please examine your backup file");
 			return;
 		} catch (Throwable e) {
 			throw new SimBaseException(e);
@@ -85,6 +88,12 @@ public class SimBase {
 					this.save(key);
 					logger.info("Push finish");
 				}
+			}
+			else
+			{
+				output.close();
+				logger.warn("Empty set~");
+				return;
 			}
 			keys = keys.substring(0, keys.length() - 1);
 			output.write(keys, 0, keys.length());

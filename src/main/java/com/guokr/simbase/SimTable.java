@@ -132,9 +132,9 @@ public class SimTable implements KryoSerializable {
 			indexer.remove(docid);
 			scores.remove(docid);
 		}
-		indexer.remove(docid);//HashMap里没有这个键了也可以用= =
+		indexer.remove(docid);// HashMap里没有这个键了也可以用= =
 		scores.remove(docid);
-		
+
 	}
 
 	public SortedSet<Map.Entry<Integer, Float>> retrieve(int docid) {
