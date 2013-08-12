@@ -104,11 +104,6 @@ public class SimEngine {
 	public void update(final int docid, final float[] distr) {
 		service.execute(new Runnable() {
 			public void run() {
-				counter++;
-				if (counter % 100 == 0) {
-					System.out.print(".");
-					counter = 0;
-				}
 				try {
 					table.update(docid, distr);
 				} catch (Throwable e) {
@@ -121,7 +116,6 @@ public class SimEngine {
 	public void delete(final int docid) {
 		service.execute(new Runnable() {
 			public void run() {
-				System.out.print("*");
 				try {
 					table.delete(docid);
 				} catch (Throwable e) {

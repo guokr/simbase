@@ -123,6 +123,7 @@ public class SimTable implements KryoSerializable {
 	}
 
 	public void delete(int docid) {
+		logger.info("Being delete "+docid);
 		if (indexer.containsKey(docid)) {
 			int cursor = indexer.get(docid);
 			while (true) {
@@ -138,6 +139,7 @@ public class SimTable implements KryoSerializable {
 		}
 		indexer.remove(docid);//HashMap里没有这个键了也可以用= =
 		scores.remove(docid);
+		logger.info("Delete finish");
 		
 	}
 
