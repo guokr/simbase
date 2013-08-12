@@ -32,7 +32,11 @@ public class SimTable implements KryoSerializable {
 					@Override
 					public int compare(Map.Entry<Integer, Float> e1,
 							Map.Entry<Integer, Float> e2) {
-						return (int) Math.signum(e2.getValue() - e1.getValue());
+						int sgn = (int) Math.signum(e2.getValue() - e1.getValue());
+						if (sgn == 0) {
+							sgn = (int) Math.signum(e2.hashCode() - e1.hashCode());
+						}
+						return sgn;
 					}
 				});
 		sortedEntries.addAll(map.entrySet());
