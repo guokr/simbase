@@ -6,3 +6,7 @@ pom.xml
 /classes/
 /targets/
 .lein-deps-sum
+
+data/*.dmp
+data/*.idx
+data/*.bak

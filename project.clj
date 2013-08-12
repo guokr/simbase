@@ -19,10 +19,12 @@
     :java-source-paths ["src/main/java"]
     :resource-paths ["src/main/resources"]
 
-    :test-paths ["src/test/clojure" "src/test/java"]
-
+    :test-paths ["src/test/clojure" "src/test/java/benchmarks"]
+    :test-selectors {:default (complement :integration)
+                     :integration :integration
+                     :all (constantly true)}
     :compile-path "targets/classes"
     :target-path "targets/"
     :javac-options ["-target" "1.6" "-source" "1.6" "-Xlint:-options"]
-
+    :jvm-opts ["-Xmx2g"]
     :main com.guokr.simbase.SimBase)
