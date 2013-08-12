@@ -45,14 +45,13 @@ public class SimBase {
 	}
 
 	public void clear() {
-			List<String> list = new ArrayList<String>(base.keySet());
-			if (list.size() != 0) {
-				Collections.shuffle(list);
-				base.get(list.get(0)).clear();
-			}
-			else {
-				logger.warn("Empty set do not need clear");
-			}
+		List<String> list = new ArrayList<String>(base.keySet());
+		if (list.size() != 0) {
+			Collections.shuffle(list);
+			base.get(list.get(0)).clear();
+		} else {
+			logger.warn("Empty set do not need clear");
+		}
 	}
 
 	public void load() {// 只有全局读取的时候读取文件里的map
@@ -86,30 +85,38 @@ public class SimBase {
 			logger.warn("Backup .dmp file not found,Please examine your backup file");
 			return;
 		}
-	}	
+	}
 
 	public void save() {// 只有全局保存的时候把map写到文件里
-		FileWriter output;
-		try {
-			output = new FileWriter(idxFilePath);
-			String keys = "";
-			if (!base.keySet().isEmpty()) {
+
+		String keys = "";
+
+		if (!base.keySet().isEmpty()) {
+			FileWriter output = null;
+			try {
+				output = new FileWriter(idxFilePath);
 				for (String key : base.keySet()) {
 					keys += key + "|";
 					logger.info("Push task:Save key-- " + key + " to queue");
 					this.save(key);
 					logger.info("Push finish");
 				}
-			} else {
-				output.close();
-				logger.warn("Empty set don't need save");
-				return;
+				keys = keys.substring(0, keys.length() - 1);
+				output.write(keys, 0, keys.length());
+
+			} catch (Throwable e) {
+				throw new SimBaseException(e);
+			} finally {
+				if (output != null) {
+					try {
+						output.close();
+					} catch (IOException e) {
+						throw new SimBaseException(e);
+					}
+				}
 			}
-			keys = keys.substring(0, keys.length() - 1);
-			output.write(keys, 0, keys.length());
-			output.close();
-		} catch (Throwable e) {
-			throw new SimBaseException(e);
+		} else {
+			logger.warn("Empty set don't need save");
 		}
 	}
 

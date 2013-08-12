@@ -30,13 +30,13 @@ public class SimEngine {
 
 	public void load(final String key) throws FileNotFoundException {
 		Input input = null;
-		String path = dir + "/backup/" + key;
+		String path = dir + "/data/" + key;
 
 		try {
 			input = new Input(new FileInputStream(path + ".dmp"));
 			table.read(kryo, input);
 		} catch (KryoException e) {
-			input = new Input(new FileInputStream(path + ".dmp.backup"));
+			input = new Input(new FileInputStream(path + ".bak"));
 			table.read(kryo, input);
 		} finally {
 			if (input != null) {
@@ -62,11 +62,11 @@ public class SimEngine {
 					@Override
 					public void run() {
 						Output output = null;
-						String path = dir + "/backup/" + key;
+						String path = dir + "/data/" + key;
 						try {
 							Process p = Runtime.getRuntime().exec(
 									"cp " + path + ".dmp " + path
-											+ ".dmp.backup");
+											+ ".bak");
 							p.waitFor();
 							output = new Output(new FileOutputStream(path
 									+ ".dmp"));
