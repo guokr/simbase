@@ -35,7 +35,7 @@ public class SimBase {
 			+ System.getProperty("file.separator");
 	private static final String idxFilePath = dir + "keys.idx";
 	private static final Logger logger = LoggerFactory.getLogger(SimBase.class);
-	private static final long timeInterval = 120000L;
+	private static final long timeInterval = 120000L;// 两分钟，上线时酌情更改
 
 	private Map<String, SimEngine> base = new HashMap<String, SimEngine>();
 
@@ -45,12 +45,17 @@ public class SimBase {
 	}
 
 	public void clear() {
-		List<String> list = new ArrayList<String>(base.keySet());
-		Collections.shuffle(list);
-		base.get(list.get(0)).clear();
+			List<String> list = new ArrayList<String>(base.keySet());
+			if (list.size() != 0) {
+				Collections.shuffle(list);
+				base.get(list.get(0)).clear();
+			}
+			else {
+				logger.warn("Empty set do not need clear");
+			}
 	}
 
-    public void load() {// 只有全局读取的时候读取文件里的map
+	public void load() {// 只有全局读取的时候读取文件里的map
 		try {
 			BufferedReader input = new BufferedReader(new FileReader(
 					idxFilePath));
@@ -80,10 +85,8 @@ public class SimBase {
 		} catch (FileNotFoundException e) {
 			logger.warn("Backup .dmp file not found,Please examine your backup file");
 			return;
-		} catch (Throwable e) {
-			throw new SimBaseException(e);
 		}
-	}
+	}	
 
 	public void save() {// 只有全局保存的时候把map写到文件里
 		FileWriter output;
@@ -97,11 +100,9 @@ public class SimBase {
 					this.save(key);
 					logger.info("Push finish");
 				}
-			}
-			else
-			{
+			} else {
 				output.close();
-				logger.warn("Empty set~");
+				logger.warn("Empty set don't need save");
 				return;
 			}
 			keys = keys.substring(0, keys.length() - 1);
@@ -148,14 +149,14 @@ public class SimBase {
 	public void cron() {
 		// 创建一个cron任务
 		Timer cron = new Timer();
-		
+
 		TimerTask cleartask = new TimerTask() {
 			public void run() {
 				clear();
 			}
 		};
-		cron.schedule(cleartask, timeInterval/2, timeInterval);
-		
+		cron.schedule(cleartask, timeInterval / 2, timeInterval);
+
 		TimerTask savetask = new TimerTask() {
 			public void run() {
 				save();

@@ -32,7 +32,8 @@ public class SimTable implements KryoSerializable {
 					@Override
 					public int compare(Map.Entry<Integer, Float> e1,
 							Map.Entry<Integer, Float> e2) {
-						return (int) Math.signum(e2.getValue() - e1.getValue());
+						int sgn = (int) Math.signum(e2.getValue() - e1.getValue());
+						return sgn<0?-1:1;
 					}
 				});
 		sortedEntries.addAll(map.entrySet());
@@ -88,7 +89,7 @@ public class SimTable implements KryoSerializable {
 			probs.add((float) (docid + 1));
 			probs.add(length);
 		}
-		int end = probs.size();
+		int end = probs.size();//end=2050*n
 
 		float score = 0;
 		int base = 0;
@@ -107,7 +108,7 @@ public class SimTable implements KryoSerializable {
 					setscore(docid, (int) val - 1, cosine);
 					setscore((int) val - 1, docid, cosine);
 					score = 0;
-					offset = offset + 1;
+					offset = offset + 1;//此时的offset移动至新的向量概率处
 					base = offset + 1;
 				}
 			}
@@ -164,8 +165,10 @@ public class SimTable implements KryoSerializable {
 					peer.indexer.put((int) value - 1, start);
 					peer.probs.add(value);
 					cursor++;
-					peer.probs.add(piter.next());
-					cursor++;
+					if (piter.hasNext()) {
+						peer.probs.add(piter.next());
+						cursor++;
+					}
 					start = cursor;
 				} else {
 					peer.probs.add(value);

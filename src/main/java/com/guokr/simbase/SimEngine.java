@@ -12,11 +12,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.esotericsoftware.kryo.Kryo;
+import com.esotericsoftware.kryo.KryoException;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
 
 public class SimEngine {
-	
+
 	private static String dir = System.getProperty("user.dir")
 			+ System.getProperty("file.separator");
 	private static final Logger logger = LoggerFactory
@@ -29,13 +30,14 @@ public class SimEngine {
 
 	public void load(final String key) throws FileNotFoundException {
 		Input input = null;
-		String path = dir + key + ".dmp";
+		String path = dir + "/backup/" + key;
 
 		try {
-			input = new Input(new FileInputStream(path));
+			input = new Input(new FileInputStream(path + ".dmp"));
 			table.read(kryo, input);
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
+		} catch (KryoException e) {
+			input = new Input(new FileInputStream(path + ".dmp.backup"));
+			table.read(kryo, input);
 		} finally {
 			if (input != null) {
 				input.close();
@@ -46,7 +48,6 @@ public class SimEngine {
 	public void clear() {
 		service.execute(new Runnable() {
 			public void run() {
-				System.out.print("!");
 				final SimTable data = table.clone();
 				table.reload(data);
 			}
@@ -56,15 +57,19 @@ public class SimEngine {
 	public void save(final String key) throws FileNotFoundException {
 		service.execute(new Runnable() {
 			public void run() {
-				System.out.print("$");
 				final SimTable data = table.clone();
 				Runnable runner = new Runnable() {
 					@Override
 					public void run() {
 						Output output = null;
-						String path = dir + key + ".dmp";
+						String path = dir + "/backup/" + key;
 						try {
-							output = new Output(new FileOutputStream(path));
+							Process p = Runtime.getRuntime().exec(
+									"cp " + path + ".dmp " + path
+											+ ".dmp.backup");
+							p.waitFor();
+							output = new Output(new FileOutputStream(path
+									+ ".dmp"));
 							data.write(kryo, output);
 						} catch (Throwable e) {
 							throw new SimBaseException(e);
@@ -85,8 +90,7 @@ public class SimEngine {
 			public void run() {
 				counter++;
 				if (counter % 100 == 0) {
-				    System.out.print(".");
-				    counter = 0;
+					logger.info("add:" + counter);
 				}
 				try {
 					table.add(docid, distr);
@@ -102,8 +106,8 @@ public class SimEngine {
 			public void run() {
 				counter++;
 				if (counter % 100 == 0) {
-				    System.out.print(".");
-				    counter = 0;
+					System.out.print(".");
+					counter = 0;
 				}
 				try {
 					table.update(docid, distr);
