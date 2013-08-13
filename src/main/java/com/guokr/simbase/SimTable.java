@@ -3,8 +3,12 @@ package com.guokr.simbase;
 import gnu.trove.iterator.TFloatIterator;
 import gnu.trove.iterator.TIntIterator;
 import gnu.trove.list.TFloatList;
+import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TFloatArrayList;
+import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.map.TIntFloatMap;
 import gnu.trove.map.TIntIntMap;
+import gnu.trove.map.hash.TIntFloatHashMap;
 import gnu.trove.map.hash.TIntIntHashMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 
@@ -32,14 +36,18 @@ public class SimTable implements KryoSerializable {
 					@Override
 					public int compare(Map.Entry<Integer, Float> e1,
 							Map.Entry<Integer, Float> e2) {
-						int sgn = (int) Math.signum(e2.getValue() - e1.getValue());
+						int sgn = (int) Math.signum(e2.getValue()
+								- e1.getValue());
 						if (sgn == 0) {
-							sgn = (int) Math.signum(e2.hashCode() - e1.hashCode());
+							sgn = (int) Math.signum(e2.hashCode()
+									- e1.hashCode());
 						}
 						return sgn;
 					}
 				});
-		sortedEntries.addAll(map.entrySet());
+		synchronized (sortedEntries) {
+			sortedEntries.addAll(map.entrySet());
+		}
 		return sortedEntries;
 	}
 
@@ -50,6 +58,8 @@ public class SimTable implements KryoSerializable {
 
 	private TFloatList probs = new TFloatArrayList();
 	private TIntIntMap indexer = new TIntIntHashMap();
+	private TIntObjectHashMap<TIntList> reverseIndexer = new TIntObjectHashMap<TIntList>();
+	private TIntFloatMap waterLine = new TIntFloatHashMap();
 	private TIntObjectHashMap<SortedMap<Integer, Float>> scores = new TIntObjectHashMap<SortedMap<Integer, Float>>();
 
 	private void setscore(int src, int tgt, float score) {
@@ -60,12 +70,33 @@ public class SimTable implements KryoSerializable {
 				scores.put(src, range);
 			}
 		}
-		if (src != tgt) {
-			range.put(tgt, score);
+
+		TIntList reverseRange = reverseIndexer.get(tgt);
+		if (reverseRange == null) {
+			reverseRange = new TIntArrayList();
+			reverseIndexer.put(tgt, reverseRange);
 		}
-		while (range.size() > MAXLIMITS) {
+
+		if (src != tgt) {
+			if (waterLine.containsKey(src)) {
+				if (waterLine.get(src) < score) {// 先前的添加不改变水位线
+					range.put(tgt, score);
+					reverseRange.add(src);// 添加反向索引
+				}
+			} else {
+				waterLine.put(src, 0f);
+				range.put(tgt, score);
+				reverseRange.add(src);// 添加反向索引
+			}
+		}
+		if (range.size() > MAXLIMITS) {
 			SortedSet<Map.Entry<Integer, Float>> entries = entriesSortedByValues(range);
-			range.remove(entries.last().getKey());
+			Map.Entry<Integer, Float> lastEntry = entries.last();
+			range.remove(lastEntry.getKey());
+
+			if (lastEntry.getValue() > waterLine.get(src))
+				waterLine.put(src, lastEntry.getValue());// 放置水位线
+			reverseRange.remove(src);
 		}
 	}
 
@@ -114,6 +145,8 @@ public class SimTable implements KryoSerializable {
 					offset = offset + 1;
 					base = offset + 1;
 				}
+			} else {
+				base = offset+1;
 			}
 		}
 	}
@@ -123,24 +156,37 @@ public class SimTable implements KryoSerializable {
 	}
 
 	public void delete(int docid) {
-		logger.info("Being delete "+docid);
+		logger.info("Being delete " + docid);
 		if (indexer.containsKey(docid)) {
 			int cursor = indexer.get(docid);
 			while (true) {
 				float val = probs.get(cursor);
-				if ((val < 0f) || (val >= 1f)) {
+				if (val < 0f) {
 					break;
 				}
+				if (val >= 1f) {// 到达docid的指针部分
+
+					probs.set(cursor++, -val);
+					val = probs.get(cursor);
+					probs.set(cursor, -val);
+					break;
+				}
+
 				probs.set(cursor, -val);
 				cursor++;
 			}
-			indexer.remove(docid);
-			scores.remove(docid);
 		}
-		indexer.remove(docid);//HashMap里没有这个键了也可以用= =
+		indexer.remove(docid);// HashMap里没有这个键了也可以用= =
 		scores.remove(docid);
+		// 根据反向索引移除scores
+		TIntIterator reverseIter = reverseIndexer.get(docid).iterator();
+		while (reverseIter.hasNext()) {
+			int reverId = reverseIter.next();
+			scores.get(reverId).remove(docid);
+		}
+		reverseIndexer.remove(docid);// 移除反向索引
+		waterLine.remove(docid);// 移除水位线
 		logger.info("Delete finish");
-		
 	}
 
 	public SortedSet<Map.Entry<Integer, Float>> retrieve(int docid) {
@@ -263,5 +309,5 @@ public class SimTable implements KryoSerializable {
 			}
 		}
 		logger.info("Save finish");
-    }
+	}
 }
