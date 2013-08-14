@@ -79,7 +79,7 @@ public class SimTable implements KryoSerializable {
 
 		if (src != tgt) {
 			if (waterLine.containsKey(src)) {
-				if (waterLine.get(src) < score) {// 先前的添加不改变水位线
+				if (waterLine.get(src) <= score) {// 先前的添加不改变水位线
 					range.put(tgt, score);
 					reverseRange.add(src);// 添加反向索引
 				}
@@ -115,7 +115,7 @@ public class SimTable implements KryoSerializable {
 			probs.set(cursor, length);
 		} else {
 			start = probs.size();
-			indexer.put(docid, start);// IllegalStateException
+			indexer.put(docid, start);
 			for (float val : distr) {
 				probs.add(val);
 				length += val * val;
@@ -146,7 +146,8 @@ public class SimTable implements KryoSerializable {
 					base = offset + 1;
 				}
 			} else {
-				base = offset+1;
+				base = offset + 1;
+
 			}
 		}
 	}
@@ -165,8 +166,8 @@ public class SimTable implements KryoSerializable {
 					break;
 				}
 				if (val >= 1f) {// 到达docid的指针部分
-
-					probs.set(cursor++, -val);
+					probs.set(cursor, -val);
+					cursor++;
 					val = probs.get(cursor);
 					probs.set(cursor, -val);
 					break;
@@ -210,6 +211,8 @@ public class SimTable implements KryoSerializable {
 		while (piter.hasNext()) {
 			float value = piter.next();
 			if (value < 0) {
+				// continue;
+				start++;
 				continue;
 			} else {
 				if (value > 1) {
@@ -217,8 +220,7 @@ public class SimTable implements KryoSerializable {
 					peer.probs.add(value);
 					cursor++;
 					peer.probs.add(piter.next());
-					cursor++;
-					start = cursor;
+					start = cursor + 1;
 				} else {
 					peer.probs.add(value);
 				}

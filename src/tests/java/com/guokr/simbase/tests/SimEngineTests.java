@@ -131,10 +131,12 @@ public class SimEngineTests {
 		String key = "test2";
 		SimBase simbase = initSimBase("test2");
 		delay(1);// 等待加载完毕
-		// simbase.delete(key, 2);
 		printSimBase(simbase,key);
 		simbase.delete(key, 1);
-//		simbase.delete(key, 2);
+		//删除之后，清除之前
+//		simbase.add(key, 7,
+//		new float[] { 0.3651483716701107f, 0.18257418583505536f,
+//				0.7302967433402214f, 0.5477225575051661f });
 		delay(1);
 		assertTrue(simbase.retrieve(key, 1).size()==0);
 		simbase.clear();
@@ -145,11 +147,13 @@ public class SimEngineTests {
 				new float[] { 0.3651483716701107f, 0.18257418583505536f,
 						0.7302967433402214f, 0.5477225575051661f });
 		delay(1);
+		assertTrue(simbase.retrieve(key, 1).size()==0);
 		printSimBase(simbase,key);
 		simbase.add(key, 1, new float[] { 0.18257418583505536f,
 				0.3651483716701107f, 0.7302967433402214f, 0.5477225575051661f });
 		delay(1);
 		printSimBase(simbase,key);
+		assertTrue(simbase.retrieve(key, 1).size()==20);
 		
 	}
 
