@@ -39,7 +39,7 @@ public class SimBase {
 
 	private Map<String, SimEngine> base = new HashMap<String, SimEngine>();
 
-	public SimBase() throws IOException {
+	public SimBase() {
 		this.load();// 新建时加载磁盘数据
 		this.cron();// 设置定时任务
 	}
