@@ -26,5 +26,5 @@
     :compile-path "targets/classes"
     :target-path "targets/"
     :javac-options ["-target" "1.6" "-source" "1.6" "-Xlint:-options"]
-    :jvm-opts ["-Xmx2g"]
+    :jvm-opts ["-Xmx1g"]
     :main com.guokr.simbase.SimBase)

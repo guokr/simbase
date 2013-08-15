@@ -1,7 +1,6 @@
 package com.guokr.simbase.tests;
 
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.assertArrayEquals;
 import java.util.Iterator;
 import java.util.Map.Entry;
 import java.util.SortedSet;
@@ -9,7 +8,6 @@ import java.util.SortedSet;
 import org.junit.Test;
 
 import com.guokr.simbase.SimBase;
-import com.guokr.simbase.SimTable;
 
 public class SimEngineTests {
 
