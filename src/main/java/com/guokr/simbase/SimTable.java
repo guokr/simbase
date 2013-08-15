@@ -19,9 +19,6 @@ import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.KryoSerializable;
 import com.esotericsoftware.kryo.io.Input;
@@ -53,8 +50,6 @@ public class SimTable implements KryoSerializable {
 
 	private static final double LOADFACTOR = 0.75;
 	private static final int MAXLIMITS = 20;
-	private static final Logger logger = LoggerFactory
-			.getLogger(SimTable.class);
 
 	private TFloatList probs = new TFloatArrayList();
 	private TIntIntMap indexer = new TIntIntHashMap();
@@ -157,7 +152,6 @@ public class SimTable implements KryoSerializable {
 	}
 
 	public void delete(int docid) {
-		logger.info("Being delete " + docid);
 		if (indexer.containsKey(docid)) {
 			int cursor = indexer.get(docid);
 			while (true) {
@@ -187,7 +181,7 @@ public class SimTable implements KryoSerializable {
 		}
 		reverseIndexer.remove(docid);// 移除反向索引
 		waterLine.remove(docid);// 移除水位线
-		logger.info("Delete finish");
+
 	}
 
 	public SortedSet<Map.Entry<Integer, Float>> retrieve(int docid) {
@@ -211,9 +205,8 @@ public class SimTable implements KryoSerializable {
 		while (piter.hasNext()) {
 			float value = piter.next();
 			if (value < 0) {
-				// continue;
 				start++;
-				continue;
+				// continue;
 			} else {
 				if (value > 1) {
 					peer.indexer.put((int) value - 1, start);
@@ -227,15 +220,15 @@ public class SimTable implements KryoSerializable {
 			}
 			cursor++;
 		}
+		synchronized (this.scores) {
+			TIntIterator siter = this.scores.keySet().iterator();
+			while (siter.hasNext()) {
+				Integer docid = siter.next();
+				SortedMap<Integer, Float> thisscores = this.scores.get(docid);
+				SortedMap<Integer, Float> peerscores = null;
+				peerscores = new TreeMap<Integer, Float>();
+				peer.scores.put(docid, peerscores);
 
-		TIntIterator siter = this.scores.keySet().iterator();
-		while (siter.hasNext()) {
-			Integer docid = siter.next();
-			SortedMap<Integer, Float> thisscores = this.scores.get(docid);
-			SortedMap<Integer, Float> peerscores = null;
-			peerscores = new TreeMap<Integer, Float>();
-			peer.scores.put(docid, peerscores);
-			synchronized (thisscores) {
 				for (Integer key : thisscores.keySet()) {
 					Float score = thisscores.get(key);
 					peerscores.put(key, score);
@@ -255,9 +248,8 @@ public class SimTable implements KryoSerializable {
 	@Override
 	// 重载序列化代码
 	public void read(Kryo kryo, Input input) {
-		logger.info("Loading....");
+
 		this.probs = kryo.readObject(input, TFloatArrayList.class);
-		// this.indexer = kryo.readObject(input, TIntIntHashMap.class);
 		int indexsize = kryo.readObject(input, int.class);
 		while (indexsize > 0) {
 			int key = kryo.readObject(input, int.class);
@@ -267,14 +259,12 @@ public class SimTable implements KryoSerializable {
 		}
 		int scoresize = kryo.readObject(input, int.class);
 		while (scoresize > 0) {
-			// System.out.println(scoresize);
 			Integer docid = kryo.readObject(input, Integer.class);
 			SortedMap<Integer, Float> range = null;
 			range = new TreeMap<Integer, Float>();
 			this.scores.put(docid, range);
 			int listsize = kryo.readObject(input, int.class);
 			while (listsize > 0) {
-				// System.out.println(Listsize);
 				Integer key = kryo.readObject(input, Integer.class);
 				Float score = kryo.readObject(input, Float.class);
 				range.put(key, score);
@@ -282,12 +272,11 @@ public class SimTable implements KryoSerializable {
 			}
 			scoresize--;
 		}
-		logger.info("Load finish");
 	}
 
 	@Override
 	public void write(Kryo kryo, Output output) {
-		logger.info("Saving....");
+
 		kryo.writeObject(output, this.probs);
 		TIntIntMap indexmap = this.indexer;
 		kryo.writeObject(output, indexmap.size());
@@ -310,6 +299,6 @@ public class SimTable implements KryoSerializable {
 				kryo.writeObject(output, score);
 			}
 		}
-		logger.info("Save finish");
+
 	}
 }

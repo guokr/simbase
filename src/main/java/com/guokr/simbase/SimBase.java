@@ -121,13 +121,12 @@ public class SimBase {
 	}
 
 	public void save(String key) {
-		if (!base.containsKey(key)) {
-			base.put(key, new SimEngine());
-		}
-		try {
-			base.get(key).save(key);
-		} catch (Throwable e) {
-			throw new SimBaseException(e);
+		if (base.containsKey(key)) {
+			try {
+				base.get(key).save(key);
+			} catch (Throwable e) {
+				throw new SimBaseException(e);
+			}
 		}
 	}
 
