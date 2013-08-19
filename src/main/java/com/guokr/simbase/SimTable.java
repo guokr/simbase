@@ -50,7 +50,7 @@ public class SimTable implements KryoSerializable {
 
 	private static double LOADFACTOR;
 	private static int MAXLIMITS;
-	private static Map<String, String> tableconfig;
+	private static Map<String, Object> tableconfig;
 
 	private TFloatList probs = new TFloatArrayList();
 	private TIntIntMap indexer = new TIntIntHashMap();
@@ -63,7 +63,7 @@ public class SimTable implements KryoSerializable {
 		MAXLIMITS = 20;
 	}
 
-	public SimTable(Map<String, String> config) {
+	public SimTable(Map<String, Object> config) {
 		tableconfig = config;
 		LOADFACTOR = Float.parseFloat((String) tableconfig.get("LOADFACTOR"));
 		MAXLIMITS = Integer.parseInt((String) tableconfig.get("MAXLIMITS"));

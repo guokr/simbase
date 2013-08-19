@@ -34,14 +34,14 @@ public class SimEngine {
 	private long timestamp = -1;
 
 	
-	public SimEngine(Map<String, String> config) {
+	public SimEngine(Map<String, Object> config) {
 		
-		if(config !=null) {
+		try {
 			cloneInterval = Integer.parseInt((String) config.get("CLONEINTERVAL"));
 			debug = Boolean.parseBoolean((String) config.get("DEBUG"));
-			addcounter = Integer.parseInt((String) config.get("DEBUGADDCOUNTER"));
+			addcounter = Integer.parseInt((String)config.get("DEBUGADDCOUNTER"));
 			table = new SimTable(config);
-		} else {
+		} catch(NullPointerException e) {
 			logger.warn("YAML not found,loading default config");
 			cloneInterval = 30000;
 			debug = true;

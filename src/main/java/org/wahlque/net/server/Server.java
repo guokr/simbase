@@ -24,7 +24,6 @@ public class Server {
 			10, 50, 60, TimeUnit.SECONDS, new ArrayBlockingQueue<Runnable>(10),
 			new ServerThreadFactory(), new RejectedHandler());
 
-	
 	private static final Logger log = LoggerFactory.getLogger(Server.class);
 
 	public Server(Map<String, Object> context, ActionRegistry registry) {
@@ -51,12 +50,10 @@ public class Server {
 		}
 	}
 
-
-
-	public void run(int port) {
+	public void run() {
 		ServerSocket serverSocket = null;
 		try {
-			serverSocket = new ServerSocket(port);
+			serverSocket = new ServerSocket(Integer.parseInt((String) serverContext.get("PORT")));
 			this.serverContext.put("serverSocket", serverSocket);
 			while (up()) {
 				if (!serverSocket.isClosed()) {
@@ -66,7 +63,7 @@ public class Server {
 					} catch (IOException e) {
 						throw new ServerExcpetion();
 					}
-					
+
 					if (socket != null && !socket.isClosed()) {
 						serverThreadPool.execute(new Runnable() {
 							public void run() {

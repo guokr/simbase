@@ -1,12 +1,19 @@
 package com.guokr.simbase.tests;
 
 import static org.junit.Assert.assertTrue;
+
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.SortedSet;
 
 import org.junit.Test;
 
+import com.esotericsoftware.yamlbeans.YamlReader;
 import com.guokr.simbase.SimBase;
 
 public class SimEngineTests {
@@ -51,7 +58,17 @@ public class SimEngineTests {
 
 
 	private SimBase initSimBase(String key) {
-		SimBase simbase = new SimBase();
+		YamlReader yaml;
+		Map<String,Object> config = new HashMap<String,Object>();
+		try {
+			yaml = new YamlReader(new FileReader("config/simBaseServer.yaml"));
+			config = (Map<String, Object>) yaml.read();
+			
+		} catch (IOException e) {
+			
+		}
+		
+		SimBase simbase = new SimBase(config);
 		simbase.add(key, 0, new float[] { 0.18257418583505536f,
 				0.3651483716701107f, 0.5477225575051661f, 0.7302967433402214f });
 		simbase.add(key, 1, new float[] { 0.18257418583505536f,

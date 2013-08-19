@@ -31,33 +31,23 @@ import com.guokr.simbase.action.SaveAction;
 import com.guokr.simbase.action.ShutdownAction;
 
 public class SimBase {
- 
+
 	private static final String dir = System.getProperty("user.dir")
 			+ System.getProperty("file.separator");
 	private static final String idxFilePath = dir + "keys.idx";
 	private static final Logger logger = LoggerFactory.getLogger(SimBase.class);
-	private static long timeInterval;
-	private static int port;
-	private static Map<String,String> config;
-	
+	private long timeInterval;
+	private int port;
+	private Map<String, Object> config;
+
 	private Map<String, SimEngine> base = new HashMap<String, SimEngine>();
 
-	@SuppressWarnings("unchecked")
-	public SimBase() {
-		
-		try {
-			YamlReader yaml = new YamlReader(new FileReader(dir + "/config/simBaseServer.yaml"));
-			config = (Map<String,String>) yaml.read();
-			timeInterval = Long.parseLong((String) config.get("CRONINTERVAL"));
-			port = Integer.parseInt((String) config.get("PORT"));
-		} catch (IOException e) {
-			logger.warn("YAML not found,loading default config");
-			timeInterval = 120000L;
-			port = 7654;
-		}
+	public SimBase(Map<String, Object> config) {
+		this.config = config;
+		this.timeInterval = Long.parseLong((String) config.get("CRONINTERVAL"));
+		this.port = Integer.parseInt((String) config.get("PORT"));
 		this.load();// 新建时加载磁盘数据
 		this.cron();// 设置定时任务
-
 	}
 
 	public void clear() {
@@ -156,7 +146,7 @@ public class SimBase {
 
 	public void add(String key, int docid, float[] distr) {
 		if (!base.containsKey(key)) {
-			base.put(key, new SimEngine(config));
+			base.put(key, new SimEngine(this.config));
 		}
 		base.get(key).add(docid, distr);
 	}
@@ -199,11 +189,20 @@ public class SimBase {
 	}
 
 	public static void main(String[] args) throws IOException {
+		Map<String, Object> config = new HashMap<String, Object>();
 		try {
-			Map<String, Object> context = new HashMap<String, Object>();
+			YamlReader yaml = new YamlReader(new FileReader(dir
+					+ "/config/simBaseServer.yaml"));
+			config = (Map<String, Object>) yaml.read();
+		} catch (IOException e) {
+			logger.warn("YAML not found,loading default config");
+			config.put("timeInterval", "120000");
+			config.put("port", "7654");
+		}
+		try {
+			Map<String, Object> context = new HashMap<String, Object>(config);
 			context.put("debug", true);
-
-			SimBase db = new SimBase();
+			SimBase db = new SimBase(config);
 			context.put("simbase", db);
 
 			ActionRegistry registry = ActionRegistry.getInstance();
@@ -218,7 +217,7 @@ public class SimBase {
 
 			Server server = new Server(context, registry);
 
-			server.run(port);
+			server.run();
 		} catch (Throwable e) {
 			logger.error("Server Error!", e);
 			System.exit(-1);
