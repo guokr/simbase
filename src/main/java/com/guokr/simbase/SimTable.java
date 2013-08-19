@@ -51,8 +51,8 @@ public class SimTable implements KryoSerializable {
 		return sortedEntries;
 	}
 
-	private static double LOADFACTOR = 0.75;
-	private static int MAXLIMITS = 20;
+	private static double LOADFACTOR;
+	private static int MAXLIMITS;
 
 	private TFloatList probs = new TFloatArrayList();
 	private TIntIntMap indexer = new TIntIntHashMap();
