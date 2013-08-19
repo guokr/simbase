@@ -3,8 +3,6 @@ package com.guokr.simbase;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.IOException;
 import java.util.Date;
 import java.util.Map;
 import java.util.SortedSet;
@@ -18,7 +16,6 @@ import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.KryoException;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
-import com.esotericsoftware.yamlbeans.YamlReader;
 
 public class SimEngine {
 
@@ -31,22 +28,20 @@ public class SimEngine {
 	private static int addcounter;
 
 	private ExecutorService service = Executors.newSingleThreadExecutor();
-	private final SimTable table = new SimTable();
+	private SimTable table;
 	private final Kryo kryo = new Kryo();
 	private int counter = 0;
 	private long timestamp = -1;
 
 	
-	public SimEngine() {
+	public SimEngine(Map<String, String> config) {
 		
-		try {
-			YamlReader yaml = new YamlReader(new FileReader(dir + "/config/simBaseServer.yaml"));
-			@SuppressWarnings("unchecked")
-			Map<String,String> config = (Map<String,String>) yaml.read();
+		if(config !=null) {
 			cloneInterval = Integer.parseInt((String) config.get("CLONEINTERVAL"));
 			debug = Boolean.parseBoolean((String) config.get("DEBUG"));
 			addcounter = Integer.parseInt((String) config.get("DEBUGADDCOUNTER"));
-		} catch (IOException e) {
+			table = new SimTable(config);
+		} else {
 			logger.warn("YAML not found,loading default config");
 			cloneInterval = 30000;
 			debug = true;

@@ -38,17 +38,17 @@ public class SimBase {
 	private static final Logger logger = LoggerFactory.getLogger(SimBase.class);
 	private static long timeInterval;
 	private static int port;
-	
+	private static Map<String,String> config;
 	
 	private Map<String, SimEngine> base = new HashMap<String, SimEngine>();
 
+	@SuppressWarnings("unchecked")
 	public SimBase() {
 		
 		try {
 			YamlReader yaml = new YamlReader(new FileReader(dir + "/config/simBaseServer.yaml"));
-			@SuppressWarnings("unchecked")
-			Map<String,String> config = (Map<String,String>) yaml.read();
-			timeInterval = Integer.parseInt((String) config.get("CRONINTERVAL"));
+			config = (Map<String,String>) yaml.read();
+			timeInterval = Long.parseLong((String) config.get("CRONINTERVAL"));
 			port = Integer.parseInt((String) config.get("PORT"));
 		} catch (IOException e) {
 			logger.warn("YAML not found,loading default config");
@@ -93,7 +93,7 @@ public class SimBase {
 
 	public void load(String key) {
 		if (!base.containsKey(key)) {
-			base.put(key, new SimEngine());
+			base.put(key, new SimEngine(config));
 		}
 		try {
 			base.get(key).load(key);
@@ -156,14 +156,14 @@ public class SimBase {
 
 	public void add(String key, int docid, float[] distr) {
 		if (!base.containsKey(key)) {
-			base.put(key, new SimEngine());
+			base.put(key, new SimEngine(config));
 		}
 		base.get(key).add(docid, distr);
 	}
 
 	public void update(String key, int docid, float[] distr) {
 		if (!base.containsKey(key)) {
-			base.put(key, new SimEngine());
+			base.put(key, new SimEngine(config));
 		}
 		base.get(key).update(docid, distr);
 	}
