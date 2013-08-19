@@ -38,11 +38,11 @@ public class SimBase {
 	private static final Logger logger = LoggerFactory.getLogger(SimBase.class);
 	private long timeInterval;
 	private int port;
-	private Map<String, Object> config;
+	private Map<String, String> config;
 
 	private Map<String, SimEngine> base = new HashMap<String, SimEngine>();
 
-	public SimBase(Map<String, Object> config) {
+	public SimBase(Map<String, String> config) {
 		this.config = config;
 		this.timeInterval = Long.parseLong((String) config.get("CRONINTERVAL"));
 		this.port = Integer.parseInt((String) config.get("PORT"));
@@ -189,11 +189,11 @@ public class SimBase {
 	}
 
 	public static void main(String[] args) throws IOException {
-		Map<String, Object> config = new HashMap<String, Object>();
+		Map<String, String> config = new HashMap<String, String>();
 		try {
 			YamlReader yaml = new YamlReader(new FileReader(dir
 					+ "/config/simBaseServer.yaml"));
-			config = (Map<String, Object>) yaml.read();
+			config = (Map<String, String>) yaml.read();
 		} catch (IOException e) {
 			logger.warn("YAML not found,loading default config");
 			config.put("timeInterval", "120000");

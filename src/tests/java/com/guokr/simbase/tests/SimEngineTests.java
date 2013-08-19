@@ -59,10 +59,10 @@ public class SimEngineTests {
 
 	private SimBase initSimBase(String key) {
 		YamlReader yaml;
-		Map<String,Object> config = new HashMap<String,Object>();
+		Map<String,String> config = new HashMap<String,String>();
 		try {
 			yaml = new YamlReader(new FileReader("config/simBaseServer.yaml"));
-			config = (Map<String, Object>) yaml.read();
+			config = (Map<String, String>) yaml.read();
 			
 		} catch (IOException e) {
 			

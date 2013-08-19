@@ -34,7 +34,7 @@ public class SimEngine {
 	private long timestamp = -1;
 
 	
-	public SimEngine(Map<String, Object> config) {
+	public SimEngine(Map<String, String> config) {
 		
 		try {
 			cloneInterval = Integer.parseInt((String) config.get("CLONEINTERVAL"));
