@@ -48,14 +48,26 @@ public class SimTable implements KryoSerializable {
 		return sortedEntries;
 	}
 
-	private static final double LOADFACTOR = 0.75;
-	private static final int MAXLIMITS = 20;
+	private static double LOADFACTOR;
+	private static int MAXLIMITS;
+	private static Map<String, String> tableconfig;
 
 	private TFloatList probs = new TFloatArrayList();
 	private TIntIntMap indexer = new TIntIntHashMap();
 	private TIntObjectHashMap<TIntList> reverseIndexer = new TIntObjectHashMap<TIntList>();
 	private TIntFloatMap waterLine = new TIntFloatHashMap();
 	private TIntObjectHashMap<SortedMap<Integer, Float>> scores = new TIntObjectHashMap<SortedMap<Integer, Float>>();
+
+	public SimTable() {
+		LOADFACTOR = 0.75;
+		MAXLIMITS = 20;
+	}
+
+	public SimTable(Map<String, String> config) {
+		tableconfig = config;
+		LOADFACTOR = Float.parseFloat((String) tableconfig.get("LOADFACTOR"));
+		MAXLIMITS = Integer.parseInt((String) tableconfig.get("MAXLIMITS"));
+	}
 
 	private void setscore(int src, int tgt, float score) {
 		SortedMap<Integer, Float> range = scores.get(src);
@@ -197,7 +209,7 @@ public class SimTable implements KryoSerializable {
 	}
 
 	public SimTable clone() {
-		SimTable peer = new SimTable();
+		SimTable peer = new SimTable(tableconfig);
 
 		int cursor = 0, start = 0;
 		TFloatIterator piter = this.probs.iterator();

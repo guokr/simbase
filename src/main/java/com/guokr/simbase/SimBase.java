@@ -20,6 +20,7 @@ import org.slf4j.LoggerFactory;
 import org.wahlque.net.action.ActionRegistry;
 import org.wahlque.net.server.Server;
 
+import com.esotericsoftware.yamlbeans.YamlReader;
 import com.guokr.simbase.action.AddAction;
 import com.guokr.simbase.action.DelAction;
 import com.guokr.simbase.action.ExitAction;
@@ -35,11 +36,16 @@ public class SimBase {
 			+ System.getProperty("file.separator");
 	private static final String idxFilePath = dir + "keys.idx";
 	private static final Logger logger = LoggerFactory.getLogger(SimBase.class);
-	private static final long timeInterval = 120000L;// 两分钟，上线时酌情更改
+	private long timeInterval;
+	private int port;
+	private Map<String, String> config;
 
 	private Map<String, SimEngine> base = new HashMap<String, SimEngine>();
 
-	public SimBase() {
+	public SimBase(Map<String, String> config) {
+		this.config = config;
+		this.timeInterval = Long.parseLong((String) config.get("CRONINTERVAL"));
+		this.port = Integer.parseInt((String) config.get("PORT"));
 		this.load();// 新建时加载磁盘数据
 		this.cron();// 设置定时任务
 	}
@@ -60,7 +66,7 @@ public class SimBase {
 					idxFilePath));
 			String[] keys = input.readLine().split("\\|");
 			for (String key : keys) {
-				logger.info("Loading key-- " + key);// 只有存储才有多进程的情况
+				logger.info("Loading key: " + key);// 只有存储才有多进程的情况
 				this.load(key);
 			}
 			input.close();
@@ -77,7 +83,7 @@ public class SimBase {
 
 	public void load(String key) {
 		if (!base.containsKey(key)) {
-			base.put(key, new SimEngine());
+			base.put(key, new SimEngine(config));
 		}
 		try {
 			base.get(key).load(key);
@@ -140,14 +146,14 @@ public class SimBase {
 
 	public void add(String key, int docid, float[] distr) {
 		if (!base.containsKey(key)) {
-			base.put(key, new SimEngine());
+			base.put(key, new SimEngine(this.config));
 		}
 		base.get(key).add(docid, distr);
 	}
 
 	public void update(String key, int docid, float[] distr) {
 		if (!base.containsKey(key)) {
-			base.put(key, new SimEngine());
+			base.put(key, new SimEngine(config));
 		}
 		base.get(key).update(docid, distr);
 	}
@@ -183,11 +189,20 @@ public class SimBase {
 	}
 
 	public static void main(String[] args) throws IOException {
+		Map<String, String> config = new HashMap<String, String>();
 		try {
-			Map<String, Object> context = new HashMap<String, Object>();
+			YamlReader yaml = new YamlReader(new FileReader(dir
+					+ "/config/simBaseServer.yaml"));
+			config = (Map<String, String>) yaml.read();
+		} catch (IOException e) {
+			logger.warn("YAML not found,loading default config");
+			config.put("timeInterval", "120000");
+			config.put("port", "7654");
+		}
+		try {
+			Map<String, Object> context = new HashMap<String, Object>(config);
 			context.put("debug", true);
-
-			SimBase db = new SimBase();
+			SimBase db = new SimBase(config);
 			context.put("simbase", db);
 
 			ActionRegistry registry = ActionRegistry.getInstance();
@@ -202,7 +217,7 @@ public class SimBase {
 
 			Server server = new Server(context, registry);
 
-			server.run(7654);
+			server.run();
 		} catch (Throwable e) {
 			logger.error("Server Error!", e);
 			System.exit(-1);
