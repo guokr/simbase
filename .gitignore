@@ -11,3 +11,5 @@ data/*.dmp
 data/*.idx
 data/*.bak
 /target
+log/*.log
+log/*.log.*

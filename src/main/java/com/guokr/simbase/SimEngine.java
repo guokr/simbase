@@ -3,6 +3,8 @@ package com.guokr.simbase;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.Date;
 import java.util.Map;
 import java.util.SortedSet;
@@ -16,6 +18,7 @@ import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.KryoException;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
+import com.esotericsoftware.yamlbeans.YamlReader;
 
 public class SimEngine {
 
@@ -23,7 +26,9 @@ public class SimEngine {
 			+ System.getProperty("file.separator");
 	private static final Logger logger = LoggerFactory
 			.getLogger(SimEngine.class);
-	private static final long cloneInterval = 30000;
+	private static long cloneInterval;
+	private static boolean debug;
+	private static int addcounter;
 
 	private ExecutorService service = Executors.newSingleThreadExecutor();
 	private final SimTable table = new SimTable();
@@ -31,6 +36,24 @@ public class SimEngine {
 	private int counter = 0;
 	private long timestamp = -1;
 
+	
+	public SimEngine() {
+		
+		try {
+			YamlReader yaml = new YamlReader(new FileReader(dir + "/config/simBaseServer.yaml"));
+			@SuppressWarnings("unchecked")
+			Map<String,String> config = (Map<String,String>) yaml.read();
+			cloneInterval = Integer.parseInt((String) config.get("CLONEINTERVAL"));
+			debug = Boolean.parseBoolean((String) config.get("DEBUG"));
+			addcounter = Integer.parseInt((String) config.get("DEBUGADDCOUNTER"));
+		} catch (IOException e) {
+			logger.warn("YAML not found,loading default config");
+			cloneInterval = 30000;
+			debug = true;
+			addcounter = 100;
+		}
+
+	}
 	/**
 	 * clone 函数之前必须验证
 	 * 
@@ -123,9 +146,11 @@ public class SimEngine {
 	public void add(final int docid, final float[] distr) {
 		service.execute(new Runnable() {
 			public void run() {
-				counter++;
-				if (counter % 100 == 0) {
-					logger.info("add:" + counter);
+				if (debug){
+					counter++;
+					if (counter % addcounter == 0) {
+						logger.debug("add:" + counter);
+					}
 				}
 				try {
 					table.add(docid, distr);

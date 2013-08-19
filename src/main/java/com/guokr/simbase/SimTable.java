@@ -12,6 +12,8 @@ import gnu.trove.map.hash.TIntFloatHashMap;
 import gnu.trove.map.hash.TIntIntHashMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.Comparator;
 import java.util.Map;
 import java.util.SortedMap;
@@ -23,6 +25,7 @@ import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.KryoSerializable;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
+import com.esotericsoftware.yamlbeans.YamlReader;
 
 public class SimTable implements KryoSerializable {
 
@@ -48,15 +51,29 @@ public class SimTable implements KryoSerializable {
 		return sortedEntries;
 	}
 
-	private static final double LOADFACTOR = 0.75;
-	private static final int MAXLIMITS = 20;
+	private static double LOADFACTOR = 0.75;
+	private static int MAXLIMITS = 20;
 
 	private TFloatList probs = new TFloatArrayList();
 	private TIntIntMap indexer = new TIntIntHashMap();
 	private TIntObjectHashMap<TIntList> reverseIndexer = new TIntObjectHashMap<TIntList>();
 	private TIntFloatMap waterLine = new TIntFloatHashMap();
 	private TIntObjectHashMap<SortedMap<Integer, Float>> scores = new TIntObjectHashMap<SortedMap<Integer, Float>>();
-
+    
+	
+	public SimTable() {
+		try {
+			YamlReader yaml = new YamlReader(new FileReader("config/simBaseServer.yaml"));
+			@SuppressWarnings("unchecked")
+			Map<String,String> config = (Map<String,String>) yaml.read();
+			LOADFACTOR = Float.parseFloat((String) config.get("LOADFACTOR"));
+			MAXLIMITS = Integer.parseInt((String) config.get("MAXLIMITS"));
+		} catch (IOException e) {
+			LOADFACTOR = 0.75;
+			MAXLIMITS = 20;
+		}
+		
+	}
 	private void setscore(int src, int tgt, float score) {
 		SortedMap<Integer, Float> range = scores.get(src);
 		if (range == null) {

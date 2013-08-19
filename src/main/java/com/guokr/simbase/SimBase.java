@@ -20,6 +20,7 @@ import org.slf4j.LoggerFactory;
 import org.wahlque.net.action.ActionRegistry;
 import org.wahlque.net.server.Server;
 
+import com.esotericsoftware.yamlbeans.YamlReader;
 import com.guokr.simbase.action.AddAction;
 import com.guokr.simbase.action.DelAction;
 import com.guokr.simbase.action.ExitAction;
@@ -30,18 +31,33 @@ import com.guokr.simbase.action.SaveAction;
 import com.guokr.simbase.action.ShutdownAction;
 
 public class SimBase {
-
+ 
 	private static final String dir = System.getProperty("user.dir")
 			+ System.getProperty("file.separator");
 	private static final String idxFilePath = dir + "keys.idx";
 	private static final Logger logger = LoggerFactory.getLogger(SimBase.class);
-	private static final long timeInterval = 120000L;// 两分钟，上线时酌情更改
-
+	private static long timeInterval;
+	private static int port;
+	
+	
 	private Map<String, SimEngine> base = new HashMap<String, SimEngine>();
 
 	public SimBase() {
+		
+		try {
+			YamlReader yaml = new YamlReader(new FileReader(dir + "/config/simBaseServer.yaml"));
+			@SuppressWarnings("unchecked")
+			Map<String,String> config = (Map<String,String>) yaml.read();
+			timeInterval = Integer.parseInt((String) config.get("CRONINTERVAL"));
+			port = Integer.parseInt((String) config.get("PORT"));
+		} catch (IOException e) {
+			logger.warn("YAML not found,loading default config");
+			timeInterval = 120000L;
+			port = 7654;
+		}
 		this.load();// 新建时加载磁盘数据
 		this.cron();// 设置定时任务
+
 	}
 
 	public void clear() {
@@ -60,7 +76,7 @@ public class SimBase {
 					idxFilePath));
 			String[] keys = input.readLine().split("\\|");
 			for (String key : keys) {
-				logger.info("Loading key-- " + key);// 只有存储才有多进程的情况
+				logger.info("Loading key: " + key);// 只有存储才有多进程的情况
 				this.load(key);
 			}
 			input.close();
@@ -202,7 +218,7 @@ public class SimBase {
 
 			Server server = new Server(context, registry);
 
-			server.run(7654);
+			server.run(port);
 		} catch (Throwable e) {
 			logger.error("Server Error!", e);
 			System.exit(-1);
