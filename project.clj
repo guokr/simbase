@@ -23,8 +23,8 @@
     :test-selectors {:default (complement :integration)
                      :integration :integration
                      :all (constantly true)}
-    :compile-path "targets/classes"
-    :target-path "targets/"
+    :compile-path "target/classes"
+    :target-path "target/"
     :javac-options ["-target" "1.6" "-source" "1.6" "-Xlint:-options"]
     :jvm-opts ["-Xmx1g"]
     :main com.guokr.simbase.SimBase)

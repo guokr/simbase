@@ -4,9 +4,10 @@ pom.xml
 *jar
 /lib/
 /classes/
-/targets/
+/target/
 .lein-deps-sum
 
 data/*.dmp
 data/*.idx
 data/*.bak
+/target
