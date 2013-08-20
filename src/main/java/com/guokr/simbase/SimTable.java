@@ -13,6 +13,7 @@ import gnu.trove.map.hash.TIntIntHashMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 
 import java.util.Comparator;
+import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.SortedSet;
@@ -202,6 +203,29 @@ public class SimTable implements KryoSerializable {
 		} else {
 			return entriesSortedByValues(new TreeMap<Integer, Float>());
 		}
+	}
+
+	/**
+	 * 
+	 start = indexer.get(docid); int cursor = start; for (float val : distr) {
+	 * probs.set(cursor, val); length += val * val; cursor++; }
+	 * probs.set(cursor++, (float) (docid + 1)); probs.set(cursor, length);
+	 * 
+	 * @param docid
+	 * @return
+	 */
+	
+	public TFloatList get(int docid) {
+		TFloatList res = null;
+		if (indexer.containsKey(docid)) {
+			res = new TFloatArrayList();
+			int idx = indexer.get(docid);
+			float ftmp = 0;
+			while((ftmp = probs.get(idx)) > 0 && (ftmp < 1)) {
+				res.add(ftmp);
+			}
+		}
+		return res;
 	}
 
 	public float similarity(int docid1, int docid2) {
