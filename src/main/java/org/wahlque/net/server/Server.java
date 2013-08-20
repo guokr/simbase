@@ -53,7 +53,7 @@ public class Server {
 	public void run() {
 		ServerSocket serverSocket = null;
 		try {
-			serverSocket = new ServerSocket(Integer.parseInt((String) serverContext.get("PORT")));
+			serverSocket = new ServerSocket((Integer)serverContext.get("port"));
 			this.serverContext.put("serverSocket", serverSocket);
 			while (up()) {
 				if (!serverSocket.isClosed()) {

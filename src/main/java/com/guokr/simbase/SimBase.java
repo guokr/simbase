@@ -30,6 +30,7 @@ import com.guokr.simbase.action.ExitAction;
 import com.guokr.simbase.action.GetAction;
 import com.guokr.simbase.action.PingAction;
 import com.guokr.simbase.action.PutAction;
+import com.guokr.simbase.action.RetrieveAction;
 import com.guokr.simbase.action.SaveAction;
 import com.guokr.simbase.action.ShutdownAction;
 
@@ -227,6 +228,7 @@ public class SimBase {
 			registry.register(AddAction.class);
 			registry.register(PutAction.class);
 			registry.register(GetAction.class);
+			registry.register(RetrieveAction.class);
 			registry.register(SaveAction.class);
 			registry.register(ExitAction.class);
 			registry.register(ShutdownAction.class);
