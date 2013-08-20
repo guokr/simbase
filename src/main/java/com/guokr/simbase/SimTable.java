@@ -13,7 +13,6 @@ import gnu.trove.map.hash.TIntIntHashMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 
 import java.util.Comparator;
-import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.SortedSet;
@@ -49,25 +48,25 @@ public class SimTable implements KryoSerializable {
 		return sortedEntries;
 	}
 
-	private static double LOADFACTOR;
-	private static int MAXLIMITS;
-	private static Map<String, String> tableconfig;
-
 	private TFloatList probs = new TFloatArrayList();
 	private TIntIntMap indexer = new TIntIntHashMap();
 	private TIntObjectHashMap<TIntList> reverseIndexer = new TIntObjectHashMap<TIntList>();
 	private TIntFloatMap waterLine = new TIntFloatHashMap();
 	private TIntObjectHashMap<SortedMap<Integer, Float>> scores = new TIntObjectHashMap<SortedMap<Integer, Float>>();
 
+	private Map<String, Object> context;
+	private double loadfactor;
+	private int maxlimits;
+
 	public SimTable() {
-		LOADFACTOR = 0.75;
-		MAXLIMITS = 20;
+		this.loadfactor = 0.75;
+		this.maxlimits = 20;
 	}
 
-	public SimTable(Map<String, String> config) {
-		tableconfig = config;
-		LOADFACTOR = Float.parseFloat((String) tableconfig.get("LOADFACTOR"));
-		MAXLIMITS = Integer.parseInt((String) tableconfig.get("MAXLIMITS"));
+	public SimTable(Map<String, Object> context) {
+		this.context = context;
+		this.loadfactor = (Double) context.get("loadfactor");
+		this.maxlimits = (Integer) context.get("maxlimits");
 	}
 
 	private void setscore(int src, int tgt, float score) {
@@ -97,7 +96,7 @@ public class SimTable implements KryoSerializable {
 				reverseRange.add(src);// 添加反向索引
 			}
 		}
-		if (range.size() > MAXLIMITS) {
+		if (range.size() > this.maxlimits) {
 			SortedSet<Map.Entry<Integer, Float>> entries = entriesSortedByValues(range);
 			Map.Entry<Integer, Float> lastEntry = entries.last();
 			range.remove(lastEntry.getKey());
@@ -205,23 +204,13 @@ public class SimTable implements KryoSerializable {
 		}
 	}
 
-	/**
-	 * 
-	 start = indexer.get(docid); int cursor = start; for (float val : distr) {
-	 * probs.set(cursor, val); length += val * val; cursor++; }
-	 * probs.set(cursor++, (float) (docid + 1)); probs.set(cursor, length);
-	 * 
-	 * @param docid
-	 * @return
-	 */
-	
 	public TFloatList get(int docid) {
 		TFloatList res = null;
 		if (indexer.containsKey(docid)) {
 			res = new TFloatArrayList();
 			int idx = indexer.get(docid);
 			float ftmp = 0;
-			while((ftmp = probs.get(idx)) > 0 && (ftmp < 1)) {
+			while ((ftmp = probs.get(idx++)) > 0 && (ftmp < 1)) {
 				res.add(ftmp);
 			}
 		}
@@ -233,11 +222,12 @@ public class SimTable implements KryoSerializable {
 	}
 
 	public SimTable clone() {
-		SimTable peer = new SimTable(tableconfig);
+		SimTable peer = new SimTable(this.context);
 
 		int cursor = 0, start = 0;
 		TFloatIterator piter = this.probs.iterator();
-		peer.probs = new TFloatArrayList((int) (this.probs.size() / LOADFACTOR));
+		peer.probs = new TFloatArrayList(
+				(int) (this.probs.size() / this.loadfactor));
 		while (piter.hasNext()) {
 			float value = piter.next();
 			if (value < 0) {
@@ -312,7 +302,6 @@ public class SimTable implements KryoSerializable {
 
 	@Override
 	public void write(Kryo kryo, Output output) {
-
 		kryo.writeObject(output, this.probs);
 		TIntIntMap indexmap = this.indexer;
 		kryo.writeObject(output, indexmap.size());

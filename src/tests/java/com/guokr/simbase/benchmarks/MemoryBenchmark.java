@@ -1,10 +1,7 @@
 package com.guokr.simbase.benchmarks;
 
-import java.io.FileReader;
 import java.util.Date;
-import java.util.Map;
 
-import com.esotericsoftware.yamlbeans.YamlReader;
 import com.guokr.simbase.SimTable;
 
 public class MemoryBenchmark {
@@ -30,7 +27,9 @@ public class MemoryBenchmark {
 			accumulated += duration;
 
 			if (i % 1024 == 0) {
-				System.out.println("docid:" + i + "\tmemory:" + Runtime.getRuntime().totalMemory() + "\ttime:" + (accumulated / 1024));
+				System.out.println("docid:" + i + "\tmemory:"
+						+ Runtime.getRuntime().totalMemory() + "\ttime:"
+						+ (accumulated / 1024));
 				accumulated = 0;
 			}
 

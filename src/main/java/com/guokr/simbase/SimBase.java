@@ -1,5 +1,8 @@
 package com.guokr.simbase;
 
+import gnu.trove.list.TFloatList;
+import gnu.trove.list.array.TFloatArrayList;
+
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -19,8 +22,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wahlque.net.action.ActionRegistry;
 import org.wahlque.net.server.Server;
+import org.yaml.snakeyaml.Yaml;
 
-import com.esotericsoftware.yamlbeans.YamlReader;
 import com.guokr.simbase.action.AddAction;
 import com.guokr.simbase.action.DelAction;
 import com.guokr.simbase.action.ExitAction;
@@ -36,16 +39,13 @@ public class SimBase {
 			+ System.getProperty("file.separator");
 	private static final String idxFilePath = dir + "keys.idx";
 	private static final Logger logger = LoggerFactory.getLogger(SimBase.class);
-	private long timeInterval;
-	private int port;
-	private Map<String, String> config;
+
+	private Map<String, Object> context;
 
 	private Map<String, SimEngine> base = new HashMap<String, SimEngine>();
 
-	public SimBase(Map<String, String> config) {
-		this.config = config;
-		this.timeInterval = Long.parseLong((String) config.get("CRONINTERVAL"));
-		this.port = Integer.parseInt((String) config.get("PORT"));
+	public SimBase(Map<String, Object> context) {
+		this.context = context;
 		this.load();// 新建时加载磁盘数据
 		this.cron();// 设置定时任务
 	}
@@ -83,7 +83,7 @@ public class SimBase {
 
 	public void load(String key) {
 		if (!base.containsKey(key)) {
-			base.put(key, new SimEngine(config));
+			base.put(key, new SimEngine(context));
 		}
 		try {
 			base.get(key).load(key);
@@ -146,19 +146,21 @@ public class SimBase {
 
 	public void add(String key, int docid, float[] distr) {
 		if (!base.containsKey(key)) {
-			base.put(key, new SimEngine(this.config));
+			base.put(key, new SimEngine(this.context));
 		}
 		base.get(key).add(docid, distr);
 	}
 
 	public void update(String key, int docid, float[] distr) {
 		if (!base.containsKey(key)) {
-			base.put(key, new SimEngine(config));
+			base.put(key, new SimEngine(context));
 		}
 		base.get(key).update(docid, distr);
 	}
 
 	public void cron() {
+		final int cronInterval = (Integer) this.context.get("cronInterval");
+
 		// 创建一个cron任务
 		Timer cron = new Timer();
 
@@ -167,14 +169,24 @@ public class SimBase {
 				clear();
 			}
 		};
-		cron.schedule(cleartask, timeInterval / 2, timeInterval);
+		cron.schedule(cleartask, cronInterval / 2, cronInterval);
 
 		TimerTask savetask = new TimerTask() {
 			public void run() {
 				save();
 			}
 		};
-		cron.schedule(savetask, timeInterval, timeInterval);
+		cron.schedule(savetask, cronInterval, cronInterval);
+	}
+
+	public TFloatList get(String key, int docid) {
+		TFloatList result = null;
+		if (base.containsKey(key)) {
+			result = base.get(key).get(docid);
+		} else {
+			result = new TFloatArrayList();
+		}
+		return result;
 	}
 
 	public SortedSet<Map.Entry<Integer, Float>> retrieve(String key, int docid) {
@@ -188,21 +200,26 @@ public class SimBase {
 		return result;
 	}
 
+	@SuppressWarnings("unchecked")
 	public static void main(String[] args) throws IOException {
-		Map<String, String> config = new HashMap<String, String>();
+
+		Map<String, Object> config = new HashMap<String, Object>();
+
 		try {
-			YamlReader yaml = new YamlReader(new FileReader(dir
-					+ "/config/simBaseServer.yaml"));
-			config = (Map<String, String>) yaml.read();
+			Yaml yaml = new Yaml();
+			config = (Map<String, Object>) yaml.load(new FileReader(dir
+					+ "/config/server.yaml"));
 		} catch (IOException e) {
-			logger.warn("YAML not found,loading default config");
-			config.put("timeInterval", "120000");
-			config.put("port", "7654");
+			logger.warn("YAML not found, loading default config");
+			config.put("cronInterval", 120000);
+			config.put("port", 7654);
 		}
+
 		try {
 			Map<String, Object> context = new HashMap<String, Object>(config);
 			context.put("debug", true);
-			SimBase db = new SimBase(config);
+
+			SimBase db = new SimBase(context);
 			context.put("simbase", db);
 
 			ActionRegistry registry = ActionRegistry.getInstance();

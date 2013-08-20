@@ -3,15 +3,12 @@ package com.guokr.simbase.tests;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertTrue;
 
-import java.io.FileReader;
 import java.util.Iterator;
-import java.util.Map;
 import java.util.Map.Entry;
 import java.util.SortedSet;
 
 import org.junit.Test;
 
-import com.esotericsoftware.yamlbeans.YamlReader;
 import com.guokr.simbase.SimTable;
 
 public class SimTableTests {
@@ -36,7 +33,7 @@ public class SimTableTests {
 			beforeValue = thisValue;
 		}
 	}
-	
+
 	@Test
 	public void test3d() {
 		SimTable table = new SimTable();

@@ -1,5 +1,8 @@
 package com.guokr.simbase.reply;
 
+import gnu.trove.iterator.TFloatIterator;
+import gnu.trove.list.TFloatList;
+
 import java.util.Map;
 import java.util.SortedSet;
 
@@ -15,25 +18,26 @@ public class Result extends Multiple implements Reply<Payload<?>[]> {
 
 		int len = 2 * result.size();
 		this.value = new Bytes[len];
-		// this.value[0] = new Bytes("result".getBytes());
-
-		// ByteBuffer bb = null;
 		int i = 0;
 		for (Map.Entry<Integer, Float> entry : result) {
-			// bb = ByteBuffer.allocate(4);
-			// bb.putFloat(result.get(docid));
-			// this.value[--len] = new Bytes(bb.array());
-			//
-			// bb = ByteBuffer.allocate(4);
-			// bb.putInt(docid);
-			// this.value[--len] = new Bytes(bb.array());
-			// debug
 			this.value[i++] = new Bytes(String.valueOf(entry.getKey())
 					.getBytes());
 			this.value[i++] = new Bytes(String.valueOf(entry.getValue())
 					.getBytes());
 		}
-
 	}
 
+	public Result(TFloatList result) {
+		super(null);
+
+		int len = result.size();
+		this.value = new Bytes[len];
+
+		int i = 0;
+		TFloatIterator iter = result.iterator();
+		while (iter.hasNext()) {
+			this.value[i++] = new Bytes(String.valueOf(iter.next())
+					.getBytes());
+		}
+	}
 }

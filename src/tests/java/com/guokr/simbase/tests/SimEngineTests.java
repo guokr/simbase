@@ -2,7 +2,6 @@ package com.guokr.simbase.tests;
 
 import static org.junit.Assert.assertTrue;
 
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.HashMap;
@@ -12,8 +11,8 @@ import java.util.Map.Entry;
 import java.util.SortedSet;
 
 import org.junit.Test;
+import org.yaml.snakeyaml.Yaml;
 
-import com.esotericsoftware.yamlbeans.YamlReader;
 import com.guokr.simbase.SimBase;
 
 public class SimEngineTests {
@@ -37,18 +36,17 @@ public class SimEngineTests {
 		} catch (InterruptedException e) {
 		}
 	}
-	
-	private void printSimBase(SimBase simbase,String key) {
-		int count =0;
+
+	private void printSimBase(SimBase simbase, String key) {
+		int count = 0;
 		while (count < 24) {
-			int [] docids = getDocids(simbase.retrieve(key, count));
-			if (docids.length!=0){
+			int[] docids = getDocids(simbase.retrieve(key, count));
+			if (docids.length != 0) {
 				for (int docid : docids) {
 					System.out.print(docid + ",");
 				}
 				System.out.println();
-			}
-			else{
+			} else {
 				System.out.println("empty");
 			}
 			count++;
@@ -56,19 +54,18 @@ public class SimEngineTests {
 		System.out.println();
 	}
 
-
 	private SimBase initSimBase(String key) {
-		YamlReader yaml;
-		Map<String,String> config = new HashMap<String,String>();
+		Map<String, Object> context = new HashMap<String, Object>();
 		try {
-			yaml = new YamlReader(new FileReader("config/simBaseServer.yaml"));
-			config = (Map<String, String>) yaml.read();
-			
+			Yaml yaml = new Yaml();
+			@SuppressWarnings("unchecked")
+			Map<String, Object> config = (Map<String, Object>) yaml
+					.load(new FileReader("config/server.yaml"));
+			context = new HashMap<String, Object>(config);
 		} catch (IOException e) {
-			
 		}
-		
-		SimBase simbase = new SimBase(config);
+
+		SimBase simbase = new SimBase(context);
 		simbase.add(key, 0, new float[] { 0.18257418583505536f,
 				0.3651483716701107f, 0.5477225575051661f, 0.7302967433402214f });
 		simbase.add(key, 1, new float[] { 0.18257418583505536f,
@@ -139,37 +136,35 @@ public class SimEngineTests {
 
 	}
 
-
-
 	@Test
 	public void test_del_clean() {
 		String key = "test2";
 		SimBase simbase = initSimBase("test2");
 		delay(1);// 等待加载完毕
-		printSimBase(simbase,key);
+		printSimBase(simbase, key);
 		simbase.delete(key, 1);
-		//删除之后，清除之前
-//		simbase.add(key, 7,
-//		new float[] { 0.3651483716701107f, 0.18257418583505536f,
-//				0.7302967433402214f, 0.5477225575051661f });
+		// 删除之后，清除之前
+		// simbase.add(key, 7,
+		// new float[] { 0.3651483716701107f, 0.18257418583505536f,
+		// 0.7302967433402214f, 0.5477225575051661f });
 		delay(1);
-		assertTrue(simbase.retrieve(key, 1).size()==0);
+		assertTrue(simbase.retrieve(key, 1).size() == 0);
 		simbase.clear();
 		delay(1);
-		assertTrue(simbase.retrieve(key, 1).size()==0);
-		printSimBase(simbase,key);
+		assertTrue(simbase.retrieve(key, 1).size() == 0);
+		printSimBase(simbase, key);
 		simbase.add(key, 7,
 				new float[] { 0.3651483716701107f, 0.18257418583505536f,
 						0.7302967433402214f, 0.5477225575051661f });
 		delay(1);
-		assertTrue(simbase.retrieve(key, 1).size()==0);
-		printSimBase(simbase,key);
+		assertTrue(simbase.retrieve(key, 1).size() == 0);
+		printSimBase(simbase, key);
 		simbase.add(key, 1, new float[] { 0.18257418583505536f,
 				0.3651483716701107f, 0.7302967433402214f, 0.5477225575051661f });
 		delay(1);
-		printSimBase(simbase,key);
-		assertTrue(simbase.retrieve(key, 1).size()==20);
-		
+		printSimBase(simbase, key);
+		assertTrue(simbase.retrieve(key, 1).size() == 20);
+
 	}
 
 }

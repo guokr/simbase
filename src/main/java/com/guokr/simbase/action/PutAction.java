@@ -16,7 +16,7 @@ import com.guokr.simbase.reply.OK;
 
 public class PutAction implements Action {
 
-	public static final String ACTION = "put";
+	public static final String ACTION = "vput";
 
 	public Multiple payload(Map<String, Object> context, Command command)
 			throws ActionException {

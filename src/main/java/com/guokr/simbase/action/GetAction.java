@@ -1,9 +1,10 @@
 package com.guokr.simbase.action;
 
+import gnu.trove.list.TFloatList;
+import gnu.trove.list.array.TFloatArrayList;
+
 import java.nio.ByteBuffer;
 import java.util.Map;
-import java.util.SortedSet;
-import java.util.TreeMap;
 
 import org.wahlque.net.action.Action;
 import org.wahlque.net.action.ActionException;
@@ -13,13 +14,12 @@ import org.wahlque.net.transport.payload.Bytes;
 import org.wahlque.net.transport.payload.Multiple;
 
 import com.guokr.simbase.SimBase;
-import com.guokr.simbase.SimTable;
 import com.guokr.simbase.command.Get;
 import com.guokr.simbase.reply.Result;
 
 public class GetAction implements Action {
 
-	public static final String ACTION = "get";
+	public static final String ACTION = "vget";
 
 	public Payload<?> payload(Map<String, Object> context, Command command)
 			throws ActionException {
@@ -79,15 +79,13 @@ public class GetAction implements Action {
 
 	public Payload<?> apply(Map<String, Object> context, Payload<?> data)
 			throws ActionException {
-		SortedSet<Map.Entry<Integer, Float>> result;
+		TFloatList result;
 		if (context == null) {
-			result = SimTable.entriesSortedByValues(new TreeMap<Integer, Float>());
+			result = new TFloatArrayList();
 		} else {
 			Get cmd = (Get) command(context, data);
-			result = ((SimBase) context.get("simbase")).retrieve(cmd.key,
-					cmd.docid);
+			result = ((SimBase) context.get("simbase")).get(cmd.key, cmd.docid);
 		}
-		// System.out.println(result);
 		return new Result(result);
 	}
 }

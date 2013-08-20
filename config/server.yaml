@@ -1,0 +1,9 @@
+port: 7654
+cronInterval: 120000
+cloneInterval: 30000
+
+maxlimits: 20
+loadfactor: 0.75
+
+debug: false
+addcounter: 100

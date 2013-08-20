@@ -14,7 +14,7 @@
                    [org.slf4j/slf4j-api "1.7.5"]
                    [org.slf4j/slf4j-log4j12 "1.7.5"]
                    [log4j/log4j "1.2.17"]
-                   [com.esotericsoftware.yamlbeans/yamlbeans "1.06"]
+                   [org.yaml/snakeyaml "1.12"]
                    [com.esotericsoftware.kryo/kryo "2.21"]]
     :source-paths ["src/main/clojure"]
     :java-source-paths ["src/main/java"]

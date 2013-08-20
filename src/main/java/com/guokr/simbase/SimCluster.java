@@ -1,13 +1,11 @@
 package com.guokr.simbase;
 
-import gnu.trove.map.hash.TIntObjectHashMap;
-
 import java.util.Map;
 import java.util.SortedSet;
 
 public class SimCluster {
 
-	private TIntObjectHashMap centers = new TIntObjectHashMap();
+	// private TIntObjectHashMap centers = new TIntObjectHashMap();
 
 	public int add(int docid, float[] distr) {
 		return 0;

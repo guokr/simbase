@@ -16,7 +16,7 @@ import com.guokr.simbase.reply.OK;
 
 public class AddAction implements Action {
 
-	public static final String ACTION = "add";
+	public static final String ACTION = "vadd";
 
 	public Multiple payload(Map<String, Object> context, Command command)
 			throws ActionException {

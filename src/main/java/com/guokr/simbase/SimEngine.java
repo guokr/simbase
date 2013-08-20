@@ -1,5 +1,7 @@
 package com.guokr.simbase;
 
+import gnu.trove.list.TFloatList;
+
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -23,9 +25,6 @@ public class SimEngine {
 			+ System.getProperty("file.separator");
 	private static final Logger logger = LoggerFactory
 			.getLogger(SimEngine.class);
-	private static long cloneInterval;
-	private static boolean debug;
-	private static int addcounter;
 
 	private ExecutorService service = Executors.newSingleThreadExecutor();
 	private SimTable table;
@@ -33,15 +32,19 @@ public class SimEngine {
 	private int counter = 0;
 	private long timestamp = -1;
 
-	
-	public SimEngine(Map<String, String> config) {
-		
+	private long cloneInterval;
+	private boolean debug;
+	private int addcounter;
+
+	public SimEngine(Map<String, Object> config) {
+
 		try {
-			cloneInterval = Integer.parseInt((String) config.get("CLONEINTERVAL"));
-			debug = Boolean.parseBoolean((String) config.get("DEBUG"));
-			addcounter = Integer.parseInt((String)config.get("DEBUGADDCOUNTER"));
+			cloneInterval = (Integer) config.get("cloneInterval");
+			debug = (Boolean) config.get("debug");
+			addcounter = (Integer) config.get("addcounter");
+
 			table = new SimTable(config);
-		} catch(NullPointerException e) {
+		} catch (NullPointerException e) {
 			logger.warn("YAML not found,loading default config");
 			cloneInterval = 30000;
 			debug = true;
@@ -49,6 +52,7 @@ public class SimEngine {
 		}
 
 	}
+
 	/**
 	 * clone 函数之前必须验证
 	 * 
@@ -141,7 +145,7 @@ public class SimEngine {
 	public void add(final int docid, final float[] distr) {
 		service.execute(new Runnable() {
 			public void run() {
-				if (debug){
+				if (debug) {
 					counter++;
 					if (counter % addcounter == 0) {
 						logger.debug("add:" + counter);
@@ -180,6 +184,10 @@ public class SimEngine {
 				}
 			}
 		});
+	}
+
+	public TFloatList get(int docid) {
+		return table.get(docid);
 	}
 
 	public SortedSet<Map.Entry<Integer, Float>> retrieve(int docid) {
