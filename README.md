@@ -12,6 +12,7 @@ How to start
 -------------
 
   > cd SIMBASE_HOME
+  
   > bin/start
 
 Client Commands
