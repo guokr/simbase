@@ -1,6 +1,6 @@
 port: 7654
-cronInterval: 120000
-cloneInterval: 30000
+cronInterval: 3600000
+cloneInterval: 3600000
 
 maxlimits: 20
 loadfactor: 0.75
