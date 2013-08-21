@@ -16,12 +16,11 @@ import com.guokr.simbase.reply.OK;
 
 public class DelAction implements Action {
 
-	public static final String ACTION = "del";
+	public static final String ACTION = "vdel";
 
 	@Override
 	public Command command(Map<String, Object> context, Payload<?> payload)
 			throws ActionException {
-		// TODO Auto-generated method stub
 		boolean debug = false;
 		if (context.containsKey("debug")) {
 			debug = ((Boolean) (context.get("debug"))).booleanValue();
@@ -79,7 +78,6 @@ public class DelAction implements Action {
 	@Override
 	public Payload<?> apply(Map<String, Object> context, Payload<?> data)
 			throws ActionException {
-		// TODO Auto-generated method stub
 		Del cmd = (Del) command(context, data);
 		SimBase base = ((SimBase) context.get("simbase"));
 		base.delete(cmd.key,cmd.docid);
