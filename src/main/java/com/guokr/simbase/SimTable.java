@@ -13,6 +13,7 @@ import gnu.trove.map.hash.TIntIntHashMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.SortedSet;
@@ -48,6 +49,9 @@ public class SimTable implements KryoSerializable {
 		return sortedEntries;
 	}
 
+	private Map<String, Integer> dimensions = new HashMap<String, Integer>();
+	private String[] current;
+
 	private TFloatList probs = new TFloatArrayList();
 	private TIntIntMap indexer = new TIntIntHashMap();
 	private TIntObjectHashMap<TIntList> reverseIndexer = new TIntObjectHashMap<TIntList>();
@@ -69,7 +73,7 @@ public class SimTable implements KryoSerializable {
 		this.maxlimits = (Integer) context.get("maxlimits");
 	}
 
-	private void setscore(int src, int tgt, float score) {
+	private void score(int src, int tgt, float value) {
 		SortedMap<Integer, Float> range = scores.get(src);
 		if (range == null) {
 			range = new TreeMap<Integer, Float>();
@@ -86,13 +90,13 @@ public class SimTable implements KryoSerializable {
 
 		if (src != tgt) {
 			if (waterLine.containsKey(src)) {
-				if (waterLine.get(src) <= score) {// 先前的添加不改变水位线
-					range.put(tgt, score);
+				if (waterLine.get(src) <= value) {// 先前的添加不改变水位线
+					range.put(tgt, value);
 					reverseRange.add(src);// 添加反向索引
 				}
 			} else {
 				waterLine.put(src, 0f);
-				range.put(tgt, score);
+				range.put(tgt, value);
 				reverseRange.add(src);// 添加反向索引
 			}
 		}
@@ -107,7 +111,40 @@ public class SimTable implements KryoSerializable {
 		}
 	}
 
+	private float[] mapping(float[] input) {
+		int size = dimensions.size();
+		float[] ret = new float[size];
+
+		for (int i = 0; i < size; i++) {
+			ret[i] = 0;
+		}
+		for (int i = 0; i < input.length; i++) {
+			String dim = current[i];
+			int pos = dimensions.get(dim);
+			ret[pos] = input[i];
+		}
+
+		return ret;
+	}
+
+	public void revise(String[] schema) {
+		current = schema;
+		for (String dim : schema) {
+			if (!dimensions.containsKey(dim)) {
+				dimensions.put(dim, dimensions.size());
+			}
+		}
+	}
+
+	public String[] schema() {
+		return this.current;
+	}
+
 	public void add(int docid, float[] distr) {
+		if (this.current.length != this.dimensions.size()) {
+			distr = mapping(distr);
+		}
+
 		float length = 0;
 		int start;
 		if (indexer.containsKey(docid)) {
@@ -146,8 +183,8 @@ public class SimTable implements KryoSerializable {
 				} else {
 					float cosine = score * score / length
 							/ probs.get(offset + 1);
-					setscore(docid, (int) val - 1, cosine);
-					setscore((int) val - 1, docid, cosine);
+					score(docid, (int) val - 1, cosine);
+					score((int) val - 1, docid, cosine);
 					score = 0;
 					offset = offset + 1;
 					base = offset + 1;
