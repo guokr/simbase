@@ -51,6 +51,27 @@ public class SimBase {
 		this.cron();// 设置定时任务
 	}
 
+	public void cron() {
+		final int cronInterval = (Integer) this.context.get("cronInterval");
+
+		// 创建一个cron任务
+		Timer cron = new Timer();
+
+		TimerTask cleartask = new TimerTask() {
+			public void run() {
+				clear();
+			}
+		};
+		cron.schedule(cleartask, cronInterval / 2, cronInterval);
+
+		TimerTask savetask = new TimerTask() {
+			public void run() {
+				save();
+			}
+		};
+		cron.schedule(savetask, cronInterval, cronInterval);
+	}
+
 	public void clear() {
 		List<String> list = new ArrayList<String>(base.keySet());
 		if (list.size() != 0) {
@@ -145,6 +166,13 @@ public class SimBase {
 		}
 	}
 
+	public void revise(String key, String[] schema) {
+		if (!base.containsKey(key)) {
+			base.put(key, new SimEngine(this.context));
+		}
+		base.get(key).revise(schema);
+	}
+
 	public void add(String key, int docid, float[] distr) {
 		if (!base.containsKey(key)) {
 			base.put(key, new SimEngine(this.context));
@@ -159,25 +187,14 @@ public class SimBase {
 		base.get(key).update(docid, distr);
 	}
 
-	public void cron() {
-		final int cronInterval = (Integer) this.context.get("cronInterval");
-
-		// 创建一个cron任务
-		Timer cron = new Timer();
-
-		TimerTask cleartask = new TimerTask() {
-			public void run() {
-				clear();
-			}
-		};
-		cron.schedule(cleartask, cronInterval / 2, cronInterval);
-
-		TimerTask savetask = new TimerTask() {
-			public void run() {
-				save();
-			}
-		};
-		cron.schedule(savetask, cronInterval, cronInterval);
+	public String[] schema(String key) {
+		String[] result = null;
+		if (base.containsKey(key)) {
+			result = base.get(key).schema();
+		} else {
+			result = new String[0];
+		}
+		return result;
 	}
 
 	public TFloatList get(String key, int docid) {

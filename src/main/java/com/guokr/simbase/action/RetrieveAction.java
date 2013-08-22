@@ -24,11 +24,6 @@ public class RetrieveAction implements Action {
 	public Payload<?> payload(Map<String, Object> context, Command command)
 			throws ActionException {
 
-		boolean debug = false;
-		if (context.containsKey("debug")) {
-			debug = ((Boolean) (context.get("debug"))).booleanValue();
-		}
-
 		Get cmd = (Get) command;
 
 		Bytes[] value = new Bytes[3];
@@ -37,24 +32,15 @@ public class RetrieveAction implements Action {
 
 		value[1] = new Bytes(cmd.key.getBytes());
 
-		if (!debug) {
-			ByteBuffer bb = ByteBuffer.allocate(4);
-			bb.putInt(cmd.docid);
-			value[2] = new Bytes(bb.array());
-		} else {
-			value[2] = new Bytes(String.valueOf(cmd.docid).getBytes());
-		}
+		ByteBuffer bb = ByteBuffer.allocate(4);
+		bb.putInt(cmd.docid);
+		value[2] = new Bytes(bb.array());
 
 		return new Multiple(value);
 	}
 
 	public Command command(Map<String, Object> context, Payload<?> payload)
 			throws ActionException {
-
-		boolean debug = false;
-		if (context.containsKey("debug")) {
-			debug = ((Boolean) (context.get("debug"))).booleanValue();
-		}
 
 		Get cmd = new Get();
 
@@ -67,12 +53,8 @@ public class RetrieveAction implements Action {
 		Bytes keyBytes = (Bytes) items[1];
 		cmd.key = new String(keyBytes.data());
 
-		if (debug) {
-			Bytes docidBytes = (Bytes) items[2];
-			cmd.docid = Integer.parseInt(new String(docidBytes.data()));
-		} else {
-
-		}
+		Bytes docidBytes = (Bytes) items[2];
+		cmd.docid = Integer.parseInt(new String(docidBytes.data()));
 
 		return cmd;
 	}
@@ -81,13 +63,13 @@ public class RetrieveAction implements Action {
 			throws ActionException {
 		SortedSet<Map.Entry<Integer, Float>> result;
 		if (context == null) {
-			result = SimTable.entriesSortedByValues(new TreeMap<Integer, Float>());
+			result = SimTable
+					.entriesSortedByValues(new TreeMap<Integer, Float>());
 		} else {
 			Get cmd = (Get) command(context, data);
 			result = ((SimBase) context.get("simbase")).retrieve(cmd.key,
 					cmd.docid);
 		}
-		// System.out.println(result);
 		return new Result(result);
 	}
 }

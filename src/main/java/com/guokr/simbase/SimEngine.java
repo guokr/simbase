@@ -142,6 +142,18 @@ public class SimEngine {
 		});
 	}
 
+	public void revise(final String[] schema) {
+		service.execute(new Runnable() {
+			public void run() {
+				try {
+					table.revise(schema);
+				} catch (Throwable e) {
+					logger.error("SimEngine Error:", e);
+				}
+			}
+		});
+	}
+
 	public void add(final int docid, final float[] distr) {
 		service.execute(new Runnable() {
 			public void run() {
@@ -184,6 +196,10 @@ public class SimEngine {
 				}
 			}
 		});
+	}
+
+	public String[] schema() {
+		return table.schema();
 	}
 
 	public TFloatList get(int docid) {

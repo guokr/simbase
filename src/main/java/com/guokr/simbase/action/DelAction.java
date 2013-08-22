@@ -21,10 +21,6 @@ public class DelAction implements Action {
 	@Override
 	public Command command(Map<String, Object> context, Payload<?> payload)
 			throws ActionException {
-		boolean debug = false;
-		if (context.containsKey("debug")) {
-			debug = ((Boolean) (context.get("debug"))).booleanValue();
-		}
 
 		Del cmd = new Del();
 
@@ -37,12 +33,8 @@ public class DelAction implements Action {
 		Bytes keyBytes = (Bytes) items[1];
 		cmd.key = new String(keyBytes.data());
 
-		if (debug) {
-			Bytes docidBytes = (Bytes) items[2];
-			cmd.docid = Integer.parseInt(new String(docidBytes.data()));
-		} else {
-
-		}
+		Bytes docidBytes = (Bytes) items[2];
+		cmd.docid = Integer.parseInt(new String(docidBytes.data()));
 
 		return cmd;
 	}
@@ -50,11 +42,6 @@ public class DelAction implements Action {
 	@Override
 	public Payload<?> payload(Map<String, Object> context, Command command)
 			throws ActionException {
-
-		boolean debug = false;
-		if (context.containsKey("debug")) {
-			debug = ((Boolean) (context.get("debug"))).booleanValue();
-		}
 
 		Del cmd = (Del) command;
 
@@ -64,13 +51,10 @@ public class DelAction implements Action {
 
 		value[1] = new Bytes(cmd.key.getBytes());
 
-		if (!debug) {
-			ByteBuffer bb = ByteBuffer.allocate(4);
-			bb.putInt(cmd.docid);
-			value[2] = new Bytes(bb.array());
-		} else {
-			value[2] = new Bytes(String.valueOf(cmd.docid).getBytes());
-		}
+		ByteBuffer bb = ByteBuffer.allocate(4);
+		bb.putInt(cmd.docid);
+		value[2] = new Bytes(bb.array());
+
 		return new Multiple(value);
 
 	}
@@ -80,7 +64,7 @@ public class DelAction implements Action {
 			throws ActionException {
 		Del cmd = (Del) command(context, data);
 		SimBase base = ((SimBase) context.get("simbase"));
-		base.delete(cmd.key,cmd.docid);
+		base.delete(cmd.key, cmd.docid);
 		return new OK();
 	}
 

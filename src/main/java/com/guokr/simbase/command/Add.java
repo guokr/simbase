@@ -10,7 +10,7 @@ public class Add implements Command {
 	
 	@Override
 	public String actionName() {
-		return "add";
+		return "vadd";
 	}
 
 }

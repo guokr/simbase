@@ -10,7 +10,7 @@ public class Put implements Command {
 
 	@Override
 	public String actionName() {
-		return "put";
+		return "vput";
 	}
 
 }

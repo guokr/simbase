@@ -63,14 +63,14 @@ public class SimTable implements KryoSerializable {
 	private int maxlimits;
 
 	public SimTable() {
-		this.loadfactor = 0.75;
-		this.maxlimits = 20;
+		loadfactor = 0.75;
+		maxlimits = 20;
 	}
 
 	public SimTable(Map<String, Object> context) {
 		this.context = context;
-		this.loadfactor = (Double) context.get("loadfactor");
-		this.maxlimits = (Integer) context.get("maxlimits");
+		loadfactor = (Double) context.get("loadfactor");
+		maxlimits = (Integer) context.get("maxlimits");
 	}
 
 	private void score(int src, int tgt, float value) {
@@ -100,7 +100,7 @@ public class SimTable implements KryoSerializable {
 				reverseRange.add(src);// 添加反向索引
 			}
 		}
-		if (range.size() > this.maxlimits) {
+		if (range.size() > maxlimits) {
 			SortedSet<Map.Entry<Integer, Float>> entries = entriesSortedByValues(range);
 			Map.Entry<Integer, Float> lastEntry = entries.last();
 			range.remove(lastEntry.getKey());
@@ -137,11 +137,11 @@ public class SimTable implements KryoSerializable {
 	}
 
 	public String[] schema() {
-		return this.current;
+		return current;
 	}
 
 	public void add(int docid, float[] distr) {
-		if (this.current.length != this.dimensions.size()) {
+		if (current != null && current.length != dimensions.size()) {
 			distr = mapping(distr);
 		}
 
@@ -259,12 +259,14 @@ public class SimTable implements KryoSerializable {
 	}
 
 	public SimTable clone() {
-		SimTable peer = new SimTable(this.context);
+		SimTable peer = new SimTable(context);
+
+		peer.dimensions = dimensions;
+		peer.current = current;
 
 		int cursor = 0, start = 0;
-		TFloatIterator piter = this.probs.iterator();
-		peer.probs = new TFloatArrayList(
-				(int) (this.probs.size() / this.loadfactor));
+		TFloatIterator piter = probs.iterator();
+		peer.probs = new TFloatArrayList((int) (probs.size() / loadfactor));
 		while (piter.hasNext()) {
 			float value = piter.next();
 			if (value < 0) {
@@ -283,11 +285,12 @@ public class SimTable implements KryoSerializable {
 			}
 			cursor++;
 		}
-		synchronized (this.scores) {
-			TIntIterator siter = this.scores.keySet().iterator();
+
+		synchronized (scores) {
+			TIntIterator siter = scores.keySet().iterator();
 			while (siter.hasNext()) {
 				Integer docid = siter.next();
-				SortedMap<Integer, Float> thisscores = this.scores.get(docid);
+				SortedMap<Integer, Float> thisscores = scores.get(docid);
 				SortedMap<Integer, Float> peerscores = null;
 				peerscores = new TreeMap<Integer, Float>();
 				peer.scores.put(docid, peerscores);
@@ -303,21 +306,29 @@ public class SimTable implements KryoSerializable {
 	}
 
 	public void reload(SimTable table) {
-		this.probs = table.probs;
-		this.indexer = table.indexer;
-		this.scores = table.scores;
+		probs = table.probs;
+		indexer = table.indexer;
+		scores = table.scores;
 	}
 
 	@Override
 	// 重载序列化代码
 	public void read(Kryo kryo, Input input) {
+		current = kryo.readObject(input, String[].class);
+		int dimsize = kryo.readObject(input, int.class);
+		while (dimsize > 0) {
+			String key = kryo.readObject(input, String.class);
+			int value = kryo.readObject(input, int.class);
+			dimensions.put(key, value);
+			dimsize--;
+		}
 
-		this.probs = kryo.readObject(input, TFloatArrayList.class);
+		probs = kryo.readObject(input, TFloatArrayList.class);
 		int indexsize = kryo.readObject(input, int.class);
 		while (indexsize > 0) {
 			int key = kryo.readObject(input, int.class);
 			int value = kryo.readObject(input, int.class);
-			this.indexer.put(key, value);
+			indexer.put(key, value);
 			indexsize--;
 		}
 		int scoresize = kryo.readObject(input, int.class);
@@ -325,7 +336,7 @@ public class SimTable implements KryoSerializable {
 			Integer docid = kryo.readObject(input, Integer.class);
 			SortedMap<Integer, Float> range = null;
 			range = new TreeMap<Integer, Float>();
-			this.scores.put(docid, range);
+			scores.put(docid, range);
 			int listsize = kryo.readObject(input, int.class);
 			while (listsize > 0) {
 				Integer key = kryo.readObject(input, Integer.class);
@@ -339,17 +350,26 @@ public class SimTable implements KryoSerializable {
 
 	@Override
 	public void write(Kryo kryo, Output output) {
-		kryo.writeObject(output, this.probs);
-		TIntIntMap indexmap = this.indexer;
+		kryo.writeObject(output, current);
+		kryo.writeObject(output, dimensions.size());
+		for (String key : dimensions.keySet()) {
+			int pos = dimensions.get(key);
+			kryo.writeObject(output, key);
+			kryo.writeObject(output, pos);
+		}
+
+		kryo.writeObject(output, probs);
+
+		TIntIntMap indexmap = indexer;
 		kryo.writeObject(output, indexmap.size());
 		for (int key : indexmap.keys()) {
 			int indexscore = indexmap.get(key);
 			kryo.writeObject(output, key);
 			kryo.writeObject(output, indexscore);
 		}
-		// kryo.writeObject(output, this.indexer);//hashmap不能直接放进去
-		TIntIterator iter = this.scores.keySet().iterator();
-		kryo.writeObject(output, this.scores.size());
+
+		TIntIterator iter = scores.keySet().iterator();
+		kryo.writeObject(output, scores.size());
 		while (iter.hasNext()) {
 			Integer docid = iter.next();
 			kryo.writeObject(output, docid);

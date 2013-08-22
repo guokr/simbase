@@ -36,8 +36,19 @@ public class Result extends Multiple implements Reply<Payload<?>[]> {
 		int i = 0;
 		TFloatIterator iter = result.iterator();
 		while (iter.hasNext()) {
-			this.value[i++] = new Bytes(String.valueOf(iter.next())
-					.getBytes());
+			this.value[i++] = new Bytes(String.valueOf(iter.next()).getBytes());
+		}
+	}
+
+	public Result(String[] result) {
+		super(null);
+
+		int len = result.length;
+		this.value = new Bytes[len];
+
+		int i = 0;
+		for (String dim : result) {
+			this.value[i++] = new Bytes(String.valueOf(dim).getBytes());
 		}
 	}
 }

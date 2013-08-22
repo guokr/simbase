@@ -9,7 +9,7 @@ public class Get implements Command {
 	
 	@Override
 	public String actionName() {
-		return "get";
+		return "vget";
 	}
 
 }

@@ -9,7 +9,7 @@ public class Del implements Command {
 	
 	@Override
 	public String actionName() {
-		return "del";
+		return "vdel";
 	}
 
 }

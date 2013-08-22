@@ -21,11 +21,6 @@ public class PutAction implements Action {
 	public Multiple payload(Map<String, Object> context, Command command)
 			throws ActionException {
 
-		boolean debug = false;
-		if (context.containsKey("debug")) {
-			debug = ((Boolean) (context.get("debug"))).booleanValue();
-		}
-
 		Put cmd = (Put) command;
 
 		Bytes[] value = new Bytes[cmd.distr.length + 3];
@@ -34,24 +29,15 @@ public class PutAction implements Action {
 
 		value[1] = new Bytes(cmd.key.getBytes());
 
-		if (!debug) {
-			ByteBuffer bb = ByteBuffer.allocate(4);
-			bb.putInt(cmd.docid);
-			value[2] = new Bytes(bb.array());
+		ByteBuffer bb = ByteBuffer.allocate(4);
+		bb.putInt(cmd.docid);
+		value[2] = new Bytes(bb.array());
 
-			int i = 2;
-			for (float component : cmd.distr) {
-				bb = ByteBuffer.allocate(4);
-				bb.putFloat(component);
-				value[++i] = new Bytes(bb.array());
-			}
-		} else {
-			value[2] = new Bytes(String.valueOf(cmd.docid).getBytes());
-
-			int i = 2;
-			for (float component : cmd.distr) {
-				value[++i] = new Bytes(String.valueOf(component).getBytes());
-			}
+		int i = 2;
+		for (float component : cmd.distr) {
+			bb = ByteBuffer.allocate(4);
+			bb.putFloat(component);
+			value[++i] = new Bytes(bb.array());
 		}
 
 		return new Multiple(value);
@@ -59,10 +45,6 @@ public class PutAction implements Action {
 
 	public Command command(Map<String, Object> context, Payload<?> payload)
 			throws ActionException {
-		boolean debug = false;
-		if (context.containsKey("debug")) {
-			debug = ((Boolean) (context.get("debug"))).booleanValue();
-		}
 
 		Put cmd = new Put();
 
@@ -75,27 +57,25 @@ public class PutAction implements Action {
 		Bytes keyBytes = (Bytes) items[1];
 		cmd.key = new String(keyBytes.data());
 
-		if (debug) {
-			Bytes docidBytes = (Bytes) items[2];
-			cmd.docid = Integer.parseInt(new String(docidBytes.data()));
+		Bytes docidBytes = (Bytes) items[2];
+		cmd.docid = Integer.parseInt(new String(docidBytes.data()));
 
-			int size = items.length - 3;
-			float[] array = new float[size];
-			for (int i = 0; i < size; i++) {
-				Bytes floatBytes = (Bytes) items[i + 3];
-				array[i] = Float.parseFloat(new String(floatBytes.data()));
-			}
-			cmd.distr = array;
-		} else {
-
+		int size = items.length - 3;
+		float[] array = new float[size];
+		for (int i = 0; i < size; i++) {
+			Bytes floatBytes = (Bytes) items[i + 3];
+			array[i] = Float.parseFloat(new String(floatBytes.data()));
 		}
+		cmd.distr = array;
 
 		return cmd;
 	}
 
-	public Payload<?> apply(Map<String, Object> context, Payload<?> data) throws ActionException {
+	public Payload<?> apply(Map<String, Object> context, Payload<?> data)
+			throws ActionException {
 		Put cmd = (Put) command(context, data);
-		((SimBase) context.get("simbase")).update(cmd.key, cmd.docid, cmd.distr);
+		((SimBase) context.get("simbase"))
+				.update(cmd.key, cmd.docid, cmd.distr);
 		return new OK();
 	}
 
