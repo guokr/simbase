@@ -50,7 +50,7 @@ public class SimTable implements KryoSerializable {
 	}
 
 	private Map<String, Integer> dimensions = new HashMap<String, Integer>();
-	private String[] current;
+	private String[] current = new String[0];
 
 	private TFloatList probs = new TFloatArrayList();
 	private TIntIntMap indexer = new TIntIntHashMap();
