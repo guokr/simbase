@@ -1,0 +1,19 @@
+#!/bin/bash
+#
+# A wrapper
+#
+
+ORG=`pwd`
+CUR="${BASH_SOURCE[0]}";
+if([ -h "${CUR}" ]) then
+  while([ -h "${CUR}" ]) do CUR=`readlink "${CUR}"`; done
+fi
+pushd . > /dev/null
+cd `dirname ${CUR}` > /dev/null
+CUR=`pwd`;
+popd  > /dev/null
+
+cd ${CUR}/../
+${CUR}/shutdown
+${CUR}/start
+cd ${ORG}
