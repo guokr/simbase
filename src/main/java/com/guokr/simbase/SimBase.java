@@ -31,7 +31,9 @@ import com.guokr.simbase.action.GetAction;
 import com.guokr.simbase.action.PingAction;
 import com.guokr.simbase.action.PutAction;
 import com.guokr.simbase.action.RetrieveAction;
+import com.guokr.simbase.action.ReviseAction;
 import com.guokr.simbase.action.SaveAction;
+import com.guokr.simbase.action.SchemaAction;
 import com.guokr.simbase.action.ShutdownAction;
 
 public class SimBase {
@@ -39,6 +41,8 @@ public class SimBase {
 	static {
 		ActionRegistry registry = ActionRegistry.getInstance();
 		registry.register(PingAction.class);
+		registry.register(ReviseAction.class);
+		registry.register(SchemaAction.class);
 		registry.register(AddAction.class);
 		registry.register(PutAction.class);
 		registry.register(GetAction.class);
@@ -48,7 +52,7 @@ public class SimBase {
 		registry.register(ShutdownAction.class);
 		registry.register(DelAction.class);
 	}
-	
+
 	private static final String dir = System.getProperty("user.dir")
 			+ System.getProperty("file.separator");
 	private static final String idxFilePath = dir + "keys.idx";
