@@ -32,23 +32,23 @@ public class SimEngine {
 	private int counter = 0;
 	private long timestamp = -1;
 
-	private long cloneInterval;
 	private boolean debug;
-	private int addcounter;
+	private long cloneThrottle;
+	private int bycount;
 
 	public SimEngine(Map<String, Object> config) {
 
 		try {
-			cloneInterval = (Integer) config.get("cloneInterval");
+			cloneThrottle = (Integer) config.get("cloneThrottle");
 			debug = (Boolean) config.get("debug");
-			addcounter = (Integer) config.get("addcounter");
+			bycount = (Integer) config.get("bycount");
 
 			table = new SimTable(config);
 		} catch (NullPointerException e) {
 			logger.warn("YAML not found,loading default config");
-			cloneInterval = 30000;
+			cloneThrottle = 30000;
 			debug = true;
-			addcounter = 100;
+			bycount = 100;
 		}
 
 	}
@@ -60,8 +60,8 @@ public class SimEngine {
 	 **/
 	private boolean validateTime() {
 		long current = new Date().getTime();
-		if (current - timestamp < cloneInterval) {
-			logger.info("Already cloned in " + cloneInterval / 1000
+		if (current - timestamp < cloneThrottle) {
+			logger.info("Already cloned in " + cloneThrottle / 1000
 					+ "s, abort;");
 			return false;
 		} else {
@@ -159,7 +159,7 @@ public class SimEngine {
 			public void run() {
 				if (debug) {
 					counter++;
-					if (counter % addcounter == 0) {
+					if (counter % bycount == 0) {
 						logger.debug("add:" + counter);
 					}
 				}
