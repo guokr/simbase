@@ -36,6 +36,19 @@ import com.guokr.simbase.action.ShutdownAction;
 
 public class SimBase {
 
+	static {
+		ActionRegistry registry = ActionRegistry.getInstance();
+		registry.register(PingAction.class);
+		registry.register(AddAction.class);
+		registry.register(PutAction.class);
+		registry.register(GetAction.class);
+		registry.register(RetrieveAction.class);
+		registry.register(SaveAction.class);
+		registry.register(ExitAction.class);
+		registry.register(ShutdownAction.class);
+		registry.register(DelAction.class);
+	}
+	
 	private static final String dir = System.getProperty("user.dir")
 			+ System.getProperty("file.separator");
 	private static final String idxFilePath = dir + "keys.idx";
@@ -235,24 +248,10 @@ public class SimBase {
 
 		try {
 			Map<String, Object> context = new HashMap<String, Object>(config);
-			context.put("debug", true);
-
 			SimBase db = new SimBase(context);
 			context.put("simbase", db);
 
-			ActionRegistry registry = ActionRegistry.getInstance();
-			registry.register(PingAction.class);
-			registry.register(AddAction.class);
-			registry.register(PutAction.class);
-			registry.register(GetAction.class);
-			registry.register(RetrieveAction.class);
-			registry.register(SaveAction.class);
-			registry.register(ExitAction.class);
-			registry.register(ShutdownAction.class);
-			registry.register(DelAction.class);
-
-			Server server = new Server(context, registry);
-
+			Server server = new Server(context, ActionRegistry.getInstance());
 			server.run();
 		} catch (Throwable e) {
 			logger.error("Server Error!", e);

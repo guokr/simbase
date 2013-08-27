@@ -10,6 +10,7 @@
 
     :dependencies [[org.clojure/clojure "1.5.1"]
                    [com.taoensso/carmine "2.0.0"]
+                   [clj-pid "0.1.1"]
                    [net.sf.trove4j/trove4j "3.0.3"]
                    [org.slf4j/slf4j-api "1.7.5"]
                    [org.slf4j/slf4j-log4j12 "1.7.5"]
@@ -28,4 +29,6 @@
     :target-path "target/"
     :javac-options ["-target" "1.6" "-source" "1.6" "-Xlint:-options"]
     :jvm-opts ["-Xmx1g"]
-    :main com.guokr.simbase.SimBase)
+
+    :aot [simbase]
+    :main simbase.main)
