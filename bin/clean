@@ -15,7 +15,6 @@ popd  > /dev/null
 
 cd ${CUR}/../
 rm data/*.dmp
-rm data/*.bak
 rm *.idx
 rm log/*.log
 rm log/*.log.*
