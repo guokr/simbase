@@ -7,7 +7,6 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.util.Date;
 import java.util.Map;
-import java.util.SortedSet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -206,7 +205,7 @@ public class SimEngine {
 		return table.get(docid);
 	}
 
-	public SortedSet<Map.Entry<Integer, Float>> retrieve(int docid) {
+	public String[] retrieve(int docid) {
 		return table.retrieve(docid);
 	}
 

@@ -1,14 +1,11 @@
 package com.guokr.simbase.tests;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertEquals;
 
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.SortedSet;
 
 import org.junit.Test;
 import org.yaml.snakeyaml.Yaml;
@@ -17,13 +14,12 @@ import com.guokr.simbase.SimBase;
 
 public class SimEngineTests {
 
-	private int[] getDocids(SortedSet<Entry<Integer, Float>> set) {
-		int[] docids = new int[set.size()];
-		Iterator<Entry<Integer, Float>> iter = set.iterator();
-		int i = 0;
-		while (iter.hasNext()) {
-			docids[i] = iter.next().getKey();
-			i++;
+	private int[] getDocids(String[] set) {
+		int[] docids = new int[set.length / 2];
+		int i = 0, j = 0;
+		while (i < set.length) {
+			docids[j++] = Integer.parseInt(set[i]);
+			i = i + 2;
 		}
 		return docids;
 	}
@@ -148,22 +144,22 @@ public class SimEngineTests {
 		// new float[] { 0.3651483716701107f, 0.18257418583505536f,
 		// 0.7302967433402214f, 0.5477225575051661f });
 		delay(1);
-		assertTrue(simbase.retrieve(key, 1).size() == 0);
+		assertEquals(0, simbase.retrieve(key, 1).length);
 		simbase.clear();
 		delay(1);
-		assertTrue(simbase.retrieve(key, 1).size() == 0);
+		assertEquals(0, simbase.retrieve(key, 1).length);
 		printSimBase(simbase, key);
 		simbase.add(key, 7,
 				new float[] { 0.3651483716701107f, 0.18257418583505536f,
 						0.7302967433402214f, 0.5477225575051661f });
 		delay(1);
-		assertTrue(simbase.retrieve(key, 1).size() == 0);
+		assertEquals(0, simbase.retrieve(key, 1).length);
 		printSimBase(simbase, key);
 		simbase.add(key, 1, new float[] { 0.18257418583505536f,
 				0.3651483716701107f, 0.7302967433402214f, 0.5477225575051661f });
 		delay(1);
 		printSimBase(simbase, key);
-		assertTrue(simbase.retrieve(key, 1).size() == 20);
+		assertEquals(40, simbase.retrieve(key, 1).length);
 
 	}
 

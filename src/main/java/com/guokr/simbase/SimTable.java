@@ -12,42 +12,16 @@ import gnu.trove.map.hash.TIntFloatHashMap;
 import gnu.trove.map.hash.TIntIntHashMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.SortedMap;
-import java.util.SortedSet;
-import java.util.TreeMap;
-import java.util.TreeSet;
 
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.KryoSerializable;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
+import com.guokr.simbase.util.Sorter;
 
 public class SimTable implements KryoSerializable {
-
-	public static SortedSet<Map.Entry<Integer, Float>> entriesSortedByValues(
-			Map<Integer, Float> map) {
-		SortedSet<Map.Entry<Integer, Float>> sortedEntries = new TreeSet<Map.Entry<Integer, Float>>(
-				new Comparator<Map.Entry<Integer, Float>>() {
-					@Override
-					public int compare(Map.Entry<Integer, Float> e1,
-							Map.Entry<Integer, Float> e2) {
-						int sgn = (int) Math.signum(e2.getValue()
-								- e1.getValue());
-						if (sgn == 0) {
-							sgn = (int) Math.signum(e2.hashCode()
-									- e1.hashCode());
-						}
-						return sgn;
-					}
-				});
-		synchronized (sortedEntries) {
-			sortedEntries.addAll(map.entrySet());
-		}
-		return sortedEntries;
-	}
 
 	private Map<String, Integer> dimensions = new HashMap<String, Integer>();
 	private String[] current = new String[0];
@@ -56,7 +30,7 @@ public class SimTable implements KryoSerializable {
 	private TIntIntMap indexer = new TIntIntHashMap();
 	private TIntObjectHashMap<TIntList> reverseIndexer = new TIntObjectHashMap<TIntList>();
 	private TIntFloatMap waterLine = new TIntFloatHashMap();
-	private TIntObjectHashMap<SortedMap<Integer, Float>> scores = new TIntObjectHashMap<SortedMap<Integer, Float>>();
+	private TIntObjectHashMap<Sorter> scores = new TIntObjectHashMap<Sorter>();
 
 	private Map<String, Object> context;
 	private double loadfactor;
@@ -74,11 +48,11 @@ public class SimTable implements KryoSerializable {
 	}
 
 	private void score(int src, int tgt, float value) {
-		SortedMap<Integer, Float> range = scores.get(src);
-		if (range == null) {
-			range = new TreeMap<Integer, Float>();
+		Sorter sorter = scores.get(src);
+		if (sorter == null) {
+			sorter = new Sorter(maxlimits);
 			synchronized (scores) {
-				scores.put(src, range);
+				scores.put(src, sorter);
 			}
 		}
 
@@ -91,23 +65,20 @@ public class SimTable implements KryoSerializable {
 		if (src != tgt) {
 			if (waterLine.containsKey(src)) {
 				if (waterLine.get(src) <= value) {// 先前的添加不改变水位线
-					range.put(tgt, value);
+					sorter.add(tgt, value);
 					reverseRange.add(src);// 添加反向索引
 				}
 			} else {
 				waterLine.put(src, 0f);
-				range.put(tgt, value);
+				sorter.add(tgt, value);
 				reverseRange.add(src);// 添加反向索引
 			}
 		}
-		if (range.size() > maxlimits) {
-			SortedSet<Map.Entry<Integer, Float>> entries = entriesSortedByValues(range);
-			Map.Entry<Integer, Float> lastEntry = entries.last();
-			range.remove(lastEntry.getKey());
 
-			if (lastEntry.getValue() > waterLine.get(src))
-				waterLine.put(src, lastEntry.getValue());// 放置水位线
-			reverseRange.remove(src);
+		if (sorter.size() > maxlimits) {
+			float lastScore = sorter.removeLast();
+			if (lastScore > waterLine.get(src))
+				waterLine.put(src, lastScore);// 放置水位线
 		}
 	}
 
@@ -233,14 +204,6 @@ public class SimTable implements KryoSerializable {
 
 	}
 
-	public SortedSet<Map.Entry<Integer, Float>> retrieve(int docid) {
-		if (scores.containsKey(docid)) {
-			return entriesSortedByValues(scores.get(docid));
-		} else {
-			return entriesSortedByValues(new TreeMap<Integer, Float>());
-		}
-	}
-
 	public TFloatList get(int docid) {
 		TFloatList res = null;
 		if (indexer.containsKey(docid)) {
@@ -256,6 +219,18 @@ public class SimTable implements KryoSerializable {
 
 	public float similarity(int docid1, int docid2) {
 		return scores.get(docid1).get(docid2);
+	}
+
+	public String[] retrieve(int docid) {
+		if (scores.contains(docid)) {
+		    return scores.get(docid).pickle();
+		} else {
+			return new String[0];
+		}
+	}
+
+	public String[] nearby(float[] distr) {
+		return null;// TODO
 	}
 
 	public SimTable clone() {
@@ -290,15 +265,12 @@ public class SimTable implements KryoSerializable {
 			TIntIterator siter = scores.keySet().iterator();
 			while (siter.hasNext()) {
 				Integer docid = siter.next();
-				SortedMap<Integer, Float> thisscores = scores.get(docid);
-				SortedMap<Integer, Float> peerscores = null;
-				peerscores = new TreeMap<Integer, Float>();
-				peer.scores.put(docid, peerscores);
-
-				for (Integer key : thisscores.keySet()) {
-					Float score = thisscores.get(key);
-					peerscores.put(key, score);
+				Sorter thissorter = scores.get(docid);
+				Sorter peersorter = new Sorter(maxlimits);
+				for (int key : thissorter.docids()) {
+					peersorter.add(key, thissorter.get(key));
 				}
+				peer.scores.put(docid, peersorter);
 			}
 		}
 
@@ -334,14 +306,14 @@ public class SimTable implements KryoSerializable {
 		int scoresize = kryo.readObject(input, int.class);
 		while (scoresize > 0) {
 			Integer docid = kryo.readObject(input, Integer.class);
-			SortedMap<Integer, Float> range = null;
-			range = new TreeMap<Integer, Float>();
-			scores.put(docid, range);
+			Sorter sorter = null;
+			sorter = new Sorter(maxlimits);
+			scores.put(docid, sorter);
 			int listsize = kryo.readObject(input, int.class);
 			while (listsize > 0) {
 				Integer key = kryo.readObject(input, Integer.class);
 				Float score = kryo.readObject(input, Float.class);
-				range.put(key, score);
+				sorter.add(key, score);
 				listsize--;
 			}
 			scoresize--;
@@ -373,10 +345,10 @@ public class SimTable implements KryoSerializable {
 		while (iter.hasNext()) {
 			Integer docid = iter.next();
 			kryo.writeObject(output, docid);
-			SortedMap<Integer, Float> scoreList = scores.get(docid);
-			kryo.writeObject(output, scoreList.size());
-			for (Integer key : scoreList.keySet()) {
-				Float score = scoreList.get(key);
+			Sorter sorter = scores.get(docid);
+			kryo.writeObject(output, sorter.size());
+			for (int key : sorter.docids()) {
+				Float score = sorter.get(key);
 				kryo.writeObject(output, key);
 				kryo.writeObject(output, score);
 			}

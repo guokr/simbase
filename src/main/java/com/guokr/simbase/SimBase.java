@@ -13,10 +13,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.SortedSet;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.TreeMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -224,13 +222,12 @@ public class SimBase {
 		return result;
 	}
 
-	public SortedSet<Map.Entry<Integer, Float>> retrieve(String key, int docid) {
-		SortedSet<Map.Entry<Integer, Float>> result = null;
+	public String[] retrieve(String key, int docid) {
+		String[] result = null;
 		if (base.containsKey(key)) {
 			result = base.get(key).retrieve(docid);
 		} else {
-			result = SimTable
-					.entriesSortedByValues(new TreeMap<Integer, Float>());
+			result = new String[0];
 		}
 		return result;
 	}
