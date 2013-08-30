@@ -90,7 +90,9 @@ public class Server {
 										logger.error("session loop error", e);
 									}
 								} finally {
-									session.close();
+									if (!session.isClosed()) {
+									    session.close();
+									}
 								}
 							}
 						});
