@@ -102,7 +102,9 @@ public class Session {
 			InputStream ins = (InputStream) this.context.remove("inputStream");
 			OutputStream outs = (OutputStream) this.context
 					.remove("outputStream");
-			ins.close();
+			if (ins != null) {
+				ins.close();
+			}
 			if (outs != null) {
 				outs.flush();
 				outs.close();
