@@ -162,7 +162,6 @@ public class SimTable implements KryoSerializable {
 				}
 			} else {
 				base = offset + 1;
-
 			}
 		}
 	}
@@ -191,17 +190,20 @@ public class SimTable implements KryoSerializable {
 				cursor++;
 			}
 		}
+
 		indexer.remove(docid);// HashMap里没有这个键了也可以用= =
 		scores.remove(docid);
-		// 根据反向索引移除scores
-		TIntIterator reverseIter = reverseIndexer.get(docid).iterator();
-		while (reverseIter.hasNext()) {
-			int reverId = reverseIter.next();
-			scores.get(reverId).remove(docid);
-		}
-		reverseIndexer.remove(docid);// 移除反向索引
 		waterLine.remove(docid);// 移除水位线
 
+		// 根据反向索引移除scores
+		if (reverseIndexer.contains(docid)) {
+			TIntIterator reverseIter = reverseIndexer.get(docid).iterator();
+			while (reverseIter.hasNext()) {
+				int reverId = reverseIter.next();
+				scores.get(reverId).remove(docid);
+			}
+			reverseIndexer.remove(docid);// 移除反向索引
+		}
 	}
 
 	public TFloatList get(int docid) {
@@ -223,7 +225,7 @@ public class SimTable implements KryoSerializable {
 
 	public String[] retrieve(int docid) {
 		if (scores.contains(docid)) {
-		    return scores.get(docid).pickle();
+			return scores.get(docid).pickle();
 		} else {
 			return new String[0];
 		}
