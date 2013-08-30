@@ -109,7 +109,9 @@ public class Session {
 				outs.flush();
 				outs.close();
 			}
-			clientSocket.close();
+			if (clientSocket != null) {
+			    clientSocket.close();
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 			logger.error("session closing error", e);
