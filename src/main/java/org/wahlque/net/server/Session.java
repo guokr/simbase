@@ -6,6 +6,8 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.wahlque.net.action.Action;
 import org.wahlque.net.action.ActionRegistry;
 import org.wahlque.net.transport.Transport;
@@ -13,6 +15,8 @@ import org.wahlque.net.transport.payload.Error;
 import org.wahlque.net.transport.payload.Multiple;
 
 public class Session {
+
+	private static final Logger logger = LoggerFactory.getLogger(Session.class);
 
 	private Map<String, Object> context;
 	private ActionRegistry registry;
@@ -33,6 +37,7 @@ public class Session {
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
+			logger.error("session construct error", e);
 		}
 	}
 
@@ -46,6 +51,7 @@ public class Session {
 			multiple = (Multiple) (Transport.readPayload(ins));
 		} catch (IOException e) {
 			e.printStackTrace();
+			logger.error("command reading error", e);
 		}
 
 		String action = "exit";
@@ -65,6 +71,7 @@ public class Session {
 			outs.flush();
 		} catch (Exception e) {
 			e.printStackTrace();
+			logger.error("payload writing error", e);
 			err = e;
 		}
 
@@ -74,6 +81,7 @@ public class Session {
 				outs.flush();
 			} catch (Exception e) {
 				e.printStackTrace();
+				logger.error("error payload writing error", e);
 			}
 		}
 
@@ -102,6 +110,7 @@ public class Session {
 			clientSocket.close();
 		} catch (Exception e) {
 			e.printStackTrace();
+			logger.error("session closing error", e);
 		}
 	}
 

@@ -17,14 +17,14 @@ import org.wahlque.net.action.ActionRegistry;
 
 public class Server {
 
+	private static final Logger logger = LoggerFactory.getLogger(Server.class);
+
 	private boolean listening = true;
 	private final Map<String, Object> serverContext;
 	private final ActionRegistry registry;
 	private final ThreadPoolExecutor serverThreadPool = new ThreadPoolExecutor(
 			10, 50, 60, TimeUnit.SECONDS, new ArrayBlockingQueue<Runnable>(10),
 			new ServerThreadFactory(), new RejectedHandler());
-
-	private static final Logger log = LoggerFactory.getLogger(Server.class);
 
 	public Server(Map<String, Object> context, ActionRegistry registry) {
 		this.serverContext = context;
@@ -47,13 +47,14 @@ public class Server {
 			((ServerSocket) this.serverContext.get("serverSocket")).close();
 		} catch (IOException e) {
 			e.printStackTrace();
+			logger.error("server shutdown error", e);
 		}
 	}
 
 	public void run() {
 		ServerSocket serverSocket = null;
 		try {
-			serverSocket = new ServerSocket((Integer)serverContext.get("port"));
+			serverSocket = new ServerSocket((Integer) serverContext.get("port"));
 			this.serverContext.put("serverSocket", serverSocket);
 			while (up()) {
 				if (!serverSocket.isClosed()) {
@@ -83,25 +84,28 @@ public class Server {
 								} catch (Throwable e) {
 									Throwable cause = e.getCause();
 									if (cause != null) {
-										log.error("SERVER ERROR!:", cause);
+										logger.error("session loop error",
+												cause);
 									} else {
-										log.error("SERVER ERROR!:", e);
+										logger.error("session loop error", e);
 									}
-
+								} finally {
+									session.close();
 								}
 							}
 						});
 					}
 				}
 			}
-
 			serverSocket.close();
 		} catch (IOException e) {
 			e.printStackTrace();
+			logger.error("server loop error", e);
 		} catch (ServerExcpetion e) {
+			logger.error("server loop error", e);
 		}
 
-		log.info("Server shutdown!");
+		logger.info("Server shutdown!");
 		System.exit(0);
 	}
 
@@ -134,6 +138,7 @@ public class Server {
 
 		@Override
 		public void rejectedExecution(Runnable r, ThreadPoolExecutor executor) {
+			logger.error("server reject request");
 		}
 
 	}
