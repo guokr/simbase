@@ -23,7 +23,7 @@ public class Server {
 	private final Map<String, Object> serverContext;
 	private final ActionRegistry registry;
 	private final ThreadPoolExecutor serverThreadPool = new ThreadPoolExecutor(
-			10, 50, 60, TimeUnit.SECONDS, new ArrayBlockingQueue<Runnable>(10),
+			24, 50, 37, TimeUnit.SECONDS, new ArrayBlockingQueue<Runnable>(100),
 			new ServerThreadFactory(), new RejectedHandler());
 
 	public Server(Map<String, Object> context, ActionRegistry registry) {
