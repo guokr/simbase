@@ -25,7 +25,7 @@ public class PutAction implements Action {
 
 		Bytes[] value = new Bytes[cmd.distr.length + 3];
 
-		value[0] = new Bytes("Put".getBytes());
+		value[0] = new Bytes(ACTION.getBytes());
 
 		value[1] = new Bytes(cmd.key.getBytes());
 
@@ -52,7 +52,7 @@ public class PutAction implements Action {
 		Payload<?>[] items = multiple.data();
 
 		Bytes actionBytes = (Bytes) items[0];
-		assert (new String(actionBytes.data()).equals("Put"));
+		assert (new String(actionBytes.data()).equals(ACTION));
 
 		Bytes keyBytes = (Bytes) items[1];
 		cmd.key = new String(keyBytes.data());
@@ -75,7 +75,7 @@ public class PutAction implements Action {
 			throws ActionException {
 		Put cmd = (Put) command(context, data);
 		((SimBase) context.get("simbase"))
-				.update(cmd.key, cmd.docid, cmd.distr);
+				.put(cmd.key, cmd.docid, cmd.distr);
 		return new OK();
 	}
 

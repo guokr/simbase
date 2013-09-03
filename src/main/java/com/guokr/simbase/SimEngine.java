@@ -171,11 +171,41 @@ public class SimEngine {
 		});
 	}
 
-	public void update(final int docid, final float[] distr) {
+	public void append(final int docid, final Object[] pairs) {
+		service.execute(new Runnable() {
+			public void run() {
+				if (debug) {
+					counter++;
+					if (counter % bycount == 0) {
+						logger.debug("add:" + counter);
+					}
+				}
+				try {
+					table.append(docid, pairs);
+				} catch (Throwable e) {
+					logger.error("SimEngine Error:", e);
+				}
+			}
+		});
+	}
+
+	public void put(final int docid, final float[] distr) {
 		service.execute(new Runnable() {
 			public void run() {
 				try {
-					table.update(docid, distr);
+					table.put(docid, distr);
+				} catch (Throwable e) {
+					logger.error("SimEngine Error:", e);
+				}
+			}
+		});
+	}
+
+	public void update(final int docid, final Object[] pairs) {
+		service.execute(new Runnable() {
+			public void run() {
+				try {
+					table.update(docid, pairs);
 				} catch (Throwable e) {
 					logger.error("SimEngine Error:", e);
 				}

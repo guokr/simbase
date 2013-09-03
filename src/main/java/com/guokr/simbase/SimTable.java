@@ -140,7 +140,7 @@ public class SimTable implements KryoSerializable {
 		}
 		int end = probs.size();
 
-		float score = 0;
+		float scoring = 0;
 		int base = 0;
 		for (int offset = 0; offset < end; offset++) {
 			float val = probs.get(offset);
@@ -149,14 +149,14 @@ public class SimTable implements KryoSerializable {
 					int idx = offset - base;
 					if (idx < end - start - 1) {
 						float another = distr[idx];// ArrayIndexOutOfBoundsException
-						score += another * val;
+						scoring += another * val;
 					}
 				} else {
-					float cosine = score * score / length
+					float cosine = scoring * scoring / length
 							/ probs.get(offset + 1);
 					score(docid, (int) val - 1, cosine);
 					score((int) val - 1, docid, cosine);
-					score = 0;
+					scoring = 0;
 					offset = offset + 1;
 					base = offset + 1;
 				}
@@ -166,8 +166,24 @@ public class SimTable implements KryoSerializable {
 		}
 	}
 
-	public void update(int docid, float[] distr) {
+	public void append(int docid, Object[] pairs) {
+		float[] distr = new float[dimensions.size()];
+		for (int i = 0; i < pairs.length;) {
+			String key = (String)pairs[i++];
+			Float val = (Float)pairs[i++];
+			if (dimensions.containsKey(key)) {
+				distr[dimensions.get(key)] = val;
+			}
+		}
 		add(docid, distr);
+	}
+
+	public void put(int docid, float[] distr) {
+		add(docid, distr);
+	}
+
+	public void update(int docid, Object[] pairs) {
+		append(docid, pairs);
 	}
 
 	public void delete(int docid) {

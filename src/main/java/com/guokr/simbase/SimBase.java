@@ -23,6 +23,7 @@ import org.wahlque.net.server.Server;
 import org.yaml.snakeyaml.Yaml;
 
 import com.guokr.simbase.action.AddAction;
+import com.guokr.simbase.action.AppendAction;
 import com.guokr.simbase.action.DelAction;
 import com.guokr.simbase.action.ExitAction;
 import com.guokr.simbase.action.GetAction;
@@ -33,6 +34,7 @@ import com.guokr.simbase.action.ReviseAction;
 import com.guokr.simbase.action.SaveAction;
 import com.guokr.simbase.action.SchemaAction;
 import com.guokr.simbase.action.ShutdownAction;
+import com.guokr.simbase.action.UpdateAction;
 
 public class SimBase {
 
@@ -42,7 +44,9 @@ public class SimBase {
 		registry.register(ReviseAction.class);
 		registry.register(SchemaAction.class);
 		registry.register(AddAction.class);
+		registry.register(AppendAction.class);
 		registry.register(PutAction.class);
+		registry.register(UpdateAction.class);
 		registry.register(GetAction.class);
 		registry.register(RetrieveAction.class);
 		registry.register(SaveAction.class);
@@ -195,11 +199,25 @@ public class SimBase {
 		base.get(key).add(docid, distr);
 	}
 
-	public void update(String key, int docid, float[] distr) {
+	public void append(String key, int docid, Object[] pairs) {
+		if (!base.containsKey(key)) {
+			base.put(key, new SimEngine(this.context));
+		}
+		base.get(key).append(docid, pairs);
+	}
+
+	public void put(String key, int docid, float[] distr) {
 		if (!base.containsKey(key)) {
 			base.put(key, new SimEngine(context));
 		}
-		base.get(key).update(docid, distr);
+		base.get(key).put(docid, distr);
+	}
+
+	public void update(String key, int docid, Object[] pairs) {
+		if (!base.containsKey(key)) {
+			base.put(key, new SimEngine(context));
+		}
+		base.get(key).update(docid, pairs);
 	}
 
 	public String[] schema(String key) {
