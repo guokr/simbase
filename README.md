@@ -36,7 +36,11 @@ Then you can use redis-cli to connect to simbase directly
 
     > vdel article 123456
 	
-*   vretr doctype docid: Retrieve some similar documents of a document specified by the doctype and docid
+*   vrec doctype docid: Recommend some similar documents of a document specified by the doctype and docid
+
+    > vrec article 123456
+	
+*   vretr doctype docid: Retrieve some similar documents with similarity of a document specified by the doctype and docid
 
     > vretr article 123456
 
