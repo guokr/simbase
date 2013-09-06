@@ -30,6 +30,7 @@ import com.guokr.simbase.action.GetAction;
 import com.guokr.simbase.action.PingAction;
 import com.guokr.simbase.action.PutAction;
 import com.guokr.simbase.action.RetrieveAction;
+import com.guokr.simbase.action.RecommendAction;
 import com.guokr.simbase.action.ReviseAction;
 import com.guokr.simbase.action.SaveAction;
 import com.guokr.simbase.action.SchemaAction;
@@ -49,6 +50,7 @@ public class SimBase {
 		registry.register(UpdateAction.class);
 		registry.register(GetAction.class);
 		registry.register(RetrieveAction.class);
+		registry.register(RecommendAction.class);
 		registry.register(SaveAction.class);
 		registry.register(ExitAction.class);
 		registry.register(ShutdownAction.class);
@@ -246,6 +248,16 @@ public class SimBase {
 			result = base.get(key).retrieve(docid);
 		} else {
 			result = new String[0];
+		}
+		return result;
+	}
+
+	public int[] recommend(String key, int docid) {
+		int[] result = null;
+		if (base.containsKey(key)) {
+			result = base.get(key).recommend(docid);
+		} else {
+			result = new int[0];
 		}
 		return result;
 	}

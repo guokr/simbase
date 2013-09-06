@@ -239,4 +239,8 @@ public class SimEngine {
 		return table.retrieve(docid);
 	}
 
+	public int[] recommend(int docid) {
+		return table.recommend(docid);
+	}
+
 }

@@ -23,6 +23,18 @@ public class Result extends Multiple implements Reply<Payload<?>[]> {
 		}
 	}
 
+	public Result(int[] result) {
+		super(null);
+
+		int len = result.length;
+		this.value = new Bytes[len];
+
+		int i = 0;
+        for(int id : result) {
+			this.value[i++] = new Bytes(String.valueOf(id).getBytes());
+		}
+	}
+
 	public Result(String[] result) {
 		super(null);
 

@@ -247,6 +247,14 @@ public class SimTable implements KryoSerializable {
 		}
 	}
 
+	public int[] recommend(int docid) {
+		if (scores.contains(docid)) {
+			return scores.get(docid).docids();
+		} else {
+			return new int[0];
+		}
+	}
+
 	public String[] nearby(float[] distr) {
 		return null;// TODO
 	}
