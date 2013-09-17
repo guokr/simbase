@@ -1,42 +1,41 @@
 package com.guokr.simbase.util;
 
-import gnu.trove.list.TFloatList;
-import gnu.trove.list.TIntList;
-import gnu.trove.list.array.TFloatArrayList;
-import gnu.trove.map.TIntIntMap;
-import gnu.trove.map.hash.TIntIntHashMap;
-import gnu.trove.map.hash.TIntObjectHashMap;
+import java.util.Map;
 
 public class VectorSet {
 
-	private TFloatList probs = new TFloatArrayList();
-	private TIntIntMap indexer = new TIntIntHashMap();
-	private TIntObjectHashMap<TIntList> reverseIndexer = new TIntObjectHashMap<TIntList>();
+	private Map<String, Object> config;
+	private Base base;
 
-	public int put(int docid, float[] distr) {
-		float length = 0;
-		int start;
-		if (indexer.containsKey(docid)) {
-			start = indexer.get(docid);
-			int cursor = start;
-			for (float val : distr) {
-				probs.set(cursor, val);
-				length += val * val;
-				cursor++;
-			}
-			probs.set(cursor++, (float) (docid + 1));
-			probs.set(cursor, length);
-		} else {
-			start = probs.size();
-			indexer.put(docid, start);
-			for (float val : distr) {
-				probs.add(val);
-				length += val * val;
-			}
-			probs.add((float) (docid + 1));
-			probs.add(length);
-		}
-		return start;
+	public VectorSet(Map<String, Object> config, Base base) {
+		this.config = config;
+		this.base = base;
+	}
+
+	public void add(int vecid, float[] distr) {
+	}
+
+	public void insert(int vecid, String[] comps, float[] distr) {
+	}
+
+	public void set(int vecid, float[] distr) {
+	}
+
+	public void update(int vecid, String[] comps, float[] distr) {
+	}
+
+	public void accumulate(int vecid, float[] distr) {
+	}
+
+	public float[] get(int vecid) {
+		return null;
+	}
+
+	public String[] retrive(int vecid) {
+		return null;
+	}
+
+	public void remove(int vecid) {
 	}
 
 }
