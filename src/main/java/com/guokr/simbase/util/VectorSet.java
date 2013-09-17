@@ -12,30 +12,54 @@ public class VectorSet {
 		this.base = base;
 	}
 
-	public void add(int vecid, float[] distr) {
+	public float[] get(int vecid) {
+		return null;
 	}
 
-	public void insert(int vecid, String[] comps, float[] distr) {
+	public String retrive(int vecid) {
+		return null;
+	}
+
+	public void remove(int vecid) {
+	}
+
+	//--------------------------------
+	// Methods for dense vector inputs
+    //--------------------------------
+
+	public void add(int vecid, float[] distr) {
 	}
 
 	public void set(int vecid, float[] distr) {
 	}
 
-	public void update(int vecid, String[] comps, float[] distr) {
-	}
-
 	public void accumulate(int vecid, float[] distr) {
 	}
+	
+    //-----------------------------
+	// Methods for json-like inputs
+    //-----------------------------
 
-	public float[] get(int vecid) {
-		return null;
+	public void add(int vecid, String jsonlike) {
 	}
 
-	public String[] retrive(int vecid) {
-		return null;
+	public void set(int vecid, String jsonlike) {
 	}
 
-	public void remove(int vecid) {
+	public void accumulate(int vecid, String jsonlike) {
+	}
+
+    //------------------------------------------
+	// Internal methods for sparse vector inputs
+    //------------------------------------------
+
+	void _add(int vecid, int[] pairs) {
+	}
+
+	void _set(int vecid, int[] pairs) {
+	}
+
+	void _accumulate(int vecid, int[] pairs) {
 	}
 
 }

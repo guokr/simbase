@@ -6,6 +6,10 @@ public class Base {
 		return null;
 	}
 
+	public int pos(String comp) {
+		return 0;
+	}
+
 	public void revise(String[] base) {
 	}
 

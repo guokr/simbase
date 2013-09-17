@@ -70,9 +70,9 @@ public class SimTable implements KryoSerializable {
 		this.vectorSets.get(vkey).add(vecid, distr);
 	}
 
-	public void vacc(String vkey, int vecid, float[] distr) {
+	public void vacc(String vkey, int vecid, String json) {
 		this.validateKey(vkey);
-		this.vectorSets.get(vkey).accumulate(vecid, distr);
+		this.vectorSets.get(vkey).accumulate(vecid, json);
 	}
 
 	public void vrem(String vkey, int vecid) {

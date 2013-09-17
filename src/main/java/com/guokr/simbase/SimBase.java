@@ -50,6 +50,9 @@ public class SimBase {
 		this.startCron();// 设置定时任务
 	}
 
+	private void clear() {
+	}
+
 	private void startCron() {
 		final int cronInterval = (Integer) this.context.get("cronInterval");
 
@@ -71,6 +74,9 @@ public class SimBase {
 		cron.schedule(savetask, cronInterval, cronInterval);
 	}
 
+	public void cfg(String key, String property) {
+	}
+
 	public void load() {
 	}
 
@@ -83,9 +89,6 @@ public class SimBase {
 	public void save(String bkey) {
 	}
 
-	public void clear() {
-	}
-	
 	public void del(String key) {
 	}
 
@@ -118,16 +121,39 @@ public class SimBase {
 	public void vmk(String vkey, String bkey) {
 	}
 
+	public void vrem(String vkey, int vecid) {
+	}
+
 	public void vadd(String vkey, int vecid, float[] distr) {
 	}
 
 	public void vacc(String vkey, int vecid, float[] distr) {
 	}
 
-	public void vrem(String vkey, int vecid) {
+	public float[] vget(String vkey, int vecid) {
+		return null;
 	}
 
-	public float[] vget(String vkey, int vecid) {
+	public void jadd(String vkey, int vecid, String jsonlike) {
+	}
+
+	public void jacc(String vkey, int vecid, String jsonlike) {
+	}
+
+	public String jget(String vkey, int vecid) {
+		return null;
+	}
+
+	//For client-side sparsification
+	public void _vadd(String vkey, int vecid, int[] pairs) {
+	}
+
+	//For client-side sparsification
+	public void _vacc(String vkey, int vecid, int[] pairs) {
+	}
+
+	//For client-side sparsification
+	public int[] _vget(String vkey, int vecid) {
 		return null;
 	}
 
