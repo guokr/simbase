@@ -10,7 +10,7 @@ import org.wahlque.net.transport.Payload;
 import org.wahlque.net.transport.payload.Bytes;
 import org.wahlque.net.transport.payload.Multiple;
 
-import com.guokr.simbase.SimBase;
+import com.guokr.simbase.SimMain;
 import com.guokr.simbase.command.Recommend;
 import com.guokr.simbase.reply.Result;
 
@@ -63,7 +63,7 @@ public class RecommendAction implements Action {
 			result = new int[0];
 		} else {
 			Recommend cmd = (Recommend) command(context, data);
-			result = ((SimBase) context.get("simbase")).recommend(cmd.key,
+			result = ((SimMain) context.get("simbase")).recommend(cmd.key,
 					cmd.docid);
 		}
 		return new Result(result);

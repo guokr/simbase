@@ -9,7 +9,7 @@ import org.wahlque.net.transport.Payload;
 import org.wahlque.net.transport.payload.Bytes;
 import org.wahlque.net.transport.payload.Multiple;
 
-import com.guokr.simbase.SimBase;
+import com.guokr.simbase.SimMain;
 import com.guokr.simbase.command.Schema;
 import com.guokr.simbase.reply.Result;
 
@@ -55,7 +55,7 @@ public class SchemaAction implements Action {
 			result = new String[0];
 		} else {
 			Schema cmd = (Schema) command(context, data);
-			result = ((SimBase) context.get("simbase")).schema(cmd.key);
+			result = ((SimMain) context.get("simbase")).schema(cmd.key);
 		}
 		return new Result(result);
 	}

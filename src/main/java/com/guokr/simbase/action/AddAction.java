@@ -10,7 +10,7 @@ import org.wahlque.net.transport.Payload;
 import org.wahlque.net.transport.payload.Bytes;
 import org.wahlque.net.transport.payload.Multiple;
 
-import com.guokr.simbase.SimBase;
+import com.guokr.simbase.SimMain;
 import com.guokr.simbase.command.Add;
 import com.guokr.simbase.reply.OK;
 
@@ -74,7 +74,7 @@ public class AddAction implements Action {
 	public Payload<?> apply(Map<String, Object> context, Payload<?> data)
 			throws ActionException {
 		Add cmd = (Add) command(context, data);
-		((SimBase) context.get("simbase")).add(cmd.key, cmd.docid, cmd.distr);
+		((SimMain) context.get("simbase")).add(cmd.key, cmd.docid, cmd.distr);
 		return new OK();
 	}
 

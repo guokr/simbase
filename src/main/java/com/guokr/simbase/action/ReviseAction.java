@@ -10,7 +10,7 @@ import org.wahlque.net.transport.Payload;
 import org.wahlque.net.transport.payload.Bytes;
 import org.wahlque.net.transport.payload.Multiple;
 
-import com.guokr.simbase.SimBase;
+import com.guokr.simbase.SimMain;
 import com.guokr.simbase.command.Revise;
 import com.guokr.simbase.reply.OK;
 
@@ -67,7 +67,7 @@ public class ReviseAction implements Action {
 	public Payload<?> apply(Map<String, Object> context, Payload<?> data)
 			throws ActionException {
 		Revise cmd = (Revise) command(context, data);
-		((SimBase) context.get("simbase")).revise(cmd.key, cmd.schema);
+		((SimMain) context.get("simbase")).revise(cmd.key, cmd.schema);
 		return new OK();
 	}
 

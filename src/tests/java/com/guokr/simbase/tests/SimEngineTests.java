@@ -10,7 +10,7 @@ import java.util.Map;
 import org.junit.Test;
 import org.yaml.snakeyaml.Yaml;
 
-import com.guokr.simbase.SimBase;
+import com.guokr.simbase.SimMain;
 
 public class SimEngineTests {
 
@@ -33,7 +33,7 @@ public class SimEngineTests {
 		}
 	}
 
-	private void printSimBase(SimBase simbase, String key) {
+	private void printSimBase(SimMain simbase, String key) {
 		int count = 0;
 		while (count < 24) {
 			int[] docids = getDocids(simbase.retrieve(key, count));
@@ -50,7 +50,7 @@ public class SimEngineTests {
 		System.out.println();
 	}
 
-	private SimBase initSimBase(String key) {
+	private SimMain initSimBase(String key) {
 		Map<String, Object> context = new HashMap<String, Object>();
 		try {
 			Yaml yaml = new Yaml();
@@ -61,7 +61,7 @@ public class SimEngineTests {
 		} catch (IOException e) {
 		}
 
-		SimBase simbase = new SimBase(context);
+		SimMain simbase = new SimMain(context);
 		simbase.add(key, 0, new float[] { 0.18257418583505536f,
 				0.3651483716701107f, 0.5477225575051661f, 0.7302967433402214f });
 		simbase.add(key, 1, new float[] { 0.18257418583505536f,
@@ -135,7 +135,7 @@ public class SimEngineTests {
 	@Test
 	public void test_del_clean() {
 		String key = "test2";
-		SimBase simbase = initSimBase("test2");
+		SimMain simbase = initSimBase("test2");
 		delay(1);// 等待加载完毕
 		printSimBase(simbase, key);
 		simbase.delete(key, 1);

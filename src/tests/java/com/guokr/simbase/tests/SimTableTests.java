@@ -6,7 +6,7 @@ import java.util.Arrays;
 
 import org.junit.Test;
 
-import com.guokr.simbase.SimTable;
+import com.guokr.simbase.SimBasis;
 
 public class SimTableTests {
 
@@ -27,7 +27,7 @@ public class SimTableTests {
 
 	@Test
 	public void test3d() {
-		SimTable table = new SimTable();
+		SimBasis table = new SimBasis();
 
 		table.add(2, new float[] { 0.9f, 0.1f, 0f });
 		table.add(3, new float[] { 0.9f, 0f, 0.1f });
@@ -95,7 +95,7 @@ public class SimTableTests {
 
 	@Test
 	public void test4d() {
-		SimTable table = new SimTable();
+		SimBasis table = new SimBasis();
 
 		table.add(0, new float[] { 0.18257418583505536f, 0.3651483716701107f,
 				0.5477225575051661f, 0.7302967433402214f });

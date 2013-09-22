@@ -10,7 +10,7 @@ import org.wahlque.net.transport.Payload;
 import org.wahlque.net.transport.payload.Bytes;
 import org.wahlque.net.transport.payload.Multiple;
 
-import com.guokr.simbase.SimBase;
+import com.guokr.simbase.SimMain;
 import com.guokr.simbase.command.Del;
 import com.guokr.simbase.reply.OK;
 
@@ -63,7 +63,7 @@ public class DelAction implements Action {
 	public Payload<?> apply(Map<String, Object> context, Payload<?> data)
 			throws ActionException {
 		Del cmd = (Del) command(context, data);
-		SimBase base = ((SimBase) context.get("simbase"));
+		SimMain base = ((SimMain) context.get("simbase"));
 		base.delete(cmd.key, cmd.docid);
 		return new OK();
 	}

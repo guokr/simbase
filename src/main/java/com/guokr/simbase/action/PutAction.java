@@ -10,7 +10,7 @@ import org.wahlque.net.transport.Payload;
 import org.wahlque.net.transport.payload.Bytes;
 import org.wahlque.net.transport.payload.Multiple;
 
-import com.guokr.simbase.SimBase;
+import com.guokr.simbase.SimMain;
 import com.guokr.simbase.command.Put;
 import com.guokr.simbase.reply.OK;
 
@@ -74,7 +74,7 @@ public class PutAction implements Action {
 	public Payload<?> apply(Map<String, Object> context, Payload<?> data)
 			throws ActionException {
 		Put cmd = (Put) command(context, data);
-		((SimBase) context.get("simbase"))
+		((SimMain) context.get("simbase"))
 				.put(cmd.key, cmd.docid, cmd.distr);
 		return new OK();
 	}

@@ -9,7 +9,7 @@ import org.wahlque.net.transport.Payload;
 import org.wahlque.net.transport.payload.Bytes;
 import org.wahlque.net.transport.payload.Multiple;
 
-import com.guokr.simbase.SimBase;
+import com.guokr.simbase.SimMain;
 import com.guokr.simbase.command.Save;
 import com.guokr.simbase.reply.OK;
 
@@ -50,7 +50,7 @@ public class SaveAction implements Action {
 	public Payload<?> apply(Map<String, Object> context, Payload<?> data)
 			throws ActionException {
 		Save cmd = (Save) command(context, data);
-		SimBase base = ((SimBase) context.get("simbase"));
+		SimMain base = ((SimMain) context.get("simbase"));
 		if (cmd.key.equals("all")) {
 			base.save();
 		} else {

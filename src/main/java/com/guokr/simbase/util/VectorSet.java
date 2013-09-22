@@ -5,9 +5,9 @@ import java.util.Map;
 public class VectorSet {
 
 	private Map<String, Object> config;
-	private Base base;
+	private Basis base;
 
-	public VectorSet(Map<String, Object> config, Base base) {
+	public VectorSet(Map<String, Object> config, Basis base) {
 		this.config = config;
 		this.base = base;
 	}

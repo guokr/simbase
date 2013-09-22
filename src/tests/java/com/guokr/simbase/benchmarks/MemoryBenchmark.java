@@ -2,13 +2,13 @@ package com.guokr.simbase.benchmarks;
 
 import java.util.Date;
 
-import com.guokr.simbase.SimTable;
+import com.guokr.simbase.SimBasis;
 
 public class MemoryBenchmark {
 
 	public static void main(String[] args) {
 		long accumulated = 0;
-		SimTable engine = new SimTable();
+		SimBasis engine = new SimBasis();
 		for (int i = 0; i < 100000; i++) {
 
 			float total = 0;

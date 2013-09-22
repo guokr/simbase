@@ -10,7 +10,7 @@ import org.wahlque.net.transport.Payload;
 import org.wahlque.net.transport.payload.Bytes;
 import org.wahlque.net.transport.payload.Multiple;
 
-import com.guokr.simbase.SimBase;
+import com.guokr.simbase.SimMain;
 import com.guokr.simbase.command.Get;
 import com.guokr.simbase.reply.Result;
 
@@ -63,7 +63,7 @@ public class RetrieveAction implements Action {
 			result = new String[0];
 		} else {
 			Get cmd = (Get) command(context, data);
-			result = ((SimBase) context.get("simbase")).retrieve(cmd.key,
+			result = ((SimMain) context.get("simbase")).retrieve(cmd.key,
 					cmd.docid);
 		}
 		return new Result(result);

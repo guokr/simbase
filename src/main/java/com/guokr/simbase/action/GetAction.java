@@ -13,7 +13,7 @@ import org.wahlque.net.transport.Payload;
 import org.wahlque.net.transport.payload.Bytes;
 import org.wahlque.net.transport.payload.Multiple;
 
-import com.guokr.simbase.SimBase;
+import com.guokr.simbase.SimMain;
 import com.guokr.simbase.command.Get;
 import com.guokr.simbase.reply.Result;
 
@@ -66,7 +66,7 @@ public class GetAction implements Action {
 			result = new TFloatArrayList();
 		} else {
 			Get cmd = (Get) command(context, data);
-			result = ((SimBase) context.get("simbase")).get(cmd.key, cmd.docid);
+			result = ((SimMain) context.get("simbase")).get(cmd.key, cmd.docid);
 		}
 		return new Result(result);
 	}

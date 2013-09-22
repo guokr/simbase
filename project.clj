@@ -9,7 +9,7 @@
             :comments "same as Clojure"}
 
     :dependencies [[org.clojure/clojure "1.5.1"]
-                   [com.taoensso/carmine "2.0.0"]
+                   [gloss "0.2.2"]
                    [clj-pid "0.1.1"]
                    [net.sf.trove4j/trove4j "3.0.3"]
                    [org.slf4j/slf4j-api "1.7.5"]
