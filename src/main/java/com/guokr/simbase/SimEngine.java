@@ -184,8 +184,7 @@ public class SimEngine {
     public void del(final SimEngineCallback callback, String key) {
     }
 
-    public String[] blist(final SimEngineCallback callback) {
-        return null;
+    public void blist(final SimEngineCallback callback) {
     }
 
     public void bmk(final SimEngineCallback callback, String bkey, String[] base) {
@@ -194,8 +193,7 @@ public class SimEngine {
     public void brev(final SimEngineCallback callback, String bkey, String[] base) {
     }
 
-    public String[] bget(final SimEngineCallback callback, String bkey) {
-        return null;
+    public void bget(final SimEngineCallback callback, String bkey) {
     }
 
     public String[] vlist(final SimEngineCallback callback, String bkey) {
@@ -214,8 +212,10 @@ public class SimEngine {
     public void vacc(final SimEngineCallback callback, String vkey, int vecid, float[] distr) {
     }
 
-    public float[] vget(final SimEngineCallback callback, String vkey, int vecid) {
-        return null;
+    public void vput(final SimEngineCallback callback, String vkey, int vecid, float[] distr) {
+    }
+
+    public void vget(final SimEngineCallback callback, String vkey, int vecid) {
     }
 
     public void jadd(final SimEngineCallback callback, String vkey, int vecid, String jsonlike) {
@@ -224,8 +224,10 @@ public class SimEngine {
     public void jacc(final SimEngineCallback callback, String vkey, int vecid, String jsonlike) {
     }
 
-    public String jget(final SimEngineCallback callback, String vkey, int vecid) {
-        return null;
+    public void jput(final SimEngineCallback callback, String vkey, int vecid, String jsonlike) {
+    }
+
+    public void jget(final SimEngineCallback callback, String vkey, int vecid) {
     }
 
     // Internal use for client-side sparsification
@@ -237,23 +239,23 @@ public class SimEngine {
     }
 
     // Internal use for client-side sparsification
-    public int[] iget(final SimEngineCallback callback, String vkey, int vecid) {
-        return null;
+    public void iput(final SimEngineCallback callback, String vkey, int vecid, int[] pairs) {
     }
 
-    public String[] rlist(final SimEngineCallback callback, String vkey) {
-        return null;
+    // Internal use for client-side sparsification
+    public void iget(final SimEngineCallback callback, String vkey, int vecid) {
+    }
+
+    public void rlist(final SimEngineCallback callback, String vkey) {
     }
 
     public void rmk(final SimEngineCallback callback, String vkeySource, String vkeyTarget) {
     }
 
-    public String[] rget(final SimEngineCallback callback, String vkeySource, String vkeyTarget) {
-        return null;
+    public void rget(final SimEngineCallback callback, String vkeySource, String vkeyTarget) {
     }
 
-    public int[] rrec(final SimEngineCallback callback, String vkeySource, String vkeyTarget) {
-        return null;
+    public void rrec(final SimEngineCallback callback, String vkeySource, String vkeyTarget) {
     }
 
 }
