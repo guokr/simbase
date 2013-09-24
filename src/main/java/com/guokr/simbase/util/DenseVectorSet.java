@@ -7,11 +7,11 @@ import gnu.trove.map.hash.TIntIntHashMap;
 
 import java.util.Map;
 
-public class FloatDenseMatrix extends AbstractVectorSet {
+public class DenseVectorSet extends AbstractVectorSet {
     private TIntIntMap vecidToidx = new TIntIntHashMap();
-    private TFloatList hive       = new TFloatArrayList();
+    TFloatList hive       = new TFloatArrayList();
 
-    public FloatDenseMatrix(Map<String, Object> config, Basis basis) {
+    public DenseVectorSet(Map<String, Object> config, Basis basis) {
         super(config, basis);
     }
 
