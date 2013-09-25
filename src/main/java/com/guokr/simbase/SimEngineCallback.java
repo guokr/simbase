@@ -4,14 +4,20 @@ public interface SimEngineCallback {
 
     void sendOK();
 
-    void sendError(String string);
+    void sendError(String msg);
 
-    void sendCfg(String string);
+    void sendCfg(String cfg);
 
-    void sendInterger(int i);
+    void sendInterger(int val);
 
-    void sendFloat(float vlaue);
+    void sendIntegerList(int[] list);
 
-    void sendString(String string);
+    void sendFloat(float val);
+
+    void sendFloatList(float[] list);
+
+    void sendString(String val);
+
+    void sendStringList(String[] list);
 
 }

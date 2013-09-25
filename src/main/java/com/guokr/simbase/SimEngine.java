@@ -51,6 +51,14 @@ public class SimEngine {
         }
     }
 
+    private void validateSameBasis(String vkeyTarget, String vkeySource) {
+        // TODO
+    }
+
+    private boolean checkExistenceAsVectorSet(String vkey) {
+        return false;//TODO
+    }
+
     private void clearData() {
     }
 
@@ -165,7 +173,7 @@ public class SimEngine {
     }
 
     public void xget(final SimEngineCallback callback, String vkey, int vecid) {
-        validateKind("xlookup", vkey, Kind.VECTORS);
+        validateKind("xget", vkey, Kind.VECTORS);
         dataExecs.get(basisOf.get(vkey)).execute(new Runnable() {
             @Override
             public void run() {
@@ -173,7 +181,7 @@ public class SimEngine {
                     // TODO
                     callback.sendString("");
                 } catch (Throwable ex) {
-                    int code = SimErrors.lookup("xlookup", ex);
+                    int code = SimErrors.lookup("xget", ex);
                     logger.error(SimErrors.info(code), ex);
                     callback.sendError(SimErrors.descr(code));
                 }
@@ -181,81 +189,496 @@ public class SimEngine {
         });
     }
 
-    public void del(final SimEngineCallback callback, String key) {
+    public void del(final SimEngineCallback callback, final String key) {
+        validateExistence(key);
+        dataExecs.get(basisOf.get(key)).execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    if (bases.containsKey(key)) {
+                        // TODO
+                        // force to keep it empty before deletion
+                    } else {
+                        // TODO
+                    }
+                    callback.sendOK();
+                } catch (Throwable ex) {
+                    int code = SimErrors.lookup("del", ex);
+                    logger.error(SimErrors.info(code), ex);
+                    callback.sendError(SimErrors.descr(code));
+                }
+            }
+        });
     }
 
     public void blist(final SimEngineCallback callback) {
+        mngmExec.execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    // TODO
+                    callback.sendOK();
+                } catch (Throwable ex) {
+                    int code = SimErrors.lookup("blist", ex);
+                    logger.error(SimErrors.info(code), ex);
+                    callback.sendError(SimErrors.descr(code));
+                }
+            }
+        });
     }
 
     public void bmk(final SimEngineCallback callback, String bkey, String[] base) {
+        mngmExec.execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    // TODO
+                    callback.sendOK();
+                } catch (Throwable ex) {
+                    int code = SimErrors.lookup("bmk", ex);
+                    logger.error(SimErrors.info(code), ex);
+                    callback.sendError(SimErrors.descr(code));
+                }
+            }
+        });
     }
 
     public void brev(final SimEngineCallback callback, String bkey, String[] base) {
+        validateKind("brev", bkey, Kind.BASIS);
+        dataExecs.get(bkey).execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    // TODO
+                } catch (Throwable ex) {
+                    int code = SimErrors.lookup("brev", ex);
+                    logger.error(SimErrors.info(code), ex);
+                    callback.sendError(SimErrors.descr(code));
+                }
+            }
+        });
+        callback.sendOK();
     }
 
     public void bget(final SimEngineCallback callback, String bkey) {
+        validateKind("bget", bkey, Kind.BASIS);
+        dataExecs.get(bkey).execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    // TODO
+                    callback.sendStringList(null);
+                } catch (Throwable ex) {
+                    int code = SimErrors.lookup("bget", ex);
+                    logger.error(SimErrors.info(code), ex);
+                    callback.sendError(SimErrors.descr(code));
+                }
+            }
+        });
     }
 
-    public String[] vlist(final SimEngineCallback callback, String bkey) {
-        return null;
+    public void vlist(final SimEngineCallback callback, String bkey) {
+        validateKind("vlist", bkey, Kind.BASIS);
+        mngmExec.execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    // TODO
+                    callback.sendStringList(null);
+                } catch (Throwable ex) {
+                    int code = SimErrors.lookup("vlist", ex);
+                    logger.error(SimErrors.info(code), ex);
+                    callback.sendError(SimErrors.descr(code));
+                }
+            }
+        });
     }
 
-    public void vmk(final SimEngineCallback callback, String vkey, String bkey) {
+    public void vmk(final SimEngineCallback callback, String bkey, String vkey) {
+        validateKind("vmk", bkey, Kind.BASIS);
+        validateNotExistence(vkey);
+        mngmExec.execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    // TODO
+                    callback.sendOK();
+                } catch (Throwable ex) {
+                    int code = SimErrors.lookup("vmk", ex);
+                    logger.error(SimErrors.info(code), ex);
+                    callback.sendError(SimErrors.descr(code));
+                }
+            }
+        });
     }
 
-    public void vrem(final SimEngineCallback callback, String vkey, int vecid) {
+    // CURD operations for one vector in vector-set
+
+    public void vget(final SimEngineCallback callback, String vkey, int vecid) {
+        validateExistence(vkey);
+        dataExecs.get(basisOf.get(vkey)).execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    // TODO
+                    callback.sendFloatList(null);
+                } catch (Throwable ex) {
+                    int code = SimErrors.lookup("vget", ex);
+                    logger.error(SimErrors.info(code), ex);
+                    callback.sendError(SimErrors.descr(code));
+                }
+            }
+        });
     }
 
-    public void vadd(final SimEngineCallback callback, String vkey, int vecid, float[] distr) {
+    public void vset(final SimEngineCallback callback, final String vkey, int vecid, float[] distr) {
+        boolean exists = checkExistenceAsVectorSet(vkey);
+        if (!exists) {
+            mngmExec.execute(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        // TODO
+                        dataExecs.get(basisOf.get(vkey)).execute(new Runnable() {
+                            @Override
+                            public void run() {
+                                try {
+                                    // TODO
+                                } catch (Throwable ex) {
+                                    int code = SimErrors.lookup("vset", ex);
+                                    logger.error(SimErrors.info(code), ex);
+                                    callback.sendError(SimErrors.descr(code));
+                                }
+                            }
+                        });
+                        callback.sendOK();
+                    } catch (Throwable ex) {
+                        int code = SimErrors.lookup("vset", ex);
+                        logger.error(SimErrors.info(code), ex);
+                        callback.sendError(SimErrors.descr(code));
+                    }
+                }
+            });
+        } else {
+            dataExecs.get(basisOf.get(vkey)).execute(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        // TODO
+                    } catch (Throwable ex) {
+                        int code = SimErrors.lookup("vset", ex);
+                        logger.error(SimErrors.info(code), ex);
+                        callback.sendError(SimErrors.descr(code));
+                    }
+                }
+            });
+            callback.sendOK();
+        }
     }
 
     public void vacc(final SimEngineCallback callback, String vkey, int vecid, float[] distr) {
+        this.validateKind("vacc", vkey, Kind.VECTORS);
+        dataExecs.get(basisOf.get(vkey)).execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    // TODO
+                    callback.sendFloatList(null);
+                } catch (Throwable ex) {
+                    int code = SimErrors.lookup("vacc", ex);
+                    logger.error(SimErrors.info(code), ex);
+                    callback.sendError(SimErrors.descr(code));
+                }
+            }
+        });
     }
 
-    public void vput(final SimEngineCallback callback, String vkey, int vecid, float[] distr) {
-    }
-
-    public void vget(final SimEngineCallback callback, String vkey, int vecid) {
-    }
-
-    public void jadd(final SimEngineCallback callback, String vkey, int vecid, String jsonlike) {
-    }
-
-    public void jacc(final SimEngineCallback callback, String vkey, int vecid, String jsonlike) {
-    }
-
-    public void jput(final SimEngineCallback callback, String vkey, int vecid, String jsonlike) {
+    public void vrem(final SimEngineCallback callback, String vkey, int vecid) {
+        this.validateKind("vacc", vkey, Kind.VECTORS);
+        dataExecs.get(basisOf.get(vkey)).execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    // TODO
+                    callback.sendFloatList(null);
+                } catch (Throwable ex) {
+                    int code = SimErrors.lookup("vrem", ex);
+                    logger.error(SimErrors.info(code), ex);
+                    callback.sendError(SimErrors.descr(code));
+                }
+            }
+        });
     }
 
     public void jget(final SimEngineCallback callback, String vkey, int vecid) {
+        validateExistence(vkey);
+        dataExecs.get(basisOf.get(vkey)).execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    // TODO
+                    callback.sendFloatList(null);
+                } catch (Throwable ex) {
+                    int code = SimErrors.lookup("jget", ex);
+                    logger.error(SimErrors.info(code), ex);
+                    callback.sendError(SimErrors.descr(code));
+                }
+            }
+        });
     }
 
-    // Internal use for client-side sparsification
-    public void iadd(final SimEngineCallback callback, String vkey, int vecid, int[] pairs) {
+    public void jset(final SimEngineCallback callback, final String vkey, int vecid, String jsonlike) {
+        boolean exists = checkExistenceAsVectorSet(vkey);
+        if (!exists) {
+            mngmExec.execute(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        // TODO
+                        dataExecs.get(basisOf.get(vkey)).execute(new Runnable() {
+                            @Override
+                            public void run() {
+                                try {
+                                    // TODO
+                                } catch (Throwable ex) {
+                                    int code = SimErrors.lookup("jset", ex);
+                                    logger.error(SimErrors.info(code), ex);
+                                    callback.sendError(SimErrors.descr(code));
+                                }
+                            }
+                        });
+                        callback.sendOK();
+                    } catch (Throwable ex) {
+                        int code = SimErrors.lookup("jset", ex);
+                        logger.error(SimErrors.info(code), ex);
+                        callback.sendError(SimErrors.descr(code));
+                    }
+                }
+            });
+        } else {
+            dataExecs.get(basisOf.get(vkey)).execute(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        // TODO
+                    } catch (Throwable ex) {
+                        int code = SimErrors.lookup("jset", ex);
+                        logger.error(SimErrors.info(code), ex);
+                        callback.sendError(SimErrors.descr(code));
+                    }
+                }
+            });
+            callback.sendOK();
+        }
     }
 
-    // Internal use for client-side sparsification
-    public void iacc(final SimEngineCallback callback, String vkey, int vecid, int[] pairs) {
+    public void jacc(final SimEngineCallback callback, String vkey, int vecid, String jsonlike) {
+        this.validateKind("jacc", vkey, Kind.VECTORS);
+        dataExecs.get(basisOf.get(vkey)).execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    // TODO
+                    callback.sendFloatList(null);
+                } catch (Throwable ex) {
+                    int code = SimErrors.lookup("jacc", ex);
+                    logger.error(SimErrors.info(code), ex);
+                    callback.sendError(SimErrors.descr(code));
+                }
+            }
+        });
     }
 
-    // Internal use for client-side sparsification
-    public void iput(final SimEngineCallback callback, String vkey, int vecid, int[] pairs) {
+    public void jrem(final SimEngineCallback callback, String vkey, int vecid) {
+        this.validateKind("jrem", vkey, Kind.VECTORS);
+        dataExecs.get(basisOf.get(vkey)).execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    // TODO
+                    callback.sendFloatList(null);
+                } catch (Throwable ex) {
+                    int code = SimErrors.lookup("jrem", ex);
+                    logger.error(SimErrors.info(code), ex);
+                    callback.sendError(SimErrors.descr(code));
+                }
+            }
+        });
     }
 
     // Internal use for client-side sparsification
     public void iget(final SimEngineCallback callback, String vkey, int vecid) {
+        validateExistence(vkey);
+        dataExecs.get(basisOf.get(vkey)).execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    // TODO
+                    callback.sendFloatList(null);
+                } catch (Throwable ex) {
+                    int code = SimErrors.lookup("iget", ex);
+                    logger.error(SimErrors.info(code), ex);
+                    callback.sendError(SimErrors.descr(code));
+                }
+            }
+        });
+    }
+
+    // Internal use for client-side sparsification
+    public void iset(final SimEngineCallback callback, final String vkey, int vecid, int[] pairs) {
+        boolean exists = checkExistenceAsVectorSet(vkey);
+        if (!exists) {
+            mngmExec.execute(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        // TODO
+                        dataExecs.get(basisOf.get(vkey)).execute(new Runnable() {
+                            @Override
+                            public void run() {
+                                try {
+                                    // TODO
+                                } catch (Throwable ex) {
+                                    int code = SimErrors.lookup("iset", ex);
+                                    logger.error(SimErrors.info(code), ex);
+                                    callback.sendError(SimErrors.descr(code));
+                                }
+                            }
+                        });
+                        callback.sendOK();
+                    } catch (Throwable ex) {
+                        int code = SimErrors.lookup("iset", ex);
+                        logger.error(SimErrors.info(code), ex);
+                        callback.sendError(SimErrors.descr(code));
+                    }
+                }
+            });
+        } else {
+            dataExecs.get(basisOf.get(vkey)).execute(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        // TODO
+                    } catch (Throwable ex) {
+                        int code = SimErrors.lookup("iset", ex);
+                        logger.error(SimErrors.info(code), ex);
+                        callback.sendError(SimErrors.descr(code));
+                    }
+                }
+            });
+            callback.sendOK();
+        }
+    }
+
+    // Internal use for client-side sparsification
+    public void iacc(final SimEngineCallback callback, String vkey, int vecid, int[] pairs) {
+        this.validateKind("iacc", vkey, Kind.VECTORS);
+        dataExecs.get(basisOf.get(vkey)).execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    // TODO
+                } catch (Throwable ex) {
+                    int code = SimErrors.lookup("iacc", ex);
+                    logger.error(SimErrors.info(code), ex);
+                    callback.sendError(SimErrors.descr(code));
+                }
+            }
+        });
+        callback.sendOK();
+    }
+
+    // Internal use for client-side sparsification
+    public void irem(final SimEngineCallback callback, String vkey, int vecid) {
+        this.validateKind("irem", vkey, Kind.VECTORS);
+        dataExecs.get(basisOf.get(vkey)).execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    // TODO
+                } catch (Throwable ex) {
+                    int code = SimErrors.lookup("irem", ex);
+                    logger.error(SimErrors.info(code), ex);
+                    callback.sendError(SimErrors.descr(code));
+                }
+            }
+        });
+        callback.sendOK();
     }
 
     public void rlist(final SimEngineCallback callback, String vkey) {
+        validateKind("rlist", vkey, Kind.VECTORS);
+        mngmExec.execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    // TODO
+                    callback.sendStringList(null);
+                } catch (Throwable ex) {
+                    int code = SimErrors.lookup("rlist", ex);
+                    logger.error(SimErrors.info(code), ex);
+                    callback.sendError(SimErrors.descr(code));
+                }
+            }
+        });
     }
 
     public void rmk(final SimEngineCallback callback, String vkeySource, String vkeyTarget) {
+        validateKind("rmk", vkeySource, Kind.VECTORS);
+        validateKind("rmk", vkeyTarget, Kind.VECTORS);
+        validateSameBasis(vkeyTarget, vkeySource);
+        validateNotExistence(vkeyTarget + ":" + vkeySource);
+        mngmExec.execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    // TODO
+                    callback.sendOK();
+                } catch (Throwable ex) {
+                    int code = SimErrors.lookup("rmk", ex);
+                    logger.error(SimErrors.info(code), ex);
+                    callback.sendError(SimErrors.descr(code));
+                }
+            }
+        });
     }
 
     public void rget(final SimEngineCallback callback, String vkeySource, String vkeyTarget) {
+        validateKind("rget", vkeySource, Kind.VECTORS);
+        validateKind("rget", vkeyTarget, Kind.VECTORS);
+        validateExistence(vkeyTarget + ":" + vkeySource);
+        dataExecs.get(basisOf.get(vkeySource)).execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    // TODO
+                    callback.sendString(null);
+                } catch (Throwable ex) {
+                    int code = SimErrors.lookup("rget", ex);
+                    logger.error(SimErrors.info(code), ex);
+                    callback.sendError(SimErrors.descr(code));
+                }
+            }
+        });
     }
 
     public void rrec(final SimEngineCallback callback, String vkeySource, String vkeyTarget) {
+        validateKind("rget", vkeySource, Kind.VECTORS);
+        validateKind("rget", vkeyTarget, Kind.VECTORS);
+        validateExistence(vkeyTarget + ":" + vkeySource);
+        dataExecs.get(basisOf.get(vkeySource)).execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    // TODO
+                    callback.sendIntegerList(null);
+                } catch (Throwable ex) {
+                    int code = SimErrors.lookup("rrec", ex);
+                    logger.error(SimErrors.info(code), ex);
+                    callback.sendError(SimErrors.descr(code));
+                }
+            }
+        });
     }
 
 }
