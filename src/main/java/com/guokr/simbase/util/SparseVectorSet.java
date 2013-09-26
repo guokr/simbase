@@ -4,6 +4,8 @@ import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.TIntIntMap;
 import gnu.trove.map.hash.TIntIntHashMap;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Map;
 
 import org.omg.CORBA.DynAnyPackage.Invalid;
@@ -22,6 +24,10 @@ public class SparseVectorSet extends AbstractVectorSet {
         super(config, base);
     }
 
+    public int size() {
+        return vecidToidx.size();
+    }
+
     private int vecidToIdx(int vecid) throws Exception {
         validateVecid(vecid);
         return vecidToidx.get(vecid);
@@ -33,73 +39,68 @@ public class SparseVectorSet extends AbstractVectorSet {
         }
     }
 
-    private void validateDistr(float[] distr) throws Exception {
-        if (distr.length > getBasis().size()) {
-            throw new Exception("invalid vector size");
+    private void validatePair(int[] pair) throws Exception {
+        if (pair.length % 2 != 0) {
+            throw new Exception("invalid vector pair length.");
+        }
+
+        if (pair.length / 2 > getBasis().size()) {
+            throw new Exception("invalid vector size.");
+        }
+        for (int i = 0; i < pair.length; i += 2) {
+            if (pair[i] >= getBasis().size() || pair[i] < 0) {
+                throw new Exception("vector index beyond the basis size.");
+            }
         }
     }
 
-    @Override
-    public void set(int vecid, float[] distr) throws Exception {
-        validateDistr(distr);
+    public void set(int vecid, int[] pair) throws Exception {
+        validatePair(pair);
 
         if (vecidToidx.containsKey(vecid)) {
             int idx = vecidToIdx(vecid);
             int len = getVectorLength(vecid);
-            if (len < distr.length) {
+            if (len < pair.length / 2) {
                 discardVector(vecid, idx);
-                allocVector(vecid, distr);
+                allocVector(vecid, pair);
             } else {
-                updateVector(vecid, distr);
+                updateVector(vecid, pair);
             }
         } else {
-            allocVector(vecid, distr);
+            allocVector(vecid, pair);
         }
     }
 
-    private void updateVector(int vecid, float[] distr) throws Exception {
-        validateDistr(distr);
+    private void updateVector(int vecid, int[] pair) throws Exception {
+        /*
+         * 私有接口不再检查参数
+         */
         int idx = vecidToIdx(vecid);
-        int len = getVectorLength(vecid);
 
-        if (len < distr.length) {
-            throw new Exception("Update failed.The argument distr's length is invalid");
-        }
-
-        hive.set(idx, distr.length); // 有可能变小
-        int i = idx + 2;
-        for (float f : distr) {
-            hive.set(i, (int) (f * coefficient()));
-            i += 2;
+        hive.set(idx++, pair.length / 2); // 有可能变小
+        for (int i = 0; i < pair.length; i += 2) {
+            hive.set(idx++, pair[i]);
+            hive.set(idx++, pair[i + 1]);
         }
     }
 
-    private void allocVector(int vecid, float[] distr) throws Exception {
-        validateDistr(distr);
+    private void allocVector(int vecid, int[] pair) throws Exception {
         int idx = hive.size();
-        int len = distr.length;
+        int len = pair.length / 2;
 
         hive.add(len);
-        int dim = 0;
-        for (float f : distr) {
-            int d = (int) (f * coefficient());
-            hive.add(dim++);
+        for (int d : pair) {
             hive.add(d);
         }
         vecidToidx.put(vecid, idx);
     }
 
-    private int coefficient() {
-        // TODO Auto-generated method stub
-        return 100;
-    }
-
     private void discardVector(int vecid, int idx) throws Exception {
         int len = getVectorLength(vecid);
 
-        hive.set(idx++, Integer.MIN_VALUE); // 长度字段本身
+        hive.set(idx, Integer.MIN_VALUE); // 长度字段本身
 
-        for (int i = idx; i < idx + 2 * len; i++) {
+        for (int i = idx + 1; i < idx + 2 * len + 1; i++) {
             hive.set(i++, Integer.MIN_VALUE); // 维度字段
             hive.set(i, Integer.MIN_VALUE); // 维度数据
         }
@@ -111,24 +112,12 @@ public class SparseVectorSet extends AbstractVectorSet {
         return hive.get(idx);
     }
 
-    @Override
-    public void add(int vectid, String[] comps, float[] distr) throws Exception {
-        // TODO Auto-generated method stub
-    }
-
-    @Override
-    public void update(int vecid, String[] comps, float[] distr) {
-        // TODO Auto-generated method stub
-    }
-
-    @Override
-    public void accumulate(int vecid, float[] distr) {
+    public void accumulate(int vecid, int[] distr) {
         // TODO Auto-generated method stub
 
     }
 
-    @Override
-    public float[] get(int vecid) {
+    public int[] get(int vecid) {
         int len, idx;
         try {
             len = getVectorLength(vecid);
@@ -137,32 +126,26 @@ public class SparseVectorSet extends AbstractVectorSet {
             return null;
         }
 
-        float[] res = new float[getBasis().size()];
-        idx++;
-        for (int i = idx; i < idx + 2 * len; i++) {
+        int[] res = new int[getBasis().size()];
+        for (int i = idx + 1; i < idx + 2 * len + 1; i++) {
             int dim = hive.get(i++);
             int d = hive.get(i);
-            res[dim] = (float) d / coefficient();
+            res[dim] = d;
         }
         return res;
     }
 
-    @Override
     public void remove(int vecid) {
         try {
             int idx = vecidToIdx(vecid);
             int len = getVectorLength(vecid);
 
+            vecidToidx.remove(vecid);
             for (int i = idx; i < idx + 2 * len + 1; i++) {
                 hive.set(i, Integer.MIN_VALUE);
             }
         } catch (Exception e) {
             return;
         }
-    }
-
-    @Override
-    public void update(int vecid, float[] distr) {
-        // TODO Auto-generated method stub
     }
 }

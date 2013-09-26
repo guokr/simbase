@@ -9,13 +9,16 @@ import java.util.Map;
 
 public class DenseVectorSet extends AbstractVectorSet {
     private TIntIntMap vecidToidx = new TIntIntHashMap();
-    TFloatList hive       = new TFloatArrayList();
+    TFloatList         hive       = new TFloatArrayList();
 
     public DenseVectorSet(Map<String, Object> config, Basis basis) {
         super(config, basis);
     }
+    
+    public int size() {
+        return vecidToidx.size();
+    }
 
-    @Override
     public void set(int vecid, float[] distr) throws Exception {
         if (distr.length > getBasis().size()) {
             throw new Exception("Invalid vector length");
@@ -36,7 +39,7 @@ public class DenseVectorSet extends AbstractVectorSet {
             allocSlot(size, vecid, distr);
         }
     }
-
+    
     private int getSlotSize(int idx) {
         int size = 0;
         while (hive.get(idx++) < 1) {
@@ -77,31 +80,10 @@ public class DenseVectorSet extends AbstractVectorSet {
         vecidToidx.put(vecid, idx);
     }
 
-    @Override
-    public void add(int vectid, String[] comps, float[] distr) {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void update(int vecid, float[] distr) {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void update(int vecid, String[] comps, float[] distr) {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
     public void accumulate(int vecid, float[] distr) {
         // TODO Auto-generated method stub
-
     }
 
-    @Override
     public float[] get(int vecid) {
         float[] res = null;
 
@@ -117,7 +99,6 @@ public class DenseVectorSet extends AbstractVectorSet {
         return res;
     }
 
-    @Override
     public void remove(int vecid) {
         if (!vecidToidx.containsKey(vecid)) {
             return;

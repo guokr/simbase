@@ -18,7 +18,7 @@ public class TestDenseVectorSet {
     @Before
     public void setUp() throws Exception {
         vectorSet = new DenseVectorSet(null, new Basis(new String[] { "a", "b", "c", "d", "e" }));
-        floats = new float[] { (float) 0.1, (float) 0.2 };
+        floats = new float[] { 0.1f, 0.2f };
     }
 
     @After
@@ -29,18 +29,40 @@ public class TestDenseVectorSet {
     @Test
     public void testSet() throws Exception {
         vectorSet.set(1, floats);
-        assertEquals(floats[0], vectorSet.get(1)[0]);
-        assertEquals(floats[1], vectorSet.get(1)[1]);
+        assertEquals(floats[0], vectorSet.get(1)[0], 0.001);
+        assertEquals(floats[1], vectorSet.get(1)[1], 0.001);
     }
 
     @Test
-    public void testRepeatSet() throws Exception {
-        for (int i = 0; i < 10000; i++) {
-            vectorSet.set(1, floats);
+    public void testSetManyTimes() throws Exception {
+        int size = 100000;
+        for (int i = 0; i < size; i++) {
+            vectorSet.set(i, floats);
+            assertEquals(i + 1, vectorSet.size());
         }
+    }
+
+    @Test
+    public void testSetThenRemoveManyTimes() throws Exception {
+        int size = 100000;
+        for (int i = 0; i < size; i++) {
+            vectorSet.set(i, floats);
+            vectorSet.set(size + i, floats);
+            vectorSet.remove(i);
+            assertEquals(i + 1, vectorSet.size());
+        }
+        for (int i = 0; i < size; i++) {
+            vectorSet.remove(size + i);
+            assertEquals(size - i - 1, vectorSet.size());
+        }
+    }
+
+    @Test
+    public void testUpdate() throws Exception {
+        vectorSet.set(1, floats);
         floats[0] = floats[0] * 2;
         vectorSet.set(1, floats);
-        assertEquals(floats[0], vectorSet.get(1)[0]);
+        assertEquals(floats[0], vectorSet.get(1)[0], 0.001);
     }
 
     @Test
@@ -67,7 +89,7 @@ public class TestDenseVectorSet {
 
         TFloatIterator iter = vectorSet.hive.iterator();
         while (iter.hasNext()) {
-            assertEquals((float)-1.0, iter.next());
+            assertEquals((float) -1.0, iter.next(), 0.001);
         }
     }
 }
