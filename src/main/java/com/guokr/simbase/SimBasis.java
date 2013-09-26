@@ -59,11 +59,17 @@ public class SimBasis implements KryoSerializable {
         return null;
     }
 
+    public void jset(String vkey, int vecid, String jsonlike) {
+    }
+
     public void jacc(String vkey, int vecid, String jsonlike) {
     }
 
     public int[] iget(String vkey, int vecid) {
         return null;
+    }
+
+    public void iset(String vkey, int vecid, int[] pairs) {
     }
 
     public void iacc(String vkey, int vecid, int[] pairs) {
@@ -74,7 +80,7 @@ public class SimBasis implements KryoSerializable {
         this.recommendations.put(rkey, new Recommendation(context.getSub(rkey)));
     }
 
-    public String[] rget(String vkeySource, String vkeyTarget) {
+    public String rget(String vkeySource, String vkeyTarget) {
         return this.recommendations.get(rkey(vkeySource, vkeyTarget)).get();
     }
 

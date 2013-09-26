@@ -21,19 +21,20 @@ public class SimEngine {
         BASIS, VECTORS, RECOMM
     };
 
-    private static final Logger          logger    = LoggerFactory.getLogger(SimEngine.class);
+    private static final Logger          logger     = LoggerFactory.getLogger(SimEngine.class);
 
     private SimContext                   context;
 
     private SimCounter                   counter;
 
-    private Map<String, Kind>            kindOf    = new HashMap<String, Kind>();
-    private Map<String, String>          basisOf   = new HashMap<String, String>();
-    private Map<String, List<String>>    vectorsOf = new HashMap<String, List<String>>();
-    private ExecutorService              mngmExec  = Executors.newSingleThreadExecutor();
+    private Map<String, Kind>            kindOf     = new HashMap<String, Kind>();
+    private Map<String, String>          basisOf    = new HashMap<String, String>();
+    private Map<String, List<String>>    vectorsOf  = new HashMap<String, List<String>>();
+    private Map<String, List<String>>    rtargetsOf = new HashMap<String, List<String>>();
+    private ExecutorService              mngmExec   = Executors.newSingleThreadExecutor();
 
-    private Map<String, SimBasis>        bases     = new HashMap<String, SimBasis>();
-    private Map<String, ExecutorService> dataExecs = new HashMap<String, ExecutorService>();
+    private Map<String, SimBasis>        bases      = new HashMap<String, SimBasis>();
+    private Map<String, ExecutorService> dataExecs  = new HashMap<String, ExecutorService>();
 
     public SimEngine(SimConfig context) {
         this.context = context;
@@ -67,10 +68,6 @@ public class SimEngine {
 
     private void validateSameBasis(String vkeyTarget, String vkeySource) {
         // TODO
-    }
-
-    private boolean checkExistenceAsVectorSet(String vkey) {
-        return false;// TODO
     }
 
     private String rkey(String vkeySource, String vkeyTarget) {
@@ -363,7 +360,7 @@ public class SimEngine {
     // CURD operations for one vector in vector-set
 
     public void vget(final SimEngineCallback callback, final String vkey, final int vecid) {
-        validateExistence(vkey);
+        validateKind("vget", vkey, Kind.VECTORS);
         final String bkey = basisOf.get(vkey);
         dataExecs.get(bkey).execute(new Runnable() {
             @Override
@@ -379,49 +376,21 @@ public class SimEngine {
         });
     }
 
-    public void vset(final SimEngineCallback callback, final String vkey, int vecid, float[] distr) {
-        boolean exists = checkExistenceAsVectorSet(vkey);
-        if (!exists) {
-            mngmExec.execute(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        // TODO
-                        dataExecs.get(basisOf.get(vkey)).execute(new Runnable() {
-                            @Override
-                            public void run() {
-                                try {
-                                    // TODO
-                                } catch (Throwable ex) {
-                                    int code = SimErrors.lookup("vset", ex);
-                                    logger.error(SimErrors.info(code), ex);
-                                    callback.sendError(SimErrors.descr(code));
-                                }
-                            }
-                        });
-                    } catch (Throwable ex) {
-                        int code = SimErrors.lookup("vset", ex);
-                        logger.error(SimErrors.info(code), ex);
-                    }
-                    callback.sendOK();
+    public void vset(final SimEngineCallback callback, final String vkey, final int vecid, final float[] distr) {
+        validateKind("vset", vkey, Kind.VECTORS);
+        final String bkey = basisOf.get(vkey);
+        dataExecs.get(bkey).execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    bases.get(bkey).vset(vkey, vecid, distr);
+                } catch (Throwable ex) {
+                    int code = SimErrors.lookup("vset", ex);
+                    logger.error(SimErrors.info(code), ex);
                 }
-            });
-        } else {
-            final String bkey = basisOf.get(vkey);
-            dataExecs.get(bkey).execute(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        // TODO
-                    } catch (Throwable ex) {
-                        int code = SimErrors.lookup("vset", ex);
-                        logger.error(SimErrors.info(code), ex);
-                        callback.sendError(SimErrors.descr(code));
-                    }
-                }
-            });
-            callback.sendOK();
-        }
+            }
+        });
+        callback.sendOK();
     }
 
     public void vacc(final SimEngineCallback callback, final String vkey, final int vecid, final float[] distr) {
@@ -475,49 +444,21 @@ public class SimEngine {
         });
     }
 
-    public void jset(final SimEngineCallback callback, final String vkey, int vecid, String jsonlike) {
-        boolean exists = checkExistenceAsVectorSet(vkey);
-        if (!exists) {
-            mngmExec.execute(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        // TODO
-                        dataExecs.get(basisOf.get(vkey)).execute(new Runnable() {
-                            @Override
-                            public void run() {
-                                try {
-                                    // TODO
-                                } catch (Throwable ex) {
-                                    int code = SimErrors.lookup("jset", ex);
-                                    logger.error(SimErrors.info(code), ex);
-                                    callback.sendError(SimErrors.descr(code));
-                                }
-                            }
-                        });
-                        callback.sendOK();
-                    } catch (Throwable ex) {
-                        int code = SimErrors.lookup("jset", ex);
-                        logger.error(SimErrors.info(code), ex);
-                        callback.sendError(SimErrors.descr(code));
-                    }
+    public void jset(final SimEngineCallback callback, final String vkey, final int vecid, final String jsonlike) {
+        validateKind("jset", vkey, Kind.VECTORS);
+        final String bkey = basisOf.get(vkey);
+        dataExecs.get(bkey).execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    bases.get(bkey).jset(vkey, vecid, jsonlike);
+                } catch (Throwable ex) {
+                    int code = SimErrors.lookup("jset", ex);
+                    logger.error(SimErrors.info(code), ex);
                 }
-            });
-        } else {
-            dataExecs.get(basisOf.get(vkey)).execute(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        // TODO
-                    } catch (Throwable ex) {
-                        int code = SimErrors.lookup("jset", ex);
-                        logger.error(SimErrors.info(code), ex);
-                        callback.sendError(SimErrors.descr(code));
-                    }
-                }
-            });
-            callback.sendOK();
-        }
+            }
+        });
+        callback.sendOK();
     }
 
     public void jacc(final SimEngineCallback callback, final String vkey, final int vecid, final String jsonlike) {
@@ -560,49 +501,21 @@ public class SimEngine {
     }
 
     // Internal use for client-side sparsification
-    public void iset(final SimEngineCallback callback, final String vkey, int vecid, int[] pairs) {
-        boolean exists = checkExistenceAsVectorSet(vkey);
-        if (!exists) {
-            mngmExec.execute(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        // TODO
-                        dataExecs.get(basisOf.get(vkey)).execute(new Runnable() {
-                            @Override
-                            public void run() {
-                                try {
-                                    // TODO
-                                } catch (Throwable ex) {
-                                    int code = SimErrors.lookup("iset", ex);
-                                    logger.error(SimErrors.info(code), ex);
-                                    callback.sendError(SimErrors.descr(code));
-                                }
-                            }
-                        });
-                        callback.sendOK();
-                    } catch (Throwable ex) {
-                        int code = SimErrors.lookup("iset", ex);
-                        logger.error(SimErrors.info(code), ex);
-                        callback.sendError(SimErrors.descr(code));
-                    }
+    public void iset(final SimEngineCallback callback, final String vkey, final int vecid, final int[] pairs) {
+        validateKind("iset", vkey, Kind.VECTORS);
+        final String bkey = basisOf.get(vkey);
+        dataExecs.get(bkey).execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    bases.get(bkey).iset(vkey, vecid, pairs);
+                } catch (Throwable ex) {
+                    int code = SimErrors.lookup("iset", ex);
+                    logger.error(SimErrors.info(code), ex);
                 }
-            });
-        } else {
-            dataExecs.get(basisOf.get(vkey)).execute(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        // TODO
-                    } catch (Throwable ex) {
-                        int code = SimErrors.lookup("iset", ex);
-                        logger.error(SimErrors.info(code), ex);
-                        callback.sendError(SimErrors.descr(code));
-                    }
-                }
-            });
-            callback.sendOK();
-        }
+            }
+        });
+        callback.sendOK();
     }
 
     // Internal use for client-side sparsification
@@ -628,14 +541,15 @@ public class SimEngine {
         vrem(callback, vkey, vecid);
     }
 
-    public void rlist(final SimEngineCallback callback, String vkey) {
+    public void rlist(final SimEngineCallback callback, final String vkey) {
         validateKind("rlist", vkey, Kind.VECTORS);
         mngmExec.execute(new Runnable() {
             @Override
             public void run() {
                 try {
-                    // TODO
-                    callback.sendStringList(null);
+                    List<String> targets = rtargetsOf.get(vkey);
+                    Collections.sort(targets);
+                    callback.sendStringList((String[]) targets.toArray(new String[targets.size()]));
                 } catch (Throwable ex) {
                     int code = SimErrors.lookup("rlist", ex);
                     logger.error(SimErrors.info(code), ex);
@@ -645,17 +559,18 @@ public class SimEngine {
         });
     }
 
-    public void rmk(final SimEngineCallback callback, String vkeySource, String vkeyTarget) {
+    public void rmk(final SimEngineCallback callback, final String vkeySource, final String vkeyTarget) {
         validateKind("rmk", vkeySource, Kind.VECTORS);
         validateKind("rmk", vkeyTarget, Kind.VECTORS);
         validateSameBasis(vkeyTarget, vkeySource);
         String rkey = rkey(vkeyTarget, vkeySource);
         validateNotExistence(rkey);
+        final String bkey = basisOf.get(vkeySource);
         mngmExec.execute(new Runnable() {
             @Override
             public void run() {
                 try {
-                    // TODO
+                    bases.get(bkey).rmk(vkeySource, vkeyTarget);
                     callback.sendOK();
                 } catch (Throwable ex) {
                     int code = SimErrors.lookup("rmk", ex);
@@ -666,17 +581,17 @@ public class SimEngine {
         });
     }
 
-    public void rget(final SimEngineCallback callback, String vkeySource, String vkeyTarget) {
+    public void rget(final SimEngineCallback callback, final String vkeySource, final String vkeyTarget) {
         validateKind("rget", vkeySource, Kind.VECTORS);
         validateKind("rget", vkeyTarget, Kind.VECTORS);
         String rkey = rkey(vkeyTarget, vkeySource);
         validateExistence(rkey);
-        dataExecs.get(basisOf.get(vkeySource)).execute(new Runnable() {
+        final String bkey = basisOf.get(vkeySource);
+        dataExecs.get(bkey).execute(new Runnable() {
             @Override
             public void run() {
                 try {
-                    // TODO
-                    callback.sendString(null);
+                    callback.sendString(bases.get(bkey).rget(vkeySource, vkeyTarget));
                 } catch (Throwable ex) {
                     int code = SimErrors.lookup("rget", ex);
                     logger.error(SimErrors.info(code), ex);
@@ -686,17 +601,17 @@ public class SimEngine {
         });
     }
 
-    public void rrec(final SimEngineCallback callback, String vkeySource, String vkeyTarget) {
+    public void rrec(final SimEngineCallback callback, final String vkeySource, final String vkeyTarget) {
         validateKind("rget", vkeySource, Kind.VECTORS);
         validateKind("rget", vkeyTarget, Kind.VECTORS);
         String rkey = rkey(vkeyTarget, vkeySource);
         validateExistence(rkey);
-        dataExecs.get(basisOf.get(vkeySource)).execute(new Runnable() {
+        final String bkey = basisOf.get(vkeySource);
+        dataExecs.get(bkey).execute(new Runnable() {
             @Override
             public void run() {
                 try {
-                    // TODO
-                    callback.sendIntegerList(null);
+                    callback.sendIntegerList(bases.get(bkey).rrec(vkeySource, vkeyTarget));
                 } catch (Throwable ex) {
                     int code = SimErrors.lookup("rrec", ex);
                     logger.error(SimErrors.info(code), ex);
