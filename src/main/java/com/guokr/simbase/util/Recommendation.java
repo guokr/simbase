@@ -7,7 +7,7 @@ public class Recommendation {
 	public Recommendation(Map<String, Object> config) {
 	}
 
-	public String[] get() {
+	public String get() {
 		return null;
 	}
 
