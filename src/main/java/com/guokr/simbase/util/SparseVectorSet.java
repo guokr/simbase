@@ -4,11 +4,7 @@ import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.TIntIntMap;
 import gnu.trove.map.hash.TIntIntHashMap;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Map;
-
-import org.omg.CORBA.DynAnyPackage.Invalid;
 
 /*
  * 多维向量集合的稀疏实现

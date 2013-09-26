@@ -17,7 +17,7 @@
                    [log4j/log4j "1.2.17"]
                    [org.yaml/snakeyaml "1.12"]
                    [com.esotericsoftware.kryo/kryo "2.21"]
-                   [junit "4.0"]]
+                   [junit "4.0" :scope "test"]]
     :source-paths ["src/main/clojure"]
     :java-source-paths ["src/main/java"]
     :resource-paths ["src/main/resources"]
