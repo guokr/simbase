@@ -13,97 +13,81 @@ import com.guokr.simbase.util.VectorSet;
 
 public class SimBasis implements KryoSerializable {
 
-	private Map<String, Object> context;
-	private Basis base;
-	private Map<String, VectorSet> vectorSets = new HashMap<String, VectorSet>();
-	private Map<String, Recommendation> recommendations = new HashMap<String, Recommendation>();
+    private SimContext                  context;
+    private Basis                       base;
+    private Map<String, VectorSet>      vectorSets      = new HashMap<String, VectorSet>();
+    private Map<String, Recommendation> recommendations = new HashMap<String, Recommendation>();
 
-	public SimBasis(Map<String, Object> context, Basis base) {
-		this.context = context;
-		this.base = base;
-	}
+    public SimBasis(SimContext context, Basis base) {
+        this.context = context;
+        this.base = base;
+    }
 
-	private void validateKeyFormat(String key) throws IllegalArgumentException {
-		if (key.indexOf('_') > -1) {
-			throw new IllegalArgumentException("Invalid key format:" + key);
-		}
-	}
+    private String rkey(String vkeySource, String vkeyTarget) {
+        return new StringBuilder().append(vkeySource).append("_").append(vkeyTarget).toString();
+    }
 
-	private void validateKey(String key) throws IllegalArgumentException {
-		if (!this.vectorSets.containsKey(key)) {
-			throw new IllegalArgumentException(
-					"The vector set can not be found:" + key);
-		}
-	}
+    public String[] bget() {
+        return this.base.get();
+    }
 
-	private String rkey(String vkeySource, String vkeyTarget) {
-		this.validateKey(vkeySource);
-		this.validateKey(vkeyTarget);
-		return new StringBuilder().append(vkeySource).append("_")
-				.append(vkeyTarget).toString();
-	}
+    public void brev(String[] base) {
+        this.base.revise(base);
+    }
 
-	@SuppressWarnings("unchecked")
-	private Map<String, Object> getConfig(String key) {
-		if (this.context.containsKey(key)) {
-			return (Map<String, Object>) this.context.get(key);
-		} else {
-			return new HashMap<String, Object>();
-		}
-	}
+    public void vmk(String vkey) {
+        this.vectorSets.put(vkey, new VectorSet(context.getSub(vkey), this.base));
+    }
 
-	public String[] bget() {
-		return this.base.get();
-	}
+    public float[] vget(String vkey, int vecid) {
+        return this.vectorSets.get(vkey).get(vecid);
+    }
 
-	public void brev(String[] base) {
-		this.base.revise(base);
-	}
+    public void vset(String vkey, int vecid, float[] distr) {
+        this.vectorSets.get(vkey).add(vecid, distr);
+    }
 
-	public void vmk(String vkey) {
-		this.validateKeyFormat(vkey);
-		this.vectorSets.put(vkey, new VectorSet(getConfig(vkey), this.base));
-	}
+    public void vacc(String vkey, int vecid, float[] distr) {
+        this.vectorSets.get(vkey).accumulate(vecid, distr);
+    }
 
-	public void vadd(String vkey, int vecid, float[] distr) {
-		this.validateKey(vkey);
-		this.vectorSets.get(vkey).add(vecid, distr);
-	}
+    public void vrem(String vkey, int vecid) {
+        this.vectorSets.get(vkey).remove(vecid);
+    }
 
-	public void vacc(String vkey, int vecid, String json) {
-		this.validateKey(vkey);
-		this.vectorSets.get(vkey).accumulate(vecid, json);
-	}
+    public String jget(String vkey, int vecid) {
+        return null;
+    }
 
-	public void vrem(String vkey, int vecid) {
-		this.validateKey(vkey);
-		this.vectorSets.get(vkey).remove(vecid);
-	}
+    public void jacc(String vkey, int vecid, String jsonlike) {
+    }
 
-	public float[] vget(String vkey, int vecid) {
-		this.validateKey(vkey);
-		return this.vectorSets.get(vkey).get(vecid);
-	}
+    public int[] iget(String vkey, int vecid) {
+        return null;
+    }
 
-	public void rmk(String vkeySource, String vkeyTarget) {
-		String key = rkey(vkeySource, vkeyTarget);
-		this.recommendations.put(key, new Recommendation(getConfig(key)));
-	}
+    public void iacc(String vkey, int vecid, int[] pairs) {
+    }
 
-	public String[] rget(String vkeySource, String vkeyTarget) {
-		return this.recommendations.get(rkey(vkeySource, vkeyTarget)).get();
-	}
+    public void rmk(String vkeySource, String vkeyTarget) {
+        String rkey = rkey(vkeySource, vkeyTarget);
+        this.recommendations.put(rkey, new Recommendation(context.getSub(rkey)));
+    }
 
-	public int[] rrec(String vkeySource, String vkeyTarget) {
-		return this.recommendations.get(rkey(vkeySource, vkeyTarget)).recommend();
-	}
+    public String[] rget(String vkeySource, String vkeyTarget) {
+        return this.recommendations.get(rkey(vkeySource, vkeyTarget)).get();
+    }
 
-	@Override
-	public void read(Kryo arg0, Input arg1) {
-	}
+    public int[] rrec(String vkeySource, String vkeyTarget) {
+        return this.recommendations.get(rkey(vkeySource, vkeyTarget)).recommend();
+    }
 
-	@Override
-	public void write(Kryo arg0, Output arg1) {
-	}
+    @Override
+    public void read(Kryo arg0, Input arg1) {
+    }
+
+    @Override
+    public void write(Kryo arg0, Output arg1) {
+    }
 
 }

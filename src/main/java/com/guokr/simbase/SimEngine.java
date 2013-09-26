@@ -1,6 +1,9 @@
 package com.guokr.simbase;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -10,6 +13,8 @@ import java.util.concurrent.Executors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.guokr.simbase.util.Basis;
+
 public class SimEngine {
 
     enum Kind {
@@ -18,10 +23,13 @@ public class SimEngine {
 
     private static final Logger          logger    = LoggerFactory.getLogger(SimEngine.class);
 
-    private SimConfig                    context;
+    private SimContext                   context;
+
+    private SimCounter                   counter;
 
     private Map<String, Kind>            kindOf    = new HashMap<String, Kind>();
     private Map<String, String>          basisOf   = new HashMap<String, String>();
+    private Map<String, List<String>>    vectorsOf = new HashMap<String, List<String>>();
     private ExecutorService              mngmExec  = Executors.newSingleThreadExecutor();
 
     private Map<String, SimBasis>        bases     = new HashMap<String, SimBasis>();
@@ -31,6 +39,12 @@ public class SimEngine {
         this.context = context;
         this.loadData();
         this.startCron();
+    }
+
+    private void validateKeyFormat(String key) throws IllegalArgumentException {
+        if (key.indexOf('_') > -1) {
+            throw new IllegalArgumentException("Invalid key format:" + key);
+        }
     }
 
     private void validateExistence(String toCheck) throws IllegalArgumentException {
@@ -56,7 +70,11 @@ public class SimEngine {
     }
 
     private boolean checkExistenceAsVectorSet(String vkey) {
-        return false;//TODO
+        return false;// TODO
+    }
+
+    private String rkey(String vkeySource, String vkeyTarget) {
+        return new StringBuilder().append(vkeySource).append("_").append(vkeyTarget).toString();
     }
 
     private void clearData() {
@@ -88,13 +106,28 @@ public class SimEngine {
         cron.schedule(savetask, cronInterval, cronInterval);
     }
 
-    public void cfg(final SimEngineCallback callback, final String key, final String property) {
+    public void cfg(final SimEngineCallback callback, final String key) {
         mngmExec.execute(new Runnable() {
             @Override
             public void run() {
                 try {
-                    // TODO
-                    callback.sendCfg(context.getString(key, property));
+                    callback.sendString(context.getString(key));
+                } catch (Throwable ex) {
+                    int code = SimErrors.lookup("cfg", ex);
+                    logger.error(SimErrors.info(code), ex);
+                    callback.sendError(SimErrors.descr(code));
+                }
+            }
+        });
+    }
+
+    public void cfg(final SimEngineCallback callback, final String key, final String val) {
+        mngmExec.execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    context.put(key, val);
+                    callback.sendOK();
                 } catch (Throwable ex) {
                     int code = SimErrors.lookup("cfg", ex);
                     logger.error(SimErrors.info(code), ex);
@@ -105,6 +138,7 @@ public class SimEngine {
     }
 
     public void load(final SimEngineCallback callback, final String bkey) {
+        validateKeyFormat(bkey);
         validateNotExistence(bkey);
         mngmExec.execute(new Runnable() {
             @Override
@@ -138,14 +172,13 @@ public class SimEngine {
         });
     }
 
-    public void xincr(final SimEngineCallback callback, String vkey, String key) {
+    public void xincr(final SimEngineCallback callback, final String vkey, final String key) {
         validateKind("xincr", vkey, Kind.VECTORS);
         dataExecs.get(basisOf.get(vkey)).execute(new Runnable() {
             @Override
             public void run() {
                 try {
-                    // TODO
-                    callback.sendInterger(0);
+                    callback.sendInteger(counter.incr(vkey, key));
                 } catch (Throwable ex) {
                     int code = SimErrors.lookup("xincr", ex);
                     logger.error(SimErrors.info(code), ex);
@@ -155,16 +188,15 @@ public class SimEngine {
         });
     }
 
-    public void xlookup(final SimEngineCallback callback, String vkey, String key) {
-        validateKind("xlookup", vkey, Kind.VECTORS);
+    public void xget(final SimEngineCallback callback, final String vkey, final String key) {
+        validateKind("xget", vkey, Kind.VECTORS);
         dataExecs.get(basisOf.get(vkey)).execute(new Runnable() {
             @Override
             public void run() {
                 try {
-                    // TODO
-                    callback.sendInterger(0);
+                    callback.sendInteger(counter.get(vkey, key));
                 } catch (Throwable ex) {
-                    int code = SimErrors.lookup("xlookup", ex);
+                    int code = SimErrors.lookup("xget", ex);
                     logger.error(SimErrors.info(code), ex);
                     callback.sendError(SimErrors.descr(code));
                 }
@@ -172,16 +204,15 @@ public class SimEngine {
         });
     }
 
-    public void xget(final SimEngineCallback callback, String vkey, int vecid) {
-        validateKind("xget", vkey, Kind.VECTORS);
+    public void xlookup(final SimEngineCallback callback, final String vkey, final int vecid) {
+        validateKind("xlookup", vkey, Kind.VECTORS);
         dataExecs.get(basisOf.get(vkey)).execute(new Runnable() {
             @Override
             public void run() {
                 try {
-                    // TODO
-                    callback.sendString("");
+                    callback.sendString(counter.lookup(vkey, vecid));
                 } catch (Throwable ex) {
-                    int code = SimErrors.lookup("xget", ex);
+                    int code = SimErrors.lookup("xlookup", ex);
                     logger.error(SimErrors.info(code), ex);
                     callback.sendError(SimErrors.descr(code));
                 }
@@ -197,7 +228,7 @@ public class SimEngine {
                 try {
                     if (bases.containsKey(key)) {
                         // TODO
-                        // force to keep it empty before deletion
+                        // should to be empty before deletion
                     } else {
                         // TODO
                     }
@@ -216,8 +247,9 @@ public class SimEngine {
             @Override
             public void run() {
                 try {
-                    // TODO
-                    callback.sendOK();
+                    List<String> bkeys = new ArrayList<String>(bases.keySet());
+                    Collections.sort(bkeys);
+                    callback.sendStringList((String[]) bkeys.toArray(new String[bkeys.size()]));
                 } catch (Throwable ex) {
                     int code = SimErrors.lookup("blist", ex);
                     logger.error(SimErrors.info(code), ex);
@@ -227,12 +259,19 @@ public class SimEngine {
         });
     }
 
-    public void bmk(final SimEngineCallback callback, String bkey, String[] base) {
+    public void bmk(final SimEngineCallback callback, final String bkey, final String[] base) {
+        validateKeyFormat(bkey);
         mngmExec.execute(new Runnable() {
             @Override
             public void run() {
                 try {
-                    // TODO
+                    Basis basis = new Basis();
+                    basis.revise(base);
+
+                    bases.put(bkey, new SimBasis(context.getSub("defaults", "vectorset"), basis));
+                    basisOf.put(bkey, bkey);
+                    dataExecs.put(bkey, Executors.newSingleThreadExecutor());
+
                     callback.sendOK();
                 } catch (Throwable ex) {
                     int code = SimErrors.lookup("bmk", ex);
@@ -243,31 +282,29 @@ public class SimEngine {
         });
     }
 
-    public void brev(final SimEngineCallback callback, String bkey, String[] base) {
+    public void brev(final SimEngineCallback callback, final String bkey, final String[] base) {
         validateKind("brev", bkey, Kind.BASIS);
         dataExecs.get(bkey).execute(new Runnable() {
             @Override
             public void run() {
                 try {
-                    // TODO
+                    bases.get(bkey).brev(base);
                 } catch (Throwable ex) {
                     int code = SimErrors.lookup("brev", ex);
                     logger.error(SimErrors.info(code), ex);
-                    callback.sendError(SimErrors.descr(code));
                 }
             }
         });
         callback.sendOK();
     }
 
-    public void bget(final SimEngineCallback callback, String bkey) {
+    public void bget(final SimEngineCallback callback, final String bkey) {
         validateKind("bget", bkey, Kind.BASIS);
         dataExecs.get(bkey).execute(new Runnable() {
             @Override
             public void run() {
                 try {
-                    // TODO
-                    callback.sendStringList(null);
+                    callback.sendStringList(bases.get(bkey).bget());
                 } catch (Throwable ex) {
                     int code = SimErrors.lookup("bget", ex);
                     logger.error(SimErrors.info(code), ex);
@@ -277,14 +314,15 @@ public class SimEngine {
         });
     }
 
-    public void vlist(final SimEngineCallback callback, String bkey) {
+    public void vlist(final SimEngineCallback callback, final String bkey) {
         validateKind("vlist", bkey, Kind.BASIS);
         mngmExec.execute(new Runnable() {
             @Override
             public void run() {
                 try {
-                    // TODO
-                    callback.sendStringList(null);
+                    List<String> vkeys = vectorsOf.get(bkey);
+                    Collections.sort(vkeys);
+                    callback.sendStringList((String[]) vkeys.toArray(new String[vkeys.size()]));
                 } catch (Throwable ex) {
                     int code = SimErrors.lookup("vlist", ex);
                     logger.error(SimErrors.info(code), ex);
@@ -294,14 +332,24 @@ public class SimEngine {
         });
     }
 
-    public void vmk(final SimEngineCallback callback, String bkey, String vkey) {
+    public void vmk(final SimEngineCallback callback, final String bkey, final String vkey) {
         validateKind("vmk", bkey, Kind.BASIS);
+        validateKeyFormat(vkey);
         validateNotExistence(vkey);
         mngmExec.execute(new Runnable() {
             @Override
             public void run() {
                 try {
-                    // TODO
+                    bases.get(bkey).vmk(vkey);
+
+                    basisOf.put(vkey, bkey);
+                    List<String> vkeys = vectorsOf.get(bkey);
+                    if (vkeys == null) {
+                        vkeys = new ArrayList<String>();
+                        vectorsOf.put(bkey, vkeys);
+                    }
+                    vkeys.add(vkey);
+
                     callback.sendOK();
                 } catch (Throwable ex) {
                     int code = SimErrors.lookup("vmk", ex);
@@ -314,14 +362,14 @@ public class SimEngine {
 
     // CURD operations for one vector in vector-set
 
-    public void vget(final SimEngineCallback callback, String vkey, int vecid) {
+    public void vget(final SimEngineCallback callback, final String vkey, final int vecid) {
         validateExistence(vkey);
-        dataExecs.get(basisOf.get(vkey)).execute(new Runnable() {
+        final String bkey = basisOf.get(vkey);
+        dataExecs.get(bkey).execute(new Runnable() {
             @Override
             public void run() {
                 try {
-                    // TODO
-                    callback.sendFloatList(null);
+                    callback.sendFloatList(bases.get(bkey).vget(vkey, vecid));
                 } catch (Throwable ex) {
                     int code = SimErrors.lookup("vget", ex);
                     logger.error(SimErrors.info(code), ex);
@@ -351,16 +399,16 @@ public class SimEngine {
                                 }
                             }
                         });
-                        callback.sendOK();
                     } catch (Throwable ex) {
                         int code = SimErrors.lookup("vset", ex);
                         logger.error(SimErrors.info(code), ex);
-                        callback.sendError(SimErrors.descr(code));
                     }
+                    callback.sendOK();
                 }
             });
         } else {
-            dataExecs.get(basisOf.get(vkey)).execute(new Runnable() {
+            final String bkey = basisOf.get(vkey);
+            dataExecs.get(bkey).execute(new Runnable() {
                 @Override
                 public void run() {
                     try {
@@ -376,48 +424,48 @@ public class SimEngine {
         }
     }
 
-    public void vacc(final SimEngineCallback callback, String vkey, int vecid, float[] distr) {
+    public void vacc(final SimEngineCallback callback, final String vkey, final int vecid, final float[] distr) {
         this.validateKind("vacc", vkey, Kind.VECTORS);
-        dataExecs.get(basisOf.get(vkey)).execute(new Runnable() {
+        final String bkey = basisOf.get(vkey);
+        dataExecs.get(bkey).execute(new Runnable() {
             @Override
             public void run() {
                 try {
-                    // TODO
-                    callback.sendFloatList(null);
+                    bases.get(bkey).vacc(vkey, vecid, distr);
                 } catch (Throwable ex) {
                     int code = SimErrors.lookup("vacc", ex);
                     logger.error(SimErrors.info(code), ex);
-                    callback.sendError(SimErrors.descr(code));
                 }
             }
         });
+        callback.sendOK();
     }
 
-    public void vrem(final SimEngineCallback callback, String vkey, int vecid) {
+    public void vrem(final SimEngineCallback callback, final String vkey, final int vecid) {
         this.validateKind("vacc", vkey, Kind.VECTORS);
-        dataExecs.get(basisOf.get(vkey)).execute(new Runnable() {
+        final String bkey = basisOf.get(vkey);
+        dataExecs.get(bkey).execute(new Runnable() {
             @Override
             public void run() {
                 try {
-                    // TODO
-                    callback.sendFloatList(null);
+                    bases.get(bkey).vrem(vkey, vecid);
                 } catch (Throwable ex) {
                     int code = SimErrors.lookup("vrem", ex);
                     logger.error(SimErrors.info(code), ex);
-                    callback.sendError(SimErrors.descr(code));
                 }
             }
         });
+        callback.sendOK();
     }
 
-    public void jget(final SimEngineCallback callback, String vkey, int vecid) {
+    public void jget(final SimEngineCallback callback, final String vkey, final int vecid) {
         validateExistence(vkey);
-        dataExecs.get(basisOf.get(vkey)).execute(new Runnable() {
+        final String bkey = basisOf.get(vkey);
+        dataExecs.get(bkey).execute(new Runnable() {
             @Override
             public void run() {
                 try {
-                    // TODO
-                    callback.sendFloatList(null);
+                    callback.sendString(bases.get(bkey).jget(vkey, vecid));
                 } catch (Throwable ex) {
                     int code = SimErrors.lookup("jget", ex);
                     logger.error(SimErrors.info(code), ex);
@@ -472,49 +520,36 @@ public class SimEngine {
         }
     }
 
-    public void jacc(final SimEngineCallback callback, String vkey, int vecid, String jsonlike) {
+    public void jacc(final SimEngineCallback callback, final String vkey, final int vecid, final String jsonlike) {
         this.validateKind("jacc", vkey, Kind.VECTORS);
-        dataExecs.get(basisOf.get(vkey)).execute(new Runnable() {
+        final String bkey = basisOf.get(vkey);
+        dataExecs.get(bkey).execute(new Runnable() {
             @Override
             public void run() {
                 try {
-                    // TODO
-                    callback.sendFloatList(null);
+                    bases.get(bkey).jacc(vkey, vecid, jsonlike);
                 } catch (Throwable ex) {
                     int code = SimErrors.lookup("jacc", ex);
                     logger.error(SimErrors.info(code), ex);
-                    callback.sendError(SimErrors.descr(code));
                 }
             }
         });
+        callback.sendOK();
     }
 
     public void jrem(final SimEngineCallback callback, String vkey, int vecid) {
-        this.validateKind("jrem", vkey, Kind.VECTORS);
-        dataExecs.get(basisOf.get(vkey)).execute(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    // TODO
-                    callback.sendFloatList(null);
-                } catch (Throwable ex) {
-                    int code = SimErrors.lookup("jrem", ex);
-                    logger.error(SimErrors.info(code), ex);
-                    callback.sendError(SimErrors.descr(code));
-                }
-            }
-        });
+        vrem(callback, vkey, vecid);
     }
 
     // Internal use for client-side sparsification
-    public void iget(final SimEngineCallback callback, String vkey, int vecid) {
+    public void iget(final SimEngineCallback callback, final String vkey, final int vecid) {
         validateExistence(vkey);
-        dataExecs.get(basisOf.get(vkey)).execute(new Runnable() {
+        final String bkey = basisOf.get(vkey);
+        dataExecs.get(bkey).execute(new Runnable() {
             @Override
             public void run() {
                 try {
-                    // TODO
-                    callback.sendFloatList(null);
+                    callback.sendIntegerList(bases.get(bkey).iget(vkey, vecid));
                 } catch (Throwable ex) {
                     int code = SimErrors.lookup("iget", ex);
                     logger.error(SimErrors.info(code), ex);
@@ -571,17 +606,17 @@ public class SimEngine {
     }
 
     // Internal use for client-side sparsification
-    public void iacc(final SimEngineCallback callback, String vkey, int vecid, int[] pairs) {
+    public void iacc(final SimEngineCallback callback, final String vkey, final int vecid, final int[] pairs) {
         this.validateKind("iacc", vkey, Kind.VECTORS);
-        dataExecs.get(basisOf.get(vkey)).execute(new Runnable() {
+        final String bkey = basisOf.get(vkey);
+        dataExecs.get(bkey).execute(new Runnable() {
             @Override
             public void run() {
                 try {
-                    // TODO
+                    bases.get(bkey).iacc(vkey, vecid, pairs);
                 } catch (Throwable ex) {
                     int code = SimErrors.lookup("iacc", ex);
                     logger.error(SimErrors.info(code), ex);
-                    callback.sendError(SimErrors.descr(code));
                 }
             }
         });
@@ -590,20 +625,7 @@ public class SimEngine {
 
     // Internal use for client-side sparsification
     public void irem(final SimEngineCallback callback, String vkey, int vecid) {
-        this.validateKind("irem", vkey, Kind.VECTORS);
-        dataExecs.get(basisOf.get(vkey)).execute(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    // TODO
-                } catch (Throwable ex) {
-                    int code = SimErrors.lookup("irem", ex);
-                    logger.error(SimErrors.info(code), ex);
-                    callback.sendError(SimErrors.descr(code));
-                }
-            }
-        });
-        callback.sendOK();
+        vrem(callback, vkey, vecid);
     }
 
     public void rlist(final SimEngineCallback callback, String vkey) {
@@ -627,7 +649,8 @@ public class SimEngine {
         validateKind("rmk", vkeySource, Kind.VECTORS);
         validateKind("rmk", vkeyTarget, Kind.VECTORS);
         validateSameBasis(vkeyTarget, vkeySource);
-        validateNotExistence(vkeyTarget + ":" + vkeySource);
+        String rkey = rkey(vkeyTarget, vkeySource);
+        validateNotExistence(rkey);
         mngmExec.execute(new Runnable() {
             @Override
             public void run() {
@@ -646,7 +669,8 @@ public class SimEngine {
     public void rget(final SimEngineCallback callback, String vkeySource, String vkeyTarget) {
         validateKind("rget", vkeySource, Kind.VECTORS);
         validateKind("rget", vkeyTarget, Kind.VECTORS);
-        validateExistence(vkeyTarget + ":" + vkeySource);
+        String rkey = rkey(vkeyTarget, vkeySource);
+        validateExistence(rkey);
         dataExecs.get(basisOf.get(vkeySource)).execute(new Runnable() {
             @Override
             public void run() {
@@ -665,7 +689,8 @@ public class SimEngine {
     public void rrec(final SimEngineCallback callback, String vkeySource, String vkeyTarget) {
         validateKind("rget", vkeySource, Kind.VECTORS);
         validateKind("rget", vkeyTarget, Kind.VECTORS);
-        validateExistence(vkeyTarget + ":" + vkeySource);
+        String rkey = rkey(vkeyTarget, vkeySource);
+        validateExistence(rkey);
         dataExecs.get(basisOf.get(vkeySource)).execute(new Runnable() {
             @Override
             public void run() {

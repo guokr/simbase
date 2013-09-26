@@ -6,9 +6,7 @@ public interface SimEngineCallback {
 
     void sendError(String msg);
 
-    void sendCfg(String cfg);
-
-    void sendInterger(int val);
+    void sendInteger(int val);
 
     void sendIntegerList(int[] list);
 
