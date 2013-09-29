@@ -1,42 +1,48 @@
 package com.guokr.simbase.server;
 
-import com.guokr.simbase.errors.server.LineTooLargeException;
-import com.guokr.simbase.errors.server.ProtocolException;
-import com.guokr.simbase.errors.server.RequestTooLargeException;
-import com.guokr.simbase.server.Frame.BinaryFrame;
-import com.guokr.simbase.server.Frame.CloseFrame;
-import com.guokr.simbase.server.Frame.PingFrame;
-import com.guokr.simbase.server.Frame.TextFrame;
+import static com.guokr.simbase.server.Frame.CloseFrame.CLOSE_AWAY;
+import static com.guokr.simbase.server.Frame.CloseFrame.CLOSE_NORMAL;
+import static java.nio.channels.SelectionKey.OP_ACCEPT;
+import static java.nio.channels.SelectionKey.OP_READ;
+import static java.nio.channels.SelectionKey.OP_WRITE;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
-import java.nio.channels.*;
-import java.util.*;
+import java.nio.channels.ClosedSelectorException;
+import java.nio.channels.SelectionKey;
+import java.nio.channels.Selector;
+import java.nio.channels.ServerSocketChannel;
+import java.nio.channels.SocketChannel;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import static com.guokr.simbase.server.Frame.CloseFrame.*;
-import static java.nio.channels.SelectionKey.*;
+import com.guokr.simbase.SimContext;
+import com.guokr.simbase.errors.server.LineTooLargeException;
+import com.guokr.simbase.errors.server.ProtocolException;
+import com.guokr.simbase.errors.server.RequestTooLargeException;
 
 public class SimServer implements Runnable {
 
-    static final String THREAD_NAME = "server-loop";
+    static final String                               THREAD_NAME = "server-loop";
 
-    private final IHandler handler;
-    private final int maxBody;
-    private final int maxLine;
+    private final IHandler                            handler;
+    private final int                                 maxBody;
+    private final int                                 maxLine;
 
-    private final Selector selector;
-    private final ServerSocketChannel serverChannel;
+    private final Selector                            selector;
+    private final ServerSocketChannel                 serverChannel;
 
-    private Thread serverThread;
+    private Thread                                    serverThread;
 
-    private final ConcurrentLinkedQueue<SelectionKey> pending = new ConcurrentLinkedQueue<SelectionKey>();
+    private final ConcurrentLinkedQueue<SelectionKey> pending     = new ConcurrentLinkedQueue<SelectionKey>();
     // shared, single thread
-    private final ByteBuffer buffer = ByteBuffer.allocateDirect(1024 * 64);
+    private final ByteBuffer                          buffer      = ByteBuffer.allocateDirect(1024 * 64);
 
-    public SimServer(String ip, int port, IHandler handler, int maxBody, int maxLine)
-            throws IOException {
+    public SimServer(String ip, int port, IHandler handler, int maxBody, int maxLine) throws IOException {
         this.handler = handler;
         this.maxLine = maxLine;
         this.maxBody = maxBody;
@@ -45,6 +51,10 @@ public class SimServer implements Runnable {
         serverChannel.configureBlocking(false);
         serverChannel.socket().bind(new InetSocketAddress(ip, port));
         serverChannel.register(selector, OP_ACCEPT);
+    }
+
+    public SimServer(SimContext ctx, IHandler handler) throws IOException {
+        this(ctx.getString("ip"), ctx.getInt("port"), handler, ctx.getInt("maxBody"), ctx.getInt("maxLine"));
     }
 
     void accept(SelectionKey key) {
@@ -95,10 +105,10 @@ public class SimServer implements Runnable {
             closeKey(key, -1);
         } catch (RequestTooLargeException e) {
             atta.keepalive = false;
-            tryWrite(key, HttpEncode(100413, e.getMessage()));
+            //tryWrite(key, HttpEncode(100413, e.getMessage()));
         } catch (LineTooLargeException e) {
             atta.keepalive = false; // close after write
-            tryWrite(key, HttpEncode(100414, e.getMessage()));
+            //tryWrite(key, HttpEncode(100414, e.getMessage()));
         }
     }
 
@@ -224,9 +234,11 @@ public class SimServer implements Runnable {
                 selectedKeys.clear();
             } catch (ClosedSelectorException ignore) {
                 return; // stopped
-                // do not exits the while IO event loop. if exits, then will not process any IO event
+                // do not exits the while IO event loop. if exits, then will not
+                // process any IO event
                 // jvm can catch any exception, including OOM
-            } catch (Throwable e) { // catch any exception(including OOM), print it
+            } catch (Throwable e) { // catch any exception(including OOM), print
+                                    // it
                 RedisUtils.printError("http server loop error, should not happen", e);
             }
         }

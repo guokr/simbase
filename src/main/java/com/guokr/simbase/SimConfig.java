@@ -1,4 +1,4 @@
-package com.guokr.simbase.engine;
+package com.guokr.simbase;
 
 
 public class SimConfig extends SimContext {

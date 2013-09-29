@@ -23,11 +23,10 @@ public class AsyncChannel {
     private final SelectionKey key;
     private final SimServer    server;
 
-    private RedisRequests      requests;             // package private, for
-                                                      // http 1.0 keep-alive
+    private RedisRequests      requests;
 
-    volatile int               closedRan      = 0;   // 0 => false, 1 => run
-    // streaming
+    volatile int               closedRan      = 0;
+
     private volatile int       isHeaderSent   = 0;
 
     private volatile IFn       receiveHandler = null;
@@ -72,15 +71,6 @@ public class AsyncChannel {
     }
 
     private void writeChunk(Object body, boolean close) throws IOException {
-        if (body != null) { // null is ignored
-            ByteBuffer buffers[];
-            ByteBuffer t = bodyBuffer(body);
-            if (t.hasRemaining()) {
-                ByteBuffer size = chunkSize(t.remaining());
-                buffers = new ByteBuffer[] { size, t, ByteBuffer.wrap(newLineBytes) };
-                server.tryWrite(key, buffers);
-            }
-        }
         if (close) {
             serverClose(0);
         }
@@ -99,18 +89,12 @@ public class AsyncChannel {
         }
     }
 
-    public void sendHandshake(Map<String, Object> headers) {
-        HeaderMap map = HeaderMap.camelCase(headers);
-        server.tryWrite(key, HttpEncode(101, map, null));
-    }
-
     public void setCloseHandler(IFn fn) {
-        if (!unsafe.compareAndSwapObject(this, closeHandlerOffset, null, fn)) { // only
-                                                                                // once
+        if (!unsafe.compareAndSwapObject(this, closeHandlerOffset, null, fn)) {
             throw new IllegalStateException("close handler exist: " + closeHandler);
         }
         if (closedRan == 1) { // no handler, but already closed
-            fn.invoke(K_UNKNOWN);
+            //fn.invoke(K_UNKNOWN);
         }
     }
 
@@ -118,7 +102,7 @@ public class AsyncChannel {
         if (unsafe.compareAndSwapInt(this, closedRanOffset, 0, 1)) {
             IFn f = closeHandler;
             if (f != null) {
-                f.invoke(readable(status));
+                //f.invoke(readable(status));
             }
         }
     }
@@ -128,10 +112,10 @@ public class AsyncChannel {
         if (!unsafe.compareAndSwapInt(this, closedRanOffset, 0, 1)) {
             return false; // already closed
         }
-        server.tryWrite(key, ByteBuffer.wrap(finalChunkBytes));
+        //server.tryWrite(key, ByteBuffer.wrap(finalChunkBytes));
         IFn f = closeHandler;
         if (f != null) {
-            f.invoke(readable(0)); // server close is 0
+            //f.invoke(readable(0)); // server close is 0
         }
         return true;
     }

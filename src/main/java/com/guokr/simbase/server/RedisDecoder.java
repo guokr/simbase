@@ -12,18 +12,18 @@ import java.util.TreeMap;
 public class RedisDecoder {
 
     public enum State {
-        //for Redis protocol
-        ALL_READ, READ_INITIAL, READ_STAR, READ_DOLLAR, READ_SIZE, READ_BYTES,
-        //for customized SimBase protocol
+        // for Redis protocol
+        ALL_READ, READ_STAR, READ_DOLLAR,
+        // for customized SimBase protocol
         READ_DOT, RAED_SPACE, READ_INTEGER, READ_FLOAT
     }
 
-    private State            state         = State.READ_INITIAL;
-    
-    //bytes count need read
+    private State            state         = State.READ_STAR;
+
+    // bytes count need read
     private int              readRemaining = 0;
-    
-    //bytes count already read
+
+    // bytes count already read
     private int              readCount     = 0;
 
     RedisRequests            requests;
@@ -36,21 +36,20 @@ public class RedisDecoder {
         this.lineReader = new LineReader(maxLine);
     }
 
-    private void createRequest(String sb) throws ProtocolException {
-    }
-
     public RedisRequests decode(ByteBuffer buffer) throws LineTooLargeException, ProtocolException, RequestTooLargeException {
-        String line;
+        @SuppressWarnings("unused")
+        byte discriminator;
         while (buffer.hasRemaining()) {
             switch (state) {
             case ALL_READ:
                 return requests;
-            case READ_INITIAL:
-                line = lineReader.readByte(buffer);
-                if (line != null) {
-                    createRequest(line);
-                    state = State.READ_HEADER;
-                }
+            case READ_STAR:
+                discriminator = lineReader.readByte(buffer);
+                break;
+            case READ_DOLLAR:
+                discriminator = lineReader.readByte(buffer);
+                break;
+            default:
                 break;
             }
         }
@@ -59,11 +58,10 @@ public class RedisDecoder {
 
     private void finish() {
         state = State.ALL_READ;
-        requests.setBody(content, readCount);
     }
 
     public void reset() {
-        state = State.READ_INITIAL;
+        state = State.READ_STAR;
         readCount = 0;
         lineReader.reset();
         requests = null;

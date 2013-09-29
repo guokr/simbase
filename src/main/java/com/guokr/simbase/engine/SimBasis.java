@@ -7,6 +7,7 @@ import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.KryoSerializable;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
+import com.guokr.simbase.SimContext;
 import com.guokr.simbase.store.Basis;
 import com.guokr.simbase.store.Recommendation;
 import com.guokr.simbase.store.VectorSet;

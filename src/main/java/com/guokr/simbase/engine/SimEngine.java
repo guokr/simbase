@@ -13,6 +13,7 @@ import java.util.concurrent.Executors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.guokr.simbase.SimContext;
 import com.guokr.simbase.errors.SimErrors;
 import com.guokr.simbase.store.Basis;
 
@@ -37,8 +38,8 @@ public class SimEngine {
     private Map<String, SimBasis>        bases      = new HashMap<String, SimBasis>();
     private Map<String, ExecutorService> dataExecs  = new HashMap<String, ExecutorService>();
 
-    public SimEngine(SimConfig context) {
-        this.context = context;
+    public SimEngine(SimContext simContext) {
+        this.context = simContext;
         this.loadData();
         this.startCron();
     }
@@ -263,8 +264,7 @@ public class SimEngine {
             @Override
             public void run() {
                 try {
-                    Basis basis = new Basis();
-                    basis.revise(base);
+                    Basis basis = new Basis(base);
 
                     bases.put(bkey, new SimBasis(context.getSub("defaults", "vectorset"), basis));
                     basisOf.put(bkey, bkey);
