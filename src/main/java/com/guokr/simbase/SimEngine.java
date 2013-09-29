@@ -411,7 +411,7 @@ public class SimEngine {
     }
 
     public void vrem(final SimEngineCallback callback, final String vkey, final int vecid) {
-        this.validateKind("vacc", vkey, Kind.VECTORS);
+        this.validateKind("vrem", vkey, Kind.VECTORS);
         final String bkey = basisOf.get(vkey);
         dataExecs.get(bkey).execute(new Runnable() {
             @Override
