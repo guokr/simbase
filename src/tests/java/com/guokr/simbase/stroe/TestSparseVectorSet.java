@@ -1,10 +1,13 @@
-package com.guokr.simbase.util;
+package com.guokr.simbase.stroe;
 
 import static org.junit.Assert.*;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+
+import com.guokr.simbase.store.Basis;
+import com.guokr.simbase.store.SparseVectorSet;
 
 public class TestSparseVectorSet {
 	SparseVectorSet vectorSet;

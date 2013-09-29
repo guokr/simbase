@@ -1,4 +1,4 @@
-package com.guokr.simbase.tests;
+package com.guokr.simbase.engine;
 
 import static org.junit.Assert.assertTrue;
 
@@ -6,7 +6,7 @@ import java.util.Arrays;
 
 import org.junit.Test;
 
-import com.guokr.simbase.SimBasis;
+import com.guokr.simbase.engine.SimBasis;
 
 public class SimTableTests {
 

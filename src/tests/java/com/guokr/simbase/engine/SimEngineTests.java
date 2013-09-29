@@ -1,4 +1,4 @@
-package com.guokr.simbase.tests;
+package com.guokr.simbase.engine;
 
 import static org.junit.Assert.assertEquals;
 
@@ -10,7 +10,7 @@ import java.util.Map;
 import org.junit.Test;
 import org.yaml.snakeyaml.Yaml;
 
-import com.guokr.simbase.SimMain;
+import com.guokr.simbase.engine.SimMain;
 
 public class SimEngineTests {
 
