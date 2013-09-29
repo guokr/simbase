@@ -2,7 +2,7 @@ package com.guokr.simbase.benchmarks;
 
 import java.util.Date;
 
-import com.guokr.simbase.SimBasis;
+import com.guokr.simbase.engine.SimBasis;
 
 public class MemoryBenchmark {
 
