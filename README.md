@@ -28,11 +28,11 @@ Simbase use a concept model as below:
 
 An real example follow this model is as below:
 
-        | - - - - - |                 | - - - - - - - -| 
-   |--->|  Articles |<----------------|  User Profiles |
-   |    | - - - - - |                 | - - - - - - - -|
-   |          |
-   -----------|
+         | - - - - - |                 | - - - - - - - -| 
+    |--->|  Articles |<----------------|  User Profiles |
+    |    | - - - - - |                 | - - - - - - - -|
+    |          |
+    -----------|
 
 This graph shows we
 
