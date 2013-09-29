@@ -26,7 +26,7 @@ Simbase use a concept model as below:
 * Basis: the basis for vectors, vectors in one vector set have same basis
 * Recommendation: a one-direction binary relationship between two vector set which have the same basis
 
-An real example follow this model is as below:
+A real example follow this model is as below:
 
          | - - - - - |                 | - - - - - - - -| 
     |--->|  Articles |<----------------|  User Profiles |
@@ -34,7 +34,7 @@ An real example follow this model is as below:
     |          |
     -----------|
 
-This graph shows we
+This graph shows
 
 * recommend article by article (recommend from article to article)
 * recommend article by user profile (recommend from user profile to article)
