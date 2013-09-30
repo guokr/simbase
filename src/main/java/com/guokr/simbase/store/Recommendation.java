@@ -1,18 +1,25 @@
 package com.guokr.simbase.store;
 
-import java.util.Map;
 
-public class Recommendation {
+public class Recommendation implements IRecommendation {
+	private int recNum;
 
-	public Recommendation(Map<String, Object> config) {
+	public Recommendation(int recNum) {
+		this.recNum = recNum;
 	}
 
-	public String get() {
+	@Override
+	public int[] recommends(int vecid) {
 		return null;
 	}
 
-	public int[] recommend() {
+	@Override
+	public int[] range(float score, float delta) {
 		return null;
 	}
 
+	@Override
+	public void add(int vecid, float profile) {
+
+	}
 }

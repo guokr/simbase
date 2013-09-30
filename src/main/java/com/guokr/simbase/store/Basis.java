@@ -8,6 +8,10 @@ public class Basis {
 	private String[] comps;
 	Map<String, Integer> compIndex;
 
+	public Basis() {
+		
+	}
+	
 	public Basis(String[] comps) {
 		size = comps.length;
 		this.comps = comps;

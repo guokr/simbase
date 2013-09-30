@@ -1,4 +1,4 @@
-package com.guokr.simbase.stroe;
+package com.guokr.simbase.store;
 
 import static org.junit.Assert.*;
 
