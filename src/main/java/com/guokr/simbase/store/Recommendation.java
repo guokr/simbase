@@ -1,25 +1,26 @@
 package com.guokr.simbase.store;
 
+import com.guokr.simbase.SimContext;
 
 public class Recommendation implements IRecommendation {
-	private int recNum;
+    private int limit;
 
-	public Recommendation(int recNum) {
-		this.recNum = recNum;
-	}
+    public Recommendation(SimContext simContext) {
+        this.limit = simContext.getInt("limit");
+    }
 
-	@Override
-	public int[] recommends(int vecid) {
-		return null;
-	}
+    @Override
+    public void add(int vecid, float profile) {
 
-	@Override
-	public int[] range(float score, float delta) {
-		return null;
-	}
+    }
 
-	@Override
-	public void add(int vecid, float profile) {
+    @Override
+    public int[] ids(int vecid) {
+        return null;
+    }
 
-	}
+    @Override
+    public String jsonize(int vecid) {
+        return null;
+    }
 }

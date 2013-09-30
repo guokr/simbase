@@ -582,7 +582,7 @@ public class SimEngine {
         });
     }
 
-    public void rget(final SimEngineCallback callback, final String vkeySource, final String vkeyTarget) {
+    public void rget(final SimEngineCallback callback, final String vkeySource, final int vecid, final String vkeyTarget) {
         validateKind("rget", vkeySource, Kind.VECTORS);
         validateKind("rget", vkeyTarget, Kind.VECTORS);
         String rkey = rkey(vkeyTarget, vkeySource);
@@ -592,7 +592,7 @@ public class SimEngine {
             @Override
             public void run() {
                 try {
-                    callback.sendString(bases.get(bkey).rget(vkeySource, vkeyTarget));
+                    callback.sendString(bases.get(bkey).rget(vkeySource, vecid, vkeyTarget));
                 } catch (Throwable ex) {
                     int code = SimErrors.lookup("rget", ex);
                     logger.error(SimErrors.info(code), ex);
@@ -602,7 +602,7 @@ public class SimEngine {
         });
     }
 
-    public void rrec(final SimEngineCallback callback, final String vkeySource, final String vkeyTarget) {
+    public void rrec(final SimEngineCallback callback, final String vkeySource, final int vecid, final String vkeyTarget) {
         validateKind("rget", vkeySource, Kind.VECTORS);
         validateKind("rget", vkeyTarget, Kind.VECTORS);
         String rkey = rkey(vkeyTarget, vkeySource);
@@ -612,7 +612,7 @@ public class SimEngine {
             @Override
             public void run() {
                 try {
-                    callback.sendIntegerList(bases.get(bkey).rrec(vkeySource, vkeyTarget));
+                    callback.sendIntegerList(bases.get(bkey).rrec(vkeySource, vecid, vkeyTarget));
                 } catch (Throwable ex) {
                     int code = SimErrors.lookup("rrec", ex);
                     logger.error(SimErrors.info(code), ex);

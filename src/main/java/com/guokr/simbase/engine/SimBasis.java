@@ -81,12 +81,12 @@ public class SimBasis implements KryoSerializable {
         this.recommendations.put(rkey, new Recommendation(context.getSub(rkey)));
     }
 
-    public String rget(String vkeySource, String vkeyTarget) {
-        return this.recommendations.get(rkey(vkeySource, vkeyTarget)).get();
+    public String rget(String vkeySource, int vecid, String vkeyTarget) {
+        return this.recommendations.get(rkey(vkeySource, vkeyTarget)).jsonize(vecid);
     }
 
-    public int[] rrec(String vkeySource, String vkeyTarget) {
-        return this.recommendations.get(rkey(vkeySource, vkeyTarget)).recommend();
+    public int[] rrec(String vkeySource, int vecid, String vkeyTarget) {
+        return this.recommendations.get(rkey(vkeySource, vkeyTarget)).ids(vecid);
     }
 
     @Override

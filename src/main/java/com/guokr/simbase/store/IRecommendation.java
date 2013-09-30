@@ -2,18 +2,19 @@ package com.guokr.simbase.store;
 
 public interface IRecommendation {
 
-	/*
-	 * 返回与某向量相关的id数组
-	 */
-	public int[] recommends(int vecid);
+    /*
+     * add an vector with id and score
+     */
+    public void add(int vecid, float score);
 
-	/*
-	 * 返回评分与某分数接近的id数组
-	 */
-	public int[] range(float score, float delta);
+    /*
+     * the ids of vectors which is with the nth-largest score
+     */
+    public int[] ids(int vecid);
 
-	/*
-	 * 添加一个item
-	 */
-	public void add(int vecid, float profile);
+    /*
+     * the id-score pairs in json format
+     */
+    public String jsonize(int vecid);
+
 }
