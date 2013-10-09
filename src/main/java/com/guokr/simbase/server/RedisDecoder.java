@@ -12,13 +12,16 @@ import java.util.TreeMap;
 public class RedisDecoder {
 
     public enum State {
+        READ_BEGIN, READ_END,
         // for Redis protocol
-        ALL_READ, READ_STAR, READ_DOLLAR,
-        // for customized SimBase protocol
-        READ_DOT, RAED_SPACE, READ_INTEGER, READ_FLOAT
+        READ_NARGS, READ_NBYTES, READ_BYTES,
+        // for customized SimBase protocol - control character
+        READ_DOT, READ_DOTDOT, READ_NNUMS, RAED_SPACE,
+        // for customized SimBase protocol - data
+        READ_INTEGER, READ_FLOAT
     }
 
-    private State            state         = State.READ_STAR;
+    private State            state         = State.READ_BEGIN;
 
     // bytes count need read
     private int              readRemaining = 0;
@@ -38,30 +41,35 @@ public class RedisDecoder {
 
     public RedisRequests decode(ByteBuffer buffer) throws LineTooLargeException, ProtocolException, RequestTooLargeException {
         @SuppressWarnings("unused")
-        byte discriminator;
+        byte discr;
+        int nargs, nbytes, nnums;
         while (buffer.hasRemaining()) {
             switch (state) {
-            case ALL_READ:
+            case READ_END:
                 return requests;
-            case READ_STAR:
-                discriminator = lineReader.readByte(buffer);
-                break;
-            case READ_DOLLAR:
-                discriminator = lineReader.readByte(buffer);
+            case READ_BEGIN:
+                discr = lineReader.readByte(buffer);
+                if (discr == RedisUtils.STAR) {
+                    state = State.READ_NARGS;
+                } else {
+                    throw new ProtocolException();
+                }
+            case READ_NARGS:
+                nargs = lineReader.readSize(buffer);
                 break;
             default:
                 break;
             }
         }
-        return state == State.ALL_READ ? requests : null;
+        return state == State.READ_END ? requests : null;
     }
 
     private void finish() {
-        state = State.ALL_READ;
+        state = State.READ_END;
     }
 
     public void reset() {
-        state = State.READ_STAR;
+        state = State.READ_BEGIN;
         readCount = 0;
         lineReader.reset();
         requests = null;

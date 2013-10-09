@@ -69,7 +69,7 @@ public class SimServer implements Runnable {
             }
         } catch (Exception e) {
             // too many open files. do not quit
-            // RedisUtils.printError("accept incoming request", e);
+            RedisUtils.printError("accept incoming request", e);
         }
     }
 

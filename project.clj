@@ -9,13 +9,12 @@
             :comments "same as Clojure"}
 
     :dependencies [[org.clojure/clojure "1.5.1"]
-                   [gloss "0.2.2"]
+                   [milieu "0.9.1"]
                    [clj-pid "0.1.1"]
                    [net.sf.trove4j/trove4j "3.0.3"]
                    [org.slf4j/slf4j-api "1.7.5"]
                    [org.slf4j/slf4j-log4j12 "1.7.5"]
                    [log4j/log4j "1.2.17"]
-                   [org.yaml/snakeyaml "1.12"]
                    [com.esotericsoftware.kryo/kryo "2.21"]
                    [junit "4.0" :scope "test"]]
     :source-paths ["src/main/clojure"]
