@@ -7,11 +7,23 @@ public class LineReader {
     public LineReader(int maxLine) {
     }
 
+    public void reset() {
+    }
+
+    public void begin() {
+    }
+
+    public void commit() {
+    }
+
+    public void rollback() {
+    }
+
     public byte readByte(ByteBuffer buffer) {
         return 0;
     }
 
-    public int readSize(ByteBuffer buffer) {
+    public byte tryByte(ByteBuffer buffer) {
         return 0;
     }
 
@@ -23,11 +35,20 @@ public class LineReader {
         return 0;
     }
 
-    public String readLine(ByteBuffer buffer, int size) {
+    public int readString(ByteBuffer buffer) {
+        return 0;
+    }
+
+    public String readByLine(ByteBuffer buffer) {
         return null;
     }
 
-    public void reset() {
+    public int readSizeByLine(ByteBuffer buffer) {
+        return 0;
+    }
+
+    public String readRemainingByLine(ByteBuffer buffer) {
+        return null;
     }
 
 }

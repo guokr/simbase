@@ -12,13 +12,16 @@ import java.util.TreeMap;
 public class RedisDecoder {
 
     public enum State {
-        READ_BEGIN, READ_END,
-        // for Redis protocol
-        READ_NARGS, READ_NBYTES, READ_BYTES,
+        // start point
+        READ_BEGIN, READ_NARGS,
+        // for Redis protocol - argument
+        READ_ARGUMENT_BEGIN, READ_NBYTES, READ_ARGUMENT, READ_STRING,
         // for customized SimBase protocol - control character
-        READ_DOT, READ_DOTDOT, READ_NNUMS, RAED_SPACE,
+        TRY_DOT, TRY_DOTDOT, READ_NINTS, READ_NFLTS, RAED_SPACE,
         // for customized SimBase protocol - data
-        READ_INTEGER, READ_FLOAT
+        READ_INTEGER, READ_FLOAT,
+        // end point
+        READ_END
     }
 
     private State            state         = State.READ_BEGIN;
@@ -42,7 +45,7 @@ public class RedisDecoder {
     public RedisRequests decode(ByteBuffer buffer) throws LineTooLargeException, ProtocolException, RequestTooLargeException {
         @SuppressWarnings("unused")
         byte discr;
-        int nargs, nbytes, nnums;
+        int nargs = 0, nbytes = 0, nnums;
         while (buffer.hasRemaining()) {
             switch (state) {
             case READ_END:
@@ -55,7 +58,45 @@ public class RedisDecoder {
                     throw new ProtocolException();
                 }
             case READ_NARGS:
-                nargs = lineReader.readSize(buffer);
+                nargs = lineReader.readSizeByLine(buffer);
+                state = State.READ_ARGUMENT;
+                break;
+            case READ_ARGUMENT:
+                discr = lineReader.readByte(buffer);
+                if (nargs > 0 && discr == RedisUtils.DOLLAR) {
+                    state = State.READ_NBYTES;
+                    nargs--;
+                } else {
+                    throw new ProtocolException();
+                }
+                break;
+            case READ_NBYTES:
+                nbytes = lineReader.readSizeByLine(buffer);
+                lineReader.begin();
+                byte first = lineReader.tryByte(buffer);
+                byte second = lineReader.tryByte(buffer);
+                if (first == RedisUtils.DOT) {
+                    if (second == RedisUtils.DOT) {
+                        lineReader.commit();
+                        state = State.READ_NFLTS;
+                    } else {
+                        lineReader.commit();
+                        state = State.READ_NINTS;
+                    }
+                } else {
+                    lineReader.rollback();
+                    state = State.READ_STRING;
+                }
+                break;
+            case READ_NFLTS:
+                break;
+            case READ_NINTS:
+                break;
+            case READ_INTEGER:
+                break;
+            case READ_FLOAT:
+                break;
+            case READ_STRING:
                 break;
             default:
                 break;
