@@ -1,13 +1,8 @@
 package com.guokr.simbase.server;
 
-import com.guokr.simbase.errors.server.LineTooLargeException;
-import com.guokr.simbase.errors.server.ProtocolException;
-import com.guokr.simbase.errors.server.RequestTooLargeException;
-
 import java.nio.ByteBuffer;
-import java.util.Arrays;
-import java.util.Map;
-import java.util.TreeMap;
+
+import com.guokr.simbase.errors.server.ProtocolException;
 
 public class RedisDecoder {
 
@@ -15,7 +10,7 @@ public class RedisDecoder {
         // start point
         READ_BEGIN, READ_NARGS,
         // for Redis protocol - argument
-        READ_ARGUMENT_BEGIN, READ_NBYTES, READ_ARGUMENT, READ_STRING,
+        READ_NBYTES, READ_ARGUMENT, READ_STRING,
         // for customized SimBase protocol - control character
         TRY_DOT, TRY_DOTDOT, READ_NINTS, READ_NFLTS, RAED_SPACE,
         // for customized SimBase protocol - data
@@ -24,28 +19,20 @@ public class RedisDecoder {
         READ_END
     }
 
-    private State            state         = State.READ_BEGIN;
-
-    // bytes count need read
-    private int              readRemaining = 0;
-
-    // bytes count already read
-    private int              readCount     = 0;
+    private State            state = State.READ_BEGIN;
 
     RedisRequests            requests;
 
-    private final int        maxBody;
     private final LineReader lineReader;
 
-    public RedisDecoder(int maxBody, int maxLine) {
-        this.maxBody = maxBody;
-        this.lineReader = new LineReader(maxLine);
+    public RedisDecoder() {
+        this.lineReader = new LineReader();
     }
 
-    public RedisRequests decode(ByteBuffer buffer) throws LineTooLargeException, ProtocolException, RequestTooLargeException {
-        @SuppressWarnings("unused")
+    public RedisRequests decode(ByteBuffer buffer) throws ProtocolException {
         byte discr;
-        int nargs = 0, nbytes = 0, nnums;
+        int nargs = 0, nbytes = 0, nnums = 0;
+        requests = new RedisRequests();
         while (buffer.hasRemaining()) {
             switch (state) {
             case READ_END:
@@ -57,21 +44,32 @@ public class RedisDecoder {
                 } else {
                     throw new ProtocolException();
                 }
+                break;
             case READ_NARGS:
-                nargs = lineReader.readSizeByLine(buffer);
+                nargs = lineReader.readSizeBy(buffer, RedisUtils.CRLF);
+                if (nargs < 1) {
+                    throw new ProtocolException();
+                }
                 state = State.READ_ARGUMENT;
+                requests.request(nargs);
                 break;
             case READ_ARGUMENT:
                 discr = lineReader.readByte(buffer);
                 if (nargs > 0 && discr == RedisUtils.DOLLAR) {
                     state = State.READ_NBYTES;
                     nargs--;
+                } else if (nargs == 0) {
+                    if (buffer.hasRemaining()) {
+                        state = State.READ_BEGIN;
+                    } else {
+                        state = State.READ_END;
+                    }
                 } else {
                     throw new ProtocolException();
                 }
                 break;
             case READ_NBYTES:
-                nbytes = lineReader.readSizeByLine(buffer);
+                nbytes = lineReader.readSizeBy(buffer, RedisUtils.CRLF);
                 lineReader.begin();
                 byte first = lineReader.tryByte(buffer);
                 byte second = lineReader.tryByte(buffer);
@@ -86,34 +84,48 @@ public class RedisDecoder {
                 } else {
                     lineReader.rollback();
                     state = State.READ_STRING;
+                    requests.string(nbytes);
                 }
                 break;
-            case READ_NFLTS:
-                break;
             case READ_NINTS:
+                nnums = lineReader.readSizeBy(buffer, RedisUtils.SPACE);
+                state = State.READ_INTEGER;
+                requests.intarray(nnums);
+                break;
+            case READ_NFLTS:
+                nnums = lineReader.readSizeBy(buffer, RedisUtils.SPACE);
+                state = State.READ_FLOAT;
+                requests.floatarray(nnums);
                 break;
             case READ_INTEGER:
+                if (nnums > 1) {
+                    requests.arrayadd(lineReader.readIntegerBy(buffer, RedisUtils.SPACE));
+                    nnums--;
+                } else if (nnums == 1) {
+                    requests.arrayadd(lineReader.readIntegerBy(buffer, RedisUtils.CRLF));
+                    nnums--;
+                    state = State.READ_ARGUMENT;
+                }
                 break;
             case READ_FLOAT:
+                if (nnums > 1) {
+                    requests.arrayadd(lineReader.readFloatBy(buffer, RedisUtils.SPACE));
+                    nnums--;
+                } else if (nnums == 1) {
+                    requests.arrayadd(lineReader.readFloatBy(buffer, RedisUtils.CRLF));
+                    nnums--;
+                    state = State.READ_ARGUMENT;
+                }
                 break;
             case READ_STRING:
+                requests.set(lineReader.readStringBy(buffer, RedisUtils.CRLF, nbytes));
+                state = State.READ_ARGUMENT;
                 break;
             default:
                 break;
             }
         }
         return state == State.READ_END ? requests : null;
-    }
-
-    private void finish() {
-        state = State.READ_END;
-    }
-
-    public void reset() {
-        state = State.READ_BEGIN;
-        readCount = 0;
-        lineReader.reset();
-        requests = null;
     }
 
 }

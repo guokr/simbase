@@ -19,7 +19,10 @@ public class RedisUtils {
     public static final byte    LF     = 10;                     // \n
 
     public static final byte    DOT    = 46;                     // '.'
-    public static final byte    SPACE  = 32;                     // ' '
+    public static final byte    SP     = 32;                     // ' '
+
+    public static final byte[]  CRLF   = new byte[] { CR, LF };  // '\r\n'
+    public static final byte[]  SPACE  = new byte[] { SP };      // '\r\n'
 
     public static void printError(String msg, Throwable t) {
         String error = String.format("%s [%s] ERROR - %s", new Date(), Thread.currentThread().getName(), msg);

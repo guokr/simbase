@@ -4,7 +4,7 @@ import java.nio.ByteBuffer;
 
 public class LineReader {
 
-    public LineReader(int maxLine) {
+    public LineReader() {
     }
 
     public void reset() {
@@ -27,27 +27,19 @@ public class LineReader {
         return 0;
     }
 
-    public int readInteger(ByteBuffer buffer) {
+    public int readSizeBy(ByteBuffer buffer, byte[] delims) {
         return 0;
     }
 
-    public float readFloat(ByteBuffer buffer) {
+    public int readIntegerBy(ByteBuffer buffer, byte[] delims) {
         return 0;
     }
 
-    public int readString(ByteBuffer buffer) {
+    public float readFloatBy(ByteBuffer buffer, byte[] delims) {
         return 0;
     }
 
-    public String readByLine(ByteBuffer buffer) {
-        return null;
-    }
-
-    public int readSizeByLine(ByteBuffer buffer) {
-        return 0;
-    }
-
-    public String readRemainingByLine(ByteBuffer buffer) {
+    public String readStringBy(ByteBuffer buffer, byte[] delims, int nbytes) {
         return null;
     }
 

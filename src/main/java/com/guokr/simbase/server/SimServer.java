@@ -21,17 +21,13 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import com.guokr.simbase.SimContext;
-import com.guokr.simbase.errors.server.LineTooLargeException;
 import com.guokr.simbase.errors.server.ProtocolException;
-import com.guokr.simbase.errors.server.RequestTooLargeException;
 
 public class SimServer implements Runnable {
 
     static final String                               THREAD_NAME = "server-loop";
 
     private final IHandler                            handler;
-    private final int                                 maxBody;
-    private final int                                 maxLine;
 
     private final Selector                            selector;
     private final ServerSocketChannel                 serverChannel;
@@ -42,10 +38,8 @@ public class SimServer implements Runnable {
     // shared, single thread
     private final ByteBuffer                          buffer      = ByteBuffer.allocateDirect(1024 * 64);
 
-    public SimServer(String ip, int port, IHandler handler, int maxBody, int maxLine) throws IOException {
+    public SimServer(String ip, int port, IHandler handler) throws IOException {
         this.handler = handler;
-        this.maxLine = maxLine;
-        this.maxBody = maxBody;
         this.selector = Selector.open();
         this.serverChannel = ServerSocketChannel.open();
         serverChannel.configureBlocking(false);
@@ -54,7 +48,7 @@ public class SimServer implements Runnable {
     }
 
     public SimServer(SimContext ctx, IHandler handler) throws IOException {
-        this(ctx.getString("ip"), ctx.getInt("port"), handler, ctx.getInt("maxBody"), ctx.getInt("maxLine"));
+        this(ctx.getString("ip"), ctx.getInt("port"), handler);
     }
 
     void accept(SelectionKey key) {
@@ -63,7 +57,7 @@ public class SimServer implements Runnable {
         try {
             while ((s = ch.accept()) != null) {
                 s.configureBlocking(false);
-                RedisAtta atta = new RedisAtta(maxBody, maxLine);
+                RedisAtta atta = new RedisAtta();
                 SelectionKey k = s.register(selector, OP_READ, atta);
                 atta.channel = new AsyncChannel(k, this);
             }
@@ -87,28 +81,22 @@ public class SimServer implements Runnable {
         }
     }
 
-    private void decodeHttp(RedisAtta atta, SelectionKey key, SocketChannel ch) {
+    private void decodeRedis(RedisAtta atta, SelectionKey key, SocketChannel ch) {
         try {
             do {
                 AsyncChannel channel = atta.channel;
-                RedisRequests request = atta.decoder.decode(buffer);
-                if (request != null) {
-                    channel.reset(request);
-                    request.channel = channel;
-                    request.remoteAddr = (InetSocketAddress) ch.socket().getRemoteSocketAddress();
-                    handler.handle(request, new RespCallback(key, this));
+                RedisRequests requests = atta.decoder.decode(buffer);
+                if (requests != null) {
+                    channel.reset(requests);
+                    requests.channel = channel;
+                    requests.remoteAddr = (InetSocketAddress) ch.socket().getRemoteSocketAddress();
+                    handler.handle(requests, new RespCallback(key, this));
                     // pipelining not supported : need queue to ensure order
-                    atta.decoder.reset();
+                    // atta.decoder.reset();
                 }
             } while (buffer.hasRemaining()); // consume all
         } catch (ProtocolException e) {
             closeKey(key, -1);
-        } catch (RequestTooLargeException e) {
-            atta.keepalive = false;
-            //tryWrite(key, HttpEncode(100413, e.getMessage()));
-        } catch (LineTooLargeException e) {
-            atta.keepalive = false; // close after write
-            //tryWrite(key, HttpEncode(100414, e.getMessage()));
         }
     }
 
@@ -124,7 +112,7 @@ public class SimServer implements Runnable {
                 buffer.flip(); // flip for read
                 final ServerAtta atta = (ServerAtta) key.attachment();
                 if (atta instanceof RedisAtta) {
-                    decodeHttp((RedisAtta) atta, key, ch);
+                    decodeRedis((RedisAtta) atta, key, ch);
                 }
             }
         } catch (IOException e) { // the remote forcibly closed the connection
