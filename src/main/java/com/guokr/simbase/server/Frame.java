@@ -2,6 +2,8 @@ package com.guokr.simbase.server;
 
 import java.nio.ByteBuffer;
 
+import com.guokr.simbase.SimUtils;
+
 public abstract class Frame {
     public final byte[] data;
 
@@ -68,7 +70,7 @@ public abstract class Frame {
 
         public TextFrame(byte[] data) {
             super(data);
-            this.msg = new String(data, RedisUtils.UTF_8);
+            this.msg = new String(data, SimUtils.UTF_8);
         }
 
         public String getText() {

@@ -1,11 +1,12 @@
-package com.guokr.simbase.server;
+package com.guokr.simbase;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.Date;
 
-public class RedisUtils {
+public class SimUtils {
 
     public static final Charset UTF_8  = Charset.forName("utf8");
 
@@ -23,6 +24,7 @@ public class RedisUtils {
 
     public static final byte[]  CRLF   = new byte[] { CR, LF };  // '\r\n'
     public static final byte[]  SPACE  = new byte[] { SP };      // '\r\n'
+    public static final byte[]  OK     = new byte[] { 'O', 'K'};
 
     public static final int     ZERO   = '0';
 
@@ -42,6 +44,34 @@ public class RedisUtils {
         pw.println(error);
         t.printStackTrace(pw);
         System.err.print(str.getBuffer().toString());
+    }
+
+    public static byte[] size(byte[] bytes) {
+        return null;
+    }
+
+    public static byte[] bytes(String msg) {
+        return msg.getBytes(UTF_8);
+    }
+
+    public static byte[] bytes(int val) {
+        return null;
+    }
+
+    public static byte[] bytes(int[] list) {
+        return null;
+    }
+
+    public static byte[] bytes(float val) {
+        return null;
+    }
+
+    public static byte[] bytes(float[] list) {
+        return null;
+    }
+
+    public static byte[] bytes(String[] list) {
+        return null;
     }
 
 }

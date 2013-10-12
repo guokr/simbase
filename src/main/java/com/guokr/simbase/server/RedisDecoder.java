@@ -2,6 +2,7 @@ package com.guokr.simbase.server;
 
 import java.nio.ByteBuffer;
 
+import com.guokr.simbase.SimUtils;
 import com.guokr.simbase.errors.server.ProtocolException;
 
 public class RedisDecoder {
@@ -39,7 +40,7 @@ public class RedisDecoder {
                 return requests;
             case READ_BEGIN:
                 discr = lineReader.readByte(buffer);
-                if (discr == RedisUtils.STAR) {
+                if (discr == SimUtils.STAR) {
                     state = State.READ_NARGS;
                 } else {
                     String msg = String.format("wrong byte %s('%c')", discr, discr);
@@ -47,7 +48,7 @@ public class RedisDecoder {
                 }
                 break;
             case READ_NARGS:
-                nargs = lineReader.readSizeBy(buffer, RedisUtils.CRLF);
+                nargs = lineReader.readSizeBy(buffer, SimUtils.CRLF);
                 if (nargs < 1) {
                     throw new ProtocolException();
                 }
@@ -56,7 +57,7 @@ public class RedisDecoder {
                 break;
             case READ_ARGUMENT:
                 discr = lineReader.readByte(buffer);
-                if (nargs > 0 && discr == RedisUtils.DOLLAR) {
+                if (nargs > 0 && discr == SimUtils.DOLLAR) {
                     state = State.READ_NBYTES;
                     nargs--;
                 } else if (nargs == 0) {
@@ -70,12 +71,12 @@ public class RedisDecoder {
                 }
                 break;
             case READ_NBYTES:
-                nbytes = lineReader.readSizeBy(buffer, RedisUtils.CRLF);
+                nbytes = lineReader.readSizeBy(buffer, SimUtils.CRLF);
                 lineReader.begin();
                 byte first = lineReader.tryByte(buffer);
                 byte second = lineReader.tryByte(buffer);
-                if (first == RedisUtils.DOT) {
-                    if (second == RedisUtils.DOT) {
+                if (first == SimUtils.DOT) {
+                    if (second == SimUtils.DOT) {
                         lineReader.commit();
                         state = State.READ_NFLTS;
                     } else {
@@ -89,37 +90,37 @@ public class RedisDecoder {
                 }
                 break;
             case READ_NINTS:
-                nnums = lineReader.readSizeBy(buffer, RedisUtils.SPACE);
+                nnums = lineReader.readSizeBy(buffer, SimUtils.SPACE);
                 state = State.READ_INTEGER;
                 requests.intarray(nnums);
                 break;
             case READ_NFLTS:
-                nnums = lineReader.readSizeBy(buffer, RedisUtils.SPACE);
+                nnums = lineReader.readSizeBy(buffer, SimUtils.SPACE);
                 state = State.READ_FLOAT;
                 requests.floatarray(nnums);
                 break;
             case READ_INTEGER:
                 if (nnums > 1) {
-                    requests.arrayadd(lineReader.readIntegerBy(buffer, RedisUtils.SPACE));
+                    requests.arrayadd(lineReader.readIntegerBy(buffer, SimUtils.SPACE));
                     nnums--;
                 } else if (nnums == 1) {
-                    requests.arrayadd(lineReader.readIntegerBy(buffer, RedisUtils.CRLF));
+                    requests.arrayadd(lineReader.readIntegerBy(buffer, SimUtils.CRLF));
                     nnums--;
                     state = State.READ_ARGUMENT;
                 }
                 break;
             case READ_FLOAT:
                 if (nnums > 1) {
-                    requests.arrayadd(lineReader.readFloatBy(buffer, RedisUtils.SPACE));
+                    requests.arrayadd(lineReader.readFloatBy(buffer, SimUtils.SPACE));
                     nnums--;
                 } else if (nnums == 1) {
-                    requests.arrayadd(lineReader.readFloatBy(buffer, RedisUtils.CRLF));
+                    requests.arrayadd(lineReader.readFloatBy(buffer, SimUtils.CRLF));
                     nnums--;
                     state = State.READ_ARGUMENT;
                 }
                 break;
             case READ_STRING:
-                requests.set(lineReader.readStringBy(buffer, RedisUtils.CRLF, nbytes));
+                requests.set(lineReader.readStringBy(buffer, SimUtils.CRLF, nbytes));
                 state = State.READ_ARGUMENT;
                 break;
             default:

@@ -2,6 +2,8 @@ package com.guokr.simbase.server;
 
 import java.nio.ByteBuffer;
 
+import com.guokr.simbase.SimUtils;
+
 public class LineReader {
 
     int index = 0, mark = -1;
@@ -65,7 +67,7 @@ public class LineReader {
                 break;
             }
 
-            int digit = next - RedisUtils.ZERO;
+            int digit = next - SimUtils.ZERO;
             if (digit >= 0 && digit < 10) {
                 number = number * 10 + digit;
             } else {
@@ -100,7 +102,7 @@ public class LineReader {
                 break;
             }
 
-            int digit = next - RedisUtils.ZERO;
+            int digit = next - SimUtils.ZERO;
             if (digit >= 0 && digit < 10) {
                 number = number * 10 + digit;
             } else {

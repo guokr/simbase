@@ -20,6 +20,7 @@ import java.util.LinkedList;
 import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import com.guokr.simbase.SimUtils;
 import com.guokr.simbase.SimContext;
 import com.guokr.simbase.errors.server.ProtocolException;
 
@@ -52,7 +53,7 @@ public class SimServer implements Runnable {
     }
 
     void accept(SelectionKey key) {
-        RedisUtils.printTrace("accept incoming request");
+        SimUtils.printTrace("accept incoming request");
         ServerSocketChannel ch = (ServerSocketChannel) key.channel();
         SocketChannel s;
         try {
@@ -64,12 +65,12 @@ public class SimServer implements Runnable {
             }
         } catch (Exception e) {
             // too many open files. do not quit
-            RedisUtils.printError("accept incoming request", e);
+            SimUtils.printError("accept incoming request", e);
         }
     }
 
     private void closeKey(final SelectionKey key, int status) {
-        RedisUtils.printTrace("close key");
+        SimUtils.printTrace("close key");
         try {
             key.channel().close();
         } catch (Exception ignore) {
@@ -98,13 +99,13 @@ public class SimServer implements Runnable {
                 }
             } while (buffer.hasRemaining()); // consume all
         } catch (ProtocolException e) {
-            RedisUtils.printError("protocol exception", e);
+            SimUtils.printError("protocol exception", e);
             closeKey(key, -1);
         }
     }
 
     private void doRead(final SelectionKey key) {
-        RedisUtils.printTrace("reading");
+        SimUtils.printTrace("reading");
         SocketChannel ch = (SocketChannel) key.channel();
         try {
             buffer.clear(); // clear for read
@@ -125,7 +126,7 @@ public class SimServer implements Runnable {
     }
 
     private void doWrite(SelectionKey key) {
-        RedisUtils.printTrace("writing");
+        SimUtils.printTrace("writing");
         ServerAtta atta = (ServerAtta) key.attachment();
         SocketChannel ch = (SocketChannel) key.channel();
         try {
@@ -210,7 +211,7 @@ public class SimServer implements Runnable {
                 }
                 Set<SelectionKey> selectedKeys = selector.selectedKeys();
                 for (SelectionKey key : selectedKeys) {
-                    // TODO I do not know if this is needed
+                    // TODO I do not know if this is needed -- shengfeng
                     // if !valid, isAcceptable, isReadable.. will Exception
                     // run hours happily after commented, but not sure.
                     if (!key.isValid()) {
@@ -232,7 +233,7 @@ public class SimServer implements Runnable {
                 // jvm can catch any exception, including OOM
             } catch (Throwable e) { // catch any exception(including OOM), print
                                     // it
-                RedisUtils.printError("http server loop error, should not happen", e);
+                SimUtils.printError("http server loop error, should not happen", e);
             }
         }
     }

@@ -1,8 +1,11 @@
 package com.guokr.simbase.server;
 
 import java.net.InetSocketAddress;
+import java.util.Iterator;
 
-public class RedisRequests {
+import com.guokr.simbase.SimRequest;
+
+public class RedisRequests implements Iterable<SimRequest> {
 
     InetSocketAddress remoteAddr;
     AsyncChannel      channel;
@@ -29,6 +32,11 @@ public class RedisRequests {
     }
 
     public void set(String string) {
+    }
+
+    @Override
+    public Iterator<SimRequest> iterator() {
+        return null;
     }
 
 }
