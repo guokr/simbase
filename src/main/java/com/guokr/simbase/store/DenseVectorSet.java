@@ -148,4 +148,5 @@ public class DenseVectorSet extends AbstractVectorSet {
 		return newSet;
 
 	}
+
 }

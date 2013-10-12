@@ -9,9 +9,9 @@ public class Basis {
 	Map<String, Integer> compIndex;
 
 	public Basis() {
-		
+
 	}
-	
+
 	public Basis(String[] comps) {
 		size = comps.length;
 		this.comps = comps;
