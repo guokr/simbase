@@ -2,7 +2,6 @@ package com.guokr.simbase;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.Date;
 
@@ -24,7 +23,7 @@ public class SimUtils {
 
     public static final byte[]  CRLF   = new byte[] { CR, LF };  // '\r\n'
     public static final byte[]  SPACE  = new byte[] { SP };      // '\r\n'
-    public static final byte[]  OK     = new byte[] { 'O', 'K'};
+    public static final byte[]  OK     = new byte[] { 'O', 'K' };
 
     public static final int     ZERO   = '0';
 

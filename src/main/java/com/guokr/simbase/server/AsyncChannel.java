@@ -6,13 +6,10 @@ import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
-import java.util.Map;
 
 import sun.misc.Unsafe;
 import clojure.lang.IFn;
-import clojure.lang.Keyword;
 
-@SuppressWarnings({ "unchecked" })
 public class AsyncChannel {
     static final Unsafe        unsafe;
     static final long          closedRanOffset;
@@ -23,6 +20,7 @@ public class AsyncChannel {
     private final SelectionKey key;
     private final SimServer    server;
 
+    @SuppressWarnings("unused")
     private RedisRequests      requests;
 
     volatile int               closedRan      = 0;
@@ -94,7 +92,7 @@ public class AsyncChannel {
             throw new IllegalStateException("close handler exist: " + closeHandler);
         }
         if (closedRan == 1) { // no handler, but already closed
-            //fn.invoke(K_UNKNOWN);
+            // fn.invoke(K_UNKNOWN);
         }
     }
 
@@ -102,7 +100,7 @@ public class AsyncChannel {
         if (unsafe.compareAndSwapInt(this, closedRanOffset, 0, 1)) {
             IFn f = closeHandler;
             if (f != null) {
-                //f.invoke(readable(status));
+                // f.invoke(readable(status));
             }
         }
     }
@@ -112,10 +110,10 @@ public class AsyncChannel {
         if (!unsafe.compareAndSwapInt(this, closedRanOffset, 0, 1)) {
             return false; // already closed
         }
-        //server.tryWrite(key, ByteBuffer.wrap(finalChunkBytes));
+        // server.tryWrite(key, ByteBuffer.wrap(finalChunkBytes));
         IFn f = closeHandler;
         if (f != null) {
-            //f.invoke(readable(0)); // server close is 0
+            // f.invoke(readable(0)); // server close is 0
         }
         return true;
     }
