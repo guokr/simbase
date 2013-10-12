@@ -24,6 +24,17 @@ public class RedisUtils {
     public static final byte[]  CRLF   = new byte[] { CR, LF };  // '\r\n'
     public static final byte[]  SPACE  = new byte[] { SP };      // '\r\n'
 
+    public static final int     ZERO   = '0';
+
+    public static void printTrace(String msg) {
+        String trace = String.format("%s [%s] TRACE - %s", new Date(), Thread.currentThread().getName(), msg);
+        StringWriter str = new StringWriter();
+        PrintWriter pw = new PrintWriter(str, false);
+        pw.println(trace);
+        new Throwable().printStackTrace(pw);
+        System.out.print(str.getBuffer().toString());
+    }
+
     public static void printError(String msg, Throwable t) {
         String error = String.format("%s [%s] ERROR - %s", new Date(), Thread.currentThread().getName(), msg);
         StringWriter str = new StringWriter();

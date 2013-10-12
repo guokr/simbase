@@ -42,7 +42,8 @@ public class RedisDecoder {
                 if (discr == RedisUtils.STAR) {
                     state = State.READ_NARGS;
                 } else {
-                    throw new ProtocolException();
+                    String msg = String.format("wrong byte %s('%c')", discr, discr);
+                    throw new ProtocolException(msg);
                 }
                 break;
             case READ_NARGS:
@@ -60,7 +61,7 @@ public class RedisDecoder {
                     nargs--;
                 } else if (nargs == 0) {
                     if (buffer.hasRemaining()) {
-                        state = State.READ_BEGIN;
+                        state = State.READ_STRING;
                     } else {
                         state = State.READ_END;
                     }

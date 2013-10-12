@@ -52,6 +52,7 @@ public class SimServer implements Runnable {
     }
 
     void accept(SelectionKey key) {
+        RedisUtils.printTrace("accept incoming request");
         ServerSocketChannel ch = (ServerSocketChannel) key.channel();
         SocketChannel s;
         try {
@@ -68,6 +69,7 @@ public class SimServer implements Runnable {
     }
 
     private void closeKey(final SelectionKey key, int status) {
+        RedisUtils.printTrace("close key");
         try {
             key.channel().close();
         } catch (Exception ignore) {
@@ -96,11 +98,13 @@ public class SimServer implements Runnable {
                 }
             } while (buffer.hasRemaining()); // consume all
         } catch (ProtocolException e) {
+            RedisUtils.printError("protocol exception", e);
             closeKey(key, -1);
         }
     }
 
     private void doRead(final SelectionKey key) {
+        RedisUtils.printTrace("reading");
         SocketChannel ch = (SocketChannel) key.channel();
         try {
             buffer.clear(); // clear for read
@@ -121,6 +125,7 @@ public class SimServer implements Runnable {
     }
 
     private void doWrite(SelectionKey key) {
+        RedisUtils.printTrace("writing");
         ServerAtta atta = (ServerAtta) key.attachment();
         SocketChannel ch = (SocketChannel) key.channel();
         try {
