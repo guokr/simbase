@@ -86,7 +86,7 @@ public class SimEngine {
     }
 
     private void startCron() {
-        final int cronInterval = this.context.getInt("global", "cronInterval");
+        final int cronInterval = this.context.getInt("cronInterval");
 
         Timer cron = new Timer();
 
