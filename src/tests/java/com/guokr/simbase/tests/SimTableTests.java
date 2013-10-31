@@ -1,9 +1,10 @@
 package com.guokr.simbase.tests;
 
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.assertEquals;
 
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.junit.Test;
 
@@ -155,6 +156,175 @@ public class SimTableTests {
         assertTrue((int) (1000 * table.similarity(2, 5)) == (int) (1000 * table.similarity(11, 13)));
         assertTrue((int) (1000 * table.similarity(2, 7)) == (int) (1000 * table.similarity(3, 5)));
         assertTrue((int) (1000 * table.similarity(2, 7)) == (int) (1000 * table.similarity(7, 11)));
+        assertTrue((int) (1000 * table.similarity(2, 11)) == (int) (1000 * table.similarity(3, 13)));
+        assertTrue((int) (1000 * table.similarity(2, 13)) == (int) (1000 * table.similarity(5, 7)));
+    }
+
+    @Test
+    public void testDelete() {
+        SimTable table = new SimTable();
+
+        table.add(2, new float[] { 0.9f, 0.1f, 0f });
+        table.add(3, new float[] { 0.9f, 0f, 0.1f });
+        table.add(5, new float[] { 0.1f, 0.9f, 0f });
+        table.add(6, new float[] { 0.2f, 0.8f, 0f });
+        table.add(7, new float[] { 0.1f, 0f, 0.9f });
+        table.add(11, new float[] { 0f, 0.9f, 0.1f });
+        table.add(12, new float[] { 0.8f, 0.2f, 0f });
+        table.add(13, new float[] { 0f, 0.1f, 0.9f });
+        System.out.println(Arrays.asList(table.retrieve(2)));
+        System.out.println(Arrays.asList(table.retrieve(3)));
+        System.out.println(Arrays.asList(table.retrieve(5)));
+        System.out.println(Arrays.asList(table.retrieve(6)));
+        System.out.println(Arrays.asList(table.retrieve(7)));
+        System.out.println(Arrays.asList(table.retrieve(11)));
+        System.out.println(Arrays.asList(table.retrieve(12)));
+        System.out.println(Arrays.asList(table.retrieve(13)));
+
+        System.err.println(Arrays.asList(table.reverseIndexer.get(2)));
+        System.err.println(Arrays.asList(table.reverseIndexer.get(3)));
+        System.err.println(Arrays.asList(table.reverseIndexer.get(5)));
+        System.err.println(Arrays.asList(table.reverseIndexer.get(6)));
+        System.err.println(Arrays.asList(table.reverseIndexer.get(7)));
+        System.err.println(Arrays.asList(table.reverseIndexer.get(11)));
+        System.err.println(Arrays.asList(table.reverseIndexer.get(12)));
+        System.err.println(Arrays.asList(table.reverseIndexer.get(13)));
+
+        try {
+            table.delete(3);
+            table.delete(2);
+        } catch (Exception e) {
+        }
+
+        System.out.println(Arrays.asList(table.retrieve(2)));
+        System.out.println(Arrays.asList(table.retrieve(3)));
+        System.out.println(Arrays.asList(table.retrieve(5)));
+        System.out.println(Arrays.asList(table.retrieve(6)));
+        System.out.println(Arrays.asList(table.retrieve(7)));
+        System.out.println(Arrays.asList(table.retrieve(11)));
+        System.out.println(Arrays.asList(table.retrieve(12)));
+        System.out.println(Arrays.asList(table.retrieve(13)));
+
+        System.err.println(Arrays.asList(table.reverseIndexer.get(2)));
+        System.err.println(Arrays.asList(table.reverseIndexer.get(3)));
+        System.err.println(Arrays.asList(table.reverseIndexer.get(5)));
+        System.err.println(Arrays.asList(table.reverseIndexer.get(6)));
+        System.err.println(Arrays.asList(table.reverseIndexer.get(7)));
+        System.err.println(Arrays.asList(table.reverseIndexer.get(11)));
+        System.err.println(Arrays.asList(table.reverseIndexer.get(12)));
+        System.err.println(Arrays.asList(table.reverseIndexer.get(13)));
+
+        table.add(2, new float[] { 0.9f, 0.1f, 0f });
+        table.add(3, new float[] { 0.9f, 0f, 0.1f });
+
+        System.out.println(Arrays.asList(table.retrieve(2)));
+        System.out.println(Arrays.asList(table.retrieve(3)));
+        System.out.println(Arrays.asList(table.retrieve(5)));
+        System.out.println(Arrays.asList(table.retrieve(6)));
+        System.out.println(Arrays.asList(table.retrieve(7)));
+        System.out.println(Arrays.asList(table.retrieve(11)));
+        System.out.println(Arrays.asList(table.retrieve(12)));
+        System.out.println(Arrays.asList(table.retrieve(13)));
+
+        System.err.println(Arrays.asList(table.reverseIndexer.get(2)));
+        System.err.println(Arrays.asList(table.reverseIndexer.get(3)));
+        System.err.println(Arrays.asList(table.reverseIndexer.get(5)));
+        System.err.println(Arrays.asList(table.reverseIndexer.get(6)));
+        System.err.println(Arrays.asList(table.reverseIndexer.get(7)));
+        System.err.println(Arrays.asList(table.reverseIndexer.get(11)));
+        System.err.println(Arrays.asList(table.reverseIndexer.get(12)));
+        System.err.println(Arrays.asList(table.reverseIndexer.get(13)));
+
+        assertTrue((int) (1000 * table.similarity(2, 3)) == (int) (1000 * table.similarity(5, 11)));
+        assertTrue((int) (1000 * table.similarity(2, 3)) == (int) (1000 * table.similarity(7, 13)));
+        assertTrue((int) (1000 * table.similarity(2, 5)) == (int) (1000 * table.similarity(3, 7)));
+        assertTrue((int) (1000 * table.similarity(2, 5)) == (int) (1000 * table.similarity(11, 13)));
+        assertTrue((int) (1000 * table.similarity(2, 7)) == (int) (1000 * table.similarity(3, 5)));
+        assertTrue((int) (1000 * table.similarity(2, 7)) == (int) (1000 * table.similarity(7, 11)));
+        assertTrue((int) (1000 * table.similarity(2, 11)) == (int) (1000 * table.similarity(3, 13)));
+        assertTrue((int) (1000 * table.similarity(2, 13)) == (int) (1000 * table.similarity(5, 7)));
+    }
+
+    @Test
+    public void testWaterLine() {
+        Map<String, Object> ctx = new HashMap<String, Object>();
+        ctx.put("loadfactor", 0.75);
+        ctx.put("maxlimits", 5);
+        SimTable table = new SimTable(ctx);
+
+        table.add(2, new float[] { 0.9f, 0.1f, 0f });
+        table.add(3, new float[] { 0.9f, 0f, 0.1f });
+        table.add(5, new float[] { 0.1f, 0.9f, 0f });
+        table.add(6, new float[] { 0.2f, 0.8f, 0f });
+        table.add(7, new float[] { 0.1f, 0f, 0.9f });
+        table.add(11, new float[] { 0f, 0.9f, 0.1f });
+        table.add(12, new float[] { 0.8f, 0.2f, 0f });
+        table.add(13, new float[] { 0f, 0.1f, 0.9f });
+        System.out.println(Arrays.asList(table.retrieve(2)));
+        System.out.println(Arrays.asList(table.retrieve(3)));
+        System.out.println(Arrays.asList(table.retrieve(5)));
+        System.out.println(Arrays.asList(table.retrieve(6)));
+        System.out.println(Arrays.asList(table.retrieve(7)));
+        System.out.println(Arrays.asList(table.retrieve(11)));
+        System.out.println(Arrays.asList(table.retrieve(12)));
+        System.out.println(Arrays.asList(table.retrieve(13)));
+
+        System.err.println(Arrays.asList(table.reverseIndexer.get(2)));
+        System.err.println(Arrays.asList(table.reverseIndexer.get(3)));
+        System.err.println(Arrays.asList(table.reverseIndexer.get(5)));
+        System.err.println(Arrays.asList(table.reverseIndexer.get(6)));
+        System.err.println(Arrays.asList(table.reverseIndexer.get(7)));
+        System.err.println(Arrays.asList(table.reverseIndexer.get(11)));
+        System.err.println(Arrays.asList(table.reverseIndexer.get(12)));
+        System.err.println(Arrays.asList(table.reverseIndexer.get(13)));
+
+        table.delete(3);
+        table.delete(2);
+
+        System.out.println(Arrays.asList(table.retrieve(2)));
+        System.out.println(Arrays.asList(table.retrieve(3)));
+        System.out.println(Arrays.asList(table.retrieve(5)));
+        System.out.println(Arrays.asList(table.retrieve(6)));
+        System.out.println(Arrays.asList(table.retrieve(7)));
+        System.out.println(Arrays.asList(table.retrieve(11)));
+        System.out.println(Arrays.asList(table.retrieve(12)));
+        System.out.println(Arrays.asList(table.retrieve(13)));
+
+        System.err.println(Arrays.asList(table.reverseIndexer.get(2)));
+        System.err.println(Arrays.asList(table.reverseIndexer.get(3)));
+        System.err.println(Arrays.asList(table.reverseIndexer.get(5)));
+        System.err.println(Arrays.asList(table.reverseIndexer.get(6)));
+        System.err.println(Arrays.asList(table.reverseIndexer.get(7)));
+        System.err.println(Arrays.asList(table.reverseIndexer.get(11)));
+        System.err.println(Arrays.asList(table.reverseIndexer.get(12)));
+        System.err.println(Arrays.asList(table.reverseIndexer.get(13)));
+
+        table.add(2, new float[] { 0.9f, 0.1f, 0f });
+        table.add(3, new float[] { 0.9f, 0f, 0.1f });
+
+        System.out.println(Arrays.asList(table.retrieve(2)));
+        System.out.println(Arrays.asList(table.retrieve(3)));
+        System.out.println(Arrays.asList(table.retrieve(5)));
+        System.out.println(Arrays.asList(table.retrieve(6)));
+        System.out.println(Arrays.asList(table.retrieve(7)));
+        System.out.println(Arrays.asList(table.retrieve(11)));
+        System.out.println(Arrays.asList(table.retrieve(12)));
+        System.out.println(Arrays.asList(table.retrieve(13)));
+
+        System.err.println(Arrays.asList(table.reverseIndexer.get(2)));
+        System.err.println(Arrays.asList(table.reverseIndexer.get(3)));
+        System.err.println(Arrays.asList(table.reverseIndexer.get(5)));
+        System.err.println(Arrays.asList(table.reverseIndexer.get(6)));
+        System.err.println(Arrays.asList(table.reverseIndexer.get(7)));
+        System.err.println(Arrays.asList(table.reverseIndexer.get(11)));
+        System.err.println(Arrays.asList(table.reverseIndexer.get(12)));
+        System.err.println(Arrays.asList(table.reverseIndexer.get(13)));
+
+        assertTrue((int) (1000 * table.similarity(2, 3)) == (int) (1000 * table.similarity(5, 11)));
+        assertTrue((int) (1000 * table.similarity(2, 3)) == (int) (1000 * table.similarity(7, 13)));
+        assertTrue((int) (1000 * table.similarity(2, 5)) == (int) (1000 * table.similarity(3, 7)));
+        assertTrue((int) (1000 * table.similarity(2, 5)) == (int) (1000 * table.similarity(11, 13)));
+        assertTrue((int) (1000 * table.similarity(2, 7)) == (int) (1000 * table.similarity(3, 5)));
         assertTrue((int) (1000 * table.similarity(2, 11)) == (int) (1000 * table.similarity(3, 13)));
         assertTrue((int) (1000 * table.similarity(2, 13)) == (int) (1000 * table.similarity(5, 7)));
     }

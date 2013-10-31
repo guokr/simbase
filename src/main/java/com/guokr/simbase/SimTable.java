@@ -28,7 +28,7 @@ public class SimTable implements KryoSerializable {
 
     private TFloatList                  probs          = new TFloatArrayList();
     private TIntIntMap                  indexer        = new TIntIntHashMap();
-    private TIntObjectHashMap<TIntList> reverseIndexer = new TIntObjectHashMap<TIntList>();
+    public TIntObjectHashMap<TIntList> reverseIndexer = new TIntObjectHashMap<TIntList>();
     private TIntFloatMap                waterLine      = new TIntFloatHashMap();
     private TIntObjectHashMap<Sorter>   scores         = new TIntObjectHashMap<Sorter>();
 
@@ -76,9 +76,13 @@ public class SimTable implements KryoSerializable {
         }
 
         if (sorter.size() > maxlimits) {
+            int lastId = sorter.lastId();
+            reverseIndexer.get(lastId).remove(src);
+
             float lastScore = sorter.removeLast();
-            if (lastScore > waterLine.get(src))
+            if (lastScore > waterLine.get(src)) {
                 waterLine.put(src, lastScore);// 放置水位线
+            }
         }
     }
 
@@ -207,15 +211,22 @@ public class SimTable implements KryoSerializable {
         }
 
         indexer.remove(docid);// HashMap里没有这个键了也可以用= =
-        scores.remove(docid);
         waterLine.remove(docid);// 移除水位线
+
+        
+        for(int id : scores.get(docid).docids()) {
+            reverseIndexer.get(id).remove(docid);
+        }
+        scores.remove(docid);
 
         // 根据反向索引移除scores
         if (reverseIndexer.contains(docid)) {
             TIntIterator reverseIter = reverseIndexer.get(docid).iterator();
             while (reverseIter.hasNext()) {
                 int reverId = reverseIter.next();
-                scores.get(reverId).remove(docid);
+                //if(scores.contains(reverId)) {
+                    scores.get(reverId).remove(docid);
+                //}
             }
             reverseIndexer.remove(docid);// 移除反向索引
         }

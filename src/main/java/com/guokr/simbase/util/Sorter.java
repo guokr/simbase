@@ -119,11 +119,15 @@ public class Sorter {
 		}
 	}
 
-	public float removeLast() {
-		this.scores[this.size - 1] = -1.0f;
-		this.size = this.size - 1;
-		return this.scores[this.size - 1];
-	}
+    public int lastId() {
+        return this.docids[this.size - 1];
+    }
+
+    public float removeLast() {
+        this.scores[this.size - 1] = -1.0f;
+        this.size = this.size - 1;
+        return this.scores[this.size - 1];
+    }
 
 	public String[] pickle() {
 		String[] result = new String[2 * this.size];
