@@ -322,6 +322,8 @@ public class SimTable implements KryoSerializable {
                 }
                 peer.scores.put(docid, peersorter);
             }
+            peer.reverseIndexer = reverseIndexer;
+            peer.waterLine = waterLine;
         }
 
         return peer;
@@ -331,6 +333,8 @@ public class SimTable implements KryoSerializable {
         probs = table.probs;
         indexer = table.indexer;
         scores = table.scores;
+        reverseIndexer = table.reverseIndexer;
+        waterLine = table.waterLine;
     }
 
     @Override
@@ -353,6 +357,7 @@ public class SimTable implements KryoSerializable {
             indexer.put(key, value);
             indexsize--;
         }
+
         int scoresize = kryo.readObject(input, int.class);
         while (scoresize > 0) {
             Integer docid = kryo.readObject(input, Integer.class);
@@ -367,6 +372,26 @@ public class SimTable implements KryoSerializable {
                 listsize--;
             }
             scoresize--;
+        }
+
+        int reversesize = kryo.readObject(input, int.class);
+        while (reversesize > 0) {
+            Integer docid = kryo.readObject(input, Integer.class);
+            int listsize = kryo.readObject(input, int.class);
+            TIntList reverseList = new TIntArrayList(listsize);
+            reverseIndexer.put(docid, reverseList);
+            while (listsize > 0) {
+                reverseList.add(kryo.readObject(input, Integer.class));
+                listsize--;
+            }
+            reversesize--;
+        }
+
+        int lineesize = kryo.readObject(input, int.class);
+        while (lineesize > 0) {
+            Integer docid = kryo.readObject(input, Integer.class);
+            waterLine.put(docid, kryo.readObject(input, Float.class));
+            lineesize--;
         }
     }
 
@@ -390,10 +415,10 @@ public class SimTable implements KryoSerializable {
             kryo.writeObject(output, indexscore);
         }
 
-        TIntIterator iter = scores.keySet().iterator();
+        TIntIterator scoresIter = scores.keySet().iterator();
         kryo.writeObject(output, scores.size());
-        while (iter.hasNext()) {
-            Integer docid = iter.next();
+        while (scoresIter.hasNext()) {
+            Integer docid = scoresIter.next();
             kryo.writeObject(output, docid);
             Sorter sorter = scores.get(docid);
             kryo.writeObject(output, sorter.size());
@@ -402,6 +427,27 @@ public class SimTable implements KryoSerializable {
                 kryo.writeObject(output, key);
                 kryo.writeObject(output, score);
             }
+        }
+
+        TIntIterator reverseIter = reverseIndexer.keySet().iterator();
+        kryo.writeObject(output, reverseIndexer.size());
+        while (reverseIter.hasNext()) {
+            Integer docid = reverseIter.next();
+            kryo.writeObject(output, docid);
+            TIntList reverseList = reverseIndexer.get(docid);
+            kryo.writeObject(output, reverseList.size());
+            TIntIterator listIter = reverseList.iterator();
+            while (listIter.hasNext()) {
+                kryo.writeObject(output, listIter.next());
+            }
+        }
+
+        TIntIterator lineIter = waterLine.keySet().iterator();
+        kryo.writeObject(output, waterLine.size());
+        while (lineIter.hasNext()) {
+            Integer docid = lineIter.next();
+            kryo.writeObject(output, docid);
+            kryo.writeObject(output, waterLine.get(docid));
         }
 
     }

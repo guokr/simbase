@@ -182,11 +182,8 @@ public class SimTableTests {
         System.out.println(Arrays.asList(table.retrieve(12)));
         System.out.println(Arrays.asList(table.retrieve(13)));
 
-        try {
-            table.delete(3);
-            table.delete(2);
-        } catch (Exception e) {
-        }
+        table.delete(3);
+        table.delete(2);
 
         System.out.println(Arrays.asList(table.retrieve(2)));
         System.out.println(Arrays.asList(table.retrieve(3)));
@@ -198,6 +195,7 @@ public class SimTableTests {
         System.out.println(Arrays.asList(table.retrieve(13)));
 
         table.add(2, new float[] { 0.9f, 0.1f, 0f });
+        table = table.clone();
         table.add(3, new float[] { 0.9f, 0f, 0.1f });
 
         System.out.println(Arrays.asList(table.retrieve(2)));
