@@ -77,7 +77,9 @@ public class SimTable implements KryoSerializable {
 
         if (sorter.size() > maxlimits) {
             int lastId = sorter.lastId();
-            reverseIndexer.get(lastId).remove(src);
+            if (reverseIndexer.containsKey(lastId)) {
+                reverseIndexer.get(lastId).remove(src);
+            }
 
             float lastScore = sorter.removeLast();
             if (lastScore > waterLine.get(src)) {
@@ -208,15 +210,15 @@ public class SimTable implements KryoSerializable {
                 probs.set(cursor, -1);
                 cursor++;
             }
+
+            for (int id : scores.get(docid).docids()) {
+                reverseIndexer.get(id).remove(docid);
+            }
         }
 
-        indexer.remove(docid);// HashMap里没有这个键了也可以用= =
-        waterLine.remove(docid);// 移除水位线
-
-        for (int id : scores.get(docid).docids()) {
-            reverseIndexer.get(id).remove(docid);
-        }
+        indexer.remove(docid);
         scores.remove(docid);
+        waterLine.remove(docid);
 
         // 根据反向索引移除scores
         TIntList tobedeleted = new TIntArrayList();
