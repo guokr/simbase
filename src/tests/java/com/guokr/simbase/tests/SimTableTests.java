@@ -1,14 +1,22 @@
 package com.guokr.simbase.tests;
 
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertTrue;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.IOException;
+import java.io.PipedInputStream;
+import java.io.PipedOutputStream;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.junit.Test;
 
+import com.esotericsoftware.kryo.Kryo;
+import com.esotericsoftware.kryo.io.Input;
+import com.esotericsoftware.kryo.io.Output;
 import com.guokr.simbase.SimTable;
 
 public class SimTableTests {
@@ -281,6 +289,84 @@ public class SimTableTests {
         assertTrue((int) (1000 * table.similarity(2, 7)) == (int) (1000 * table.similarity(3, 5)));
         assertTrue((int) (1000 * table.similarity(2, 11)) == (int) (1000 * table.similarity(3, 13)));
         assertTrue((int) (1000 * table.similarity(2, 13)) == (int) (1000 * table.similarity(5, 7)));
+    }
+        
+    @Test
+    public void testSerialization() {
+        Map<String, Object> ctx = new HashMap<String, Object>();
+        ctx.put("loadfactor", 0.75);
+        ctx.put("maxlimits", 5);
+        final SimTable table = new SimTable(ctx);
+
+        table.add(2, new float[] { 0.9f, 0.1f, 0f });
+        table.add(3, new float[] { 0.9f, 0f, 0.1f });
+        table.add(5, new float[] { 0.1f, 0.9f, 0f });
+        table.add(6, new float[] { 0.2f, 0.8f, 0f });
+        table.add(7, new float[] { 0.1f, 0f, 0.9f });
+        table.add(11, new float[] { 0f, 0.9f, 0.1f });
+        table.add(12, new float[] { 0.8f, 0.2f, 0f });
+        table.add(13, new float[] { 0f, 0.1f, 0.9f });
+        table.delete(3);
+        table.delete(2);
+        table.add(2, new float[] { 0.9f, 0.1f, 0f });
+        table.add(3, new float[] { 0.9f, 0f, 0.1f });
+
+        final SimTable another = new SimTable();
+
+        final Kryo kryo = new Kryo();
+        PipedInputStream pis = new PipedInputStream();
+        PipedOutputStream pos = new PipedOutputStream();
+
+        try {
+            pis.connect(pos);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        final Output output = new Output(new BufferedOutputStream(pos));
+        final Input input = new Input(new BufferedInputStream(pis));
+
+        Thread writing = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                table.write(kryo, output);
+                output.close();
+            }
+        });
+
+        Thread reading = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                another.read(kryo, input);
+                input.close();
+            }
+        });
+
+        writing.start();
+        reading.start();
+
+        try {
+            reading.join(1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        assertArrayEquals(another.get(2).toArray(), new float[] { 0.9f, 0.1f, 0f }, 0);
+        assertArrayEquals(another.get(3).toArray(), new float[] { 0.9f, 0f, 0.1f }, 0);
+        assertArrayEquals(another.get(5).toArray(), new float[] { 0.1f, 0.9f, 0f }, 0);
+        assertArrayEquals(another.get(6).toArray(), new float[] { 0.2f, 0.8f, 0f }, 0);
+        assertArrayEquals(another.get(7).toArray(), new float[] { 0.1f, 0f, 0.9f }, 0);
+        assertArrayEquals(another.get(11).toArray(), new float[] { 0f, 0.9f, 0.1f }, 0);
+        assertArrayEquals(another.get(12).toArray(), new float[] { 0.8f, 0.2f, 0f }, 0);
+        assertArrayEquals(another.get(13).toArray(), new float[] { 0f, 0.1f, 0.9f }, 0);
+
+        assertTrue((int) (1000 * another.similarity(2, 3)) == (int) (1000 * another.similarity(5, 11)));
+        assertTrue((int) (1000 * another.similarity(2, 3)) == (int) (1000 * another.similarity(7, 13)));
+        assertTrue((int) (1000 * another.similarity(2, 5)) == (int) (1000 * another.similarity(3, 7)));
+        assertTrue((int) (1000 * another.similarity(2, 5)) == (int) (1000 * another.similarity(11, 13)));
+        assertTrue((int) (1000 * another.similarity(2, 7)) == (int) (1000 * another.similarity(3, 5)));
+        assertTrue((int) (1000 * another.similarity(2, 11)) == (int) (1000 * another.similarity(3, 13)));
+        assertTrue((int) (1000 * another.similarity(2, 13)) == (int) (1000 * another.similarity(5, 7)));
     }
 
 }

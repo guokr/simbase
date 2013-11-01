@@ -287,6 +287,9 @@ public class SimTable implements KryoSerializable {
             peer = new SimTable(context);
         }
 
+        peer.loadfactor = loadfactor;
+        peer.maxlimits = maxlimits;
+
         peer.dimensions = dimensions;
         peer.current = current;
 
@@ -330,6 +333,8 @@ public class SimTable implements KryoSerializable {
     }
 
     public void reload(SimTable table) {
+        loadfactor = table.loadfactor;
+        maxlimits = table.maxlimits;
         probs = table.probs;
         indexer = table.indexer;
         scores = table.scores;
@@ -340,6 +345,9 @@ public class SimTable implements KryoSerializable {
     @Override
     // 重载序列化代码
     public void read(Kryo kryo, Input input) {
+        loadfactor = kryo.readObject(input, Double.class);
+        maxlimits = kryo.readObject(input, Integer.class);
+
         current = kryo.readObject(input, String[].class);
         int dimsize = kryo.readObject(input, int.class);
         while (dimsize > 0) {
@@ -397,6 +405,9 @@ public class SimTable implements KryoSerializable {
 
     @Override
     public void write(Kryo kryo, Output output) {
+        kryo.writeObject(output, loadfactor);
+        kryo.writeObject(output, maxlimits);
+
         kryo.writeObject(output, current);
         kryo.writeObject(output, dimensions.size());
         for (String key : dimensions.keySet()) {
