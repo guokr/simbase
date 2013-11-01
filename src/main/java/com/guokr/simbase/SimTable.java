@@ -75,7 +75,7 @@ public class SimTable implements KryoSerializable {
             }
         }
 
-        if (sorter.size() > maxlimits) {
+        while (sorter.size() > maxlimits) {
             int lastId = sorter.lastId();
             if (reverseIndexer.containsKey(lastId)) {
                 reverseIndexer.get(lastId).remove(src);
