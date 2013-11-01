@@ -28,7 +28,7 @@ public class SimTable implements KryoSerializable {
 
     private TFloatList                  probs          = new TFloatArrayList();
     private TIntIntMap                  indexer        = new TIntIntHashMap();
-    public TIntObjectHashMap<TIntList> reverseIndexer = new TIntObjectHashMap<TIntList>();
+    private TIntObjectHashMap<TIntList> reverseIndexer = new TIntObjectHashMap<TIntList>();
     private TIntFloatMap                waterLine      = new TIntFloatHashMap();
     private TIntObjectHashMap<Sorter>   scores         = new TIntObjectHashMap<Sorter>();
 
@@ -213,22 +213,30 @@ public class SimTable implements KryoSerializable {
         indexer.remove(docid);// HashMap里没有这个键了也可以用= =
         waterLine.remove(docid);// 移除水位线
 
-        
-        for(int id : scores.get(docid).docids()) {
+        for (int id : scores.get(docid).docids()) {
             reverseIndexer.get(id).remove(docid);
         }
         scores.remove(docid);
 
         // 根据反向索引移除scores
+        TIntList tobedeleted = new TIntArrayList();
+        TIntList reverse = reverseIndexer.get(docid);
         if (reverseIndexer.contains(docid)) {
-            TIntIterator reverseIter = reverseIndexer.get(docid).iterator();
+            TIntIterator reverseIter = reverse.iterator();
             while (reverseIter.hasNext()) {
                 int reverId = reverseIter.next();
-                //if(scores.contains(reverId)) {
+                if (scores.contains(reverId)) {
                     scores.get(reverId).remove(docid);
-                //}
+                } else {
+                    tobedeleted.add(reverId);
+                }
             }
-            reverseIndexer.remove(docid);// 移除反向索引
+            reverseIndexer.remove(docid);
+
+            TIntIterator deletedIter = tobedeleted.iterator();
+            while (deletedIter.hasNext()) {
+                reverse.remove(deletedIter.next());
+            }
         }
     }
 
@@ -238,7 +246,7 @@ public class SimTable implements KryoSerializable {
             res = new TFloatArrayList();
             int idx = indexer.get(docid);
             float ftmp = 0;
-            while ((ftmp = probs.get(idx++)) > 0 && (ftmp < 1)) {
+            while ((ftmp = probs.get(idx++)) >= 0 && (ftmp < 1)) {
                 res.add(ftmp);
             }
         }
