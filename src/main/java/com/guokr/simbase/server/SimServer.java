@@ -88,7 +88,9 @@ public class SimServer implements Runnable {
         try {
             do {
                 AsyncChannel channel = atta.channel;
+                SimUtils.printTrace("getting requests");
                 RedisRequests requests = atta.decoder.decode(buffer);
+                SimUtils.printTrace("getting requests done");
                 if (requests != null) {
                     channel.reset(requests);
                     requests.channel = channel;
@@ -96,6 +98,8 @@ public class SimServer implements Runnable {
                     handler.handle(requests, new RespCallback(key, this));
                     // pipelining not supported : need queue to ensure order
                     // atta.decoder.reset();
+                } else {
+                    SimUtils.printTrace("requests null");
                 }
             } while (buffer.hasRemaining()); // consume all
         } catch (ProtocolException e) {
@@ -105,18 +109,19 @@ public class SimServer implements Runnable {
     }
 
     private void doRead(final SelectionKey key) {
-        SimUtils.printTrace("reading");
         SocketChannel ch = (SocketChannel) key.channel();
         try {
             buffer.clear(); // clear for read
             int read = ch.read(buffer);
             if (read == -1) {
                 // remote entity shut the socket down cleanly.
+                SimUtils.printTrace("remote shut down");
                 closeKey(key, CLOSE_AWAY);
             } else if (read > 0) {
                 buffer.flip(); // flip for read
                 final ServerAtta atta = (ServerAtta) key.attachment();
                 if (atta instanceof RedisAtta) {
+                    SimUtils.printTrace("reading:" + read);
                     decodeRedis((RedisAtta) atta, key, ch);
                 }
             }

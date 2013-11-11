@@ -124,7 +124,25 @@ public class LineReader {
     }
 
     public String readStringBy(ByteBuffer buffer, byte[] delims, int nbytes) {
-        return null;
+        int len = delims.length;
+        String result = null;
+        byte[] bytes = null;
+        if (nbytes > 0) {
+            bytes = new byte[nbytes];
+            buffer.get(bytes);
+            result = new String(bytes, SimUtils.UTF_8);
+            index = index + nbytes;
+        }
+
+        if (trySame(delims, buffer, index) == len) {
+            index = index + len;
+        } else {
+            result = null;
+            String msg = String.format("Invalid character at: %d", index);
+            throw new IllegalStateException(msg);
+        }
+
+        return result;
     }
 
 }

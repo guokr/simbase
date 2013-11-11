@@ -8,6 +8,7 @@ import java.util.Map;
 import org.yaml.snakeyaml.Yaml;
 
 import com.guokr.simbase.engine.SimEngine;
+import com.guokr.simbase.handler.Ping;
 import com.guokr.simbase.server.ServerHandler;
 import com.guokr.simbase.server.SimServer;
 
@@ -18,6 +19,7 @@ public class SimBase {
     public SimBase(SimConfig conf) throws IOException {
         SimEngine engine = new SimEngine(conf.getSub("engine"));
         SimRegistry registry = new SimRegistry();
+        registry.add("ping", new Ping());
 
         server = new SimServer(conf.getSub("server"), new ServerHandler(32, "", 100, registry, engine));
     }

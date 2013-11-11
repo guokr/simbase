@@ -56,10 +56,12 @@ public class RedisDecoder {
                 requests.request(nargs);
                 break;
             case READ_ARGUMENT:
-                discr = lineReader.readByte(buffer);
-                if (nargs > 0 && discr == SimUtils.DOLLAR) {
-                    state = State.READ_NBYTES;
-                    nargs--;
+                if (nargs > 0) {
+                    discr = lineReader.readByte(buffer);
+                    if (discr == SimUtils.DOLLAR) {
+                        state = State.READ_NBYTES;
+                        nargs--;
+                    }
                 } else if (nargs == 0) {
                     if (buffer.hasRemaining()) {
                         state = State.READ_STRING;
