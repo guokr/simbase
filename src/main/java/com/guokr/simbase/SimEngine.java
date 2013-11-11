@@ -34,17 +34,17 @@ public class SimEngine {
 	private boolean debug;
 	private long cloneThrottle;
 	private int bycount;
-	private String engineName;
+	private String name;
 
 	public SimEngine(String engineName, Map<String, Object> config) {
 
-		engineName = engineName;
+		name = engineName;
 		try {
 			cloneThrottle = (Integer) config.get("cloneThrottle");
 			debug = (Boolean) config.get("debug");
 			bycount = (Integer) config.get("bycount");
 
-			table = new SimTable(engineName, config);
+			table = new SimTable(name, config);
 		} catch (NullPointerException e) {
 			logger.warn("YAML not found,loading default config");
 			cloneThrottle = 30000;
@@ -163,6 +163,17 @@ public class SimEngine {
 					if (counter % bycount == 0) {
 						logger.debug("add:" + counter);
 					}
+					int maxIndex = 0;
+					float maxValue = 0.0f;
+					int index = 0;
+					for (float value: distr) {
+						if (value > maxValue) {
+							maxValue = value;
+							maxIndex = index;
+						}
+						index++;
+					}
+					logger.debug(String.format("add: %s %d %d", name, docid, maxIndex));
 				}
 				try {
 					table.add(docid, distr);
@@ -219,7 +230,7 @@ public class SimEngine {
 		service.execute(new Runnable() {
 			public void run() {
 				try {
-					logger.info("Being delete " + docid);
+					logger.info(String.format("delete: %s %s", name, docid));
 					table.delete(docid);
 					logger.info("Delete finish");
 				} catch (Throwable e) {
