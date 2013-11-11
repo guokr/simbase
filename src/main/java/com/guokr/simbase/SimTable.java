@@ -305,6 +305,14 @@ public class SimTable implements KryoSerializable {
 
     public int[] recommend(int docid) {
         if (scores.contains(docid)) {
+            int idx = indexer.get(docid);
+            if (debug && debugPattern != null) {
+                Matcher matcher = debugPattern.matcher(String.valueOf(docid));
+                boolean match = matcher.matches();
+                if (match) {
+                    logger.info(String.format("get: %s %s %s", name, idx, docid));
+                }
+            }
             return scores.get(docid).docids();
         } else {
             return new int[0];
