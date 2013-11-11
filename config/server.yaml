@@ -6,5 +6,6 @@ maxlimits: 20
 loadfactor: 0.75
 
 debug: false
+debugPattern: "\\d*"
 
 bycount: 100

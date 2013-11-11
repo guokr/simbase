@@ -14,6 +14,11 @@ import gnu.trove.map.hash.TIntObjectHashMap;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.KryoSerializable;
@@ -22,6 +27,8 @@ import com.esotericsoftware.kryo.io.Output;
 import com.guokr.simbase.util.Sorter;
 
 public class SimTable implements KryoSerializable {
+
+    private static final Logger logger = LoggerFactory.getLogger(SimTable.class);
 
     private Map<String, Integer>        dimensions     = new HashMap<String, Integer>();
     private String[]                    current        = new String[0];
@@ -36,11 +43,15 @@ public class SimTable implements KryoSerializable {
     private double                      loadfactor;
     private int                         maxlimits;
     private String                      name;
+    private boolean                     debug;
+    private Pattern                     debugPattern;
 
     public SimTable(String tableName) {
         name = tableName;
         loadfactor = 0.75;
         maxlimits = 20;
+        debug = true;
+        debugPattern = null;
     }
 
     public SimTable(String tableName, Map<String, Object> context) {
@@ -48,6 +59,9 @@ public class SimTable implements KryoSerializable {
         context = context;
         loadfactor = (Double) context.get("loadfactor");
         maxlimits = (Integer) context.get("maxlimits");
+        debug = (Boolean) context.get("debug");
+        debugPattern = (Pattern) context.get("debugPattern");
+
     }
 
     private void score(int src, int tgt, float value) {
@@ -172,6 +186,19 @@ public class SimTable implements KryoSerializable {
                 base = offset + 1;
             }
         }
+
+        if (debug) {
+            int maxIndex = 0;
+            float maxValue = 0.0f;
+            for (int index=0; index < distr.length; index++) {
+                float value = probs.get(start + index);
+                if (value > maxValue) {
+                    maxValue = value;
+                    maxIndex = index;
+                }
+            }
+            logger.debug(String.format("add: %s %d %d %d", name, start, docid, maxIndex));
+        }
     }
 
     public void append(int docid, Object[] pairs) {
@@ -246,10 +273,16 @@ public class SimTable implements KryoSerializable {
     }
 
     public TFloatList get(int docid) {
-        TFloatList res = null;
+        TFloatList res = new TFloatArrayList();
         if (indexer.containsKey(docid)) {
-            res = new TFloatArrayList();
             int idx = indexer.get(docid);
+            if (debug && debugPattern != null) {
+                Matcher matcher = debugPattern.matcher(String.valueOf(docid));
+                boolean match = matcher.matches();
+                if (match) {
+                    logger.info(String.format("get: %s %s %s", name, idx, docid));
+                }
+            }
             float ftmp = 0;
             while ((ftmp = probs.get(idx++)) >= 0 && (ftmp < 1)) {
                 res.add(ftmp);

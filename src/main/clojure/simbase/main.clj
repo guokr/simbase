@@ -5,10 +5,10 @@
 (def logger (org.slf4j.LoggerFactory/getLogger (class com.guokr.simbase.SimBase)))
 
 (defn- load-config []
-  (try 
+  (try
     (let [yaml (org.yaml.snakeyaml.Yaml.)]
       (.load yaml (java.io.FileReader. "config/server.yaml")))
-    (catch java.io.IOException e 
+    (catch java.io.IOException e
       (.warn logger "config file server.yaml was not found, loading the default config"))))
 
 (defn -main [& args]
@@ -22,13 +22,13 @@
     (pid/delete-on-shutdown! pid-file)
 
     (let [context  (java.util.HashMap. config)
-			    database (com.guokr.simbase.SimBase. context)
+                database (com.guokr.simbase.SimBase. context)
           server   (org.wahlque.net.server.Server. context
                      (org.wahlque.net.action.ActionRegistry/getInstance))]
-			(.put context "simbase" database) 
+            (.put context "simbase" database)
       (try
-			  (.run server)
+              (.run server)
         (catch java.lang.Throwable e (do
           (.error logger "Server Error!" e)
-			    (System/exit -1)))))))
+                (System/exit -1)))))))
 
