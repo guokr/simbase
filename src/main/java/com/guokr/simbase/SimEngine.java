@@ -34,15 +34,17 @@ public class SimEngine {
 	private boolean debug;
 	private long cloneThrottle;
 	private int bycount;
+	private String engineName;
 
-	public SimEngine(Map<String, Object> config) {
+	public SimEngine(String engineName, Map<String, Object> config) {
 
+		engineName = engineName;
 		try {
 			cloneThrottle = (Integer) config.get("cloneThrottle");
 			debug = (Boolean) config.get("debug");
 			bycount = (Integer) config.get("bycount");
 
-			table = new SimTable(config);
+			table = new SimTable(engineName, config);
 		} catch (NullPointerException e) {
 			logger.warn("YAML not found,loading default config");
 			cloneThrottle = 30000;
@@ -54,7 +56,7 @@ public class SimEngine {
 
 	/**
 	 * clone 函数之前必须验证
-	 * 
+	 *
 	 * @return cloneInterval 秒内clone过，则返回false,否则true
 	 **/
 	private boolean validateTime() {

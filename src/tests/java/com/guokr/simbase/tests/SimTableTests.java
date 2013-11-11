@@ -37,7 +37,7 @@ public class SimTableTests {
 
     @Test
     public void test3d() {
-        SimTable table = new SimTable();
+        SimTable table = new SimTable("test");
 
         table.add(2, new float[] { 0.9f, 0.1f, 0f });
         table.add(3, new float[] { 0.9f, 0f, 0.1f });
@@ -89,7 +89,7 @@ public class SimTableTests {
 
     @Test
     public void test4d() {
-        SimTable table = new SimTable();
+        SimTable table = new SimTable("test");
 
         table.add(0, new float[] { 0.18257418583505536f, 0.3651483716701107f, 0.5477225575051661f, 0.7302967433402214f });
         table.add(1, new float[] { 0.18257418583505536f, 0.3651483716701107f, 0.7302967433402214f, 0.5477225575051661f });
@@ -133,7 +133,7 @@ public class SimTableTests {
 
     @Test
     public void testClone() {
-        SimTable table = new SimTable();
+        SimTable table = new SimTable("test");
 
         table.add(2, new float[] { 0.9f, 0.1f, 0f });
         table.add(3, new float[] { 0.9f, 0f, 0.1f });
@@ -171,7 +171,7 @@ public class SimTableTests {
 
     @Test
     public void testDelete() {
-        SimTable table = new SimTable();
+        SimTable table = new SimTable("test");
 
         table.add(2, new float[] { 0.9f, 0.1f, 0f });
         table.add(3, new float[] { 0.9f, 0f, 0.1f });
@@ -239,7 +239,7 @@ public class SimTableTests {
         Map<String, Object> ctx = new HashMap<String, Object>();
         ctx.put("loadfactor", 0.75);
         ctx.put("maxlimits", 5);
-        SimTable table = new SimTable(ctx);
+        SimTable table = new SimTable("test", ctx);
 
         table.add(2, new float[] { 0.9f, 0.1f, 0f });
         table.add(3, new float[] { 0.9f, 0f, 0.1f });
@@ -290,13 +290,13 @@ public class SimTableTests {
         assertTrue((int) (1000 * table.similarity(2, 11)) == (int) (1000 * table.similarity(3, 13)));
         assertTrue((int) (1000 * table.similarity(2, 13)) == (int) (1000 * table.similarity(5, 7)));
     }
-        
+
     @Test
     public void testSerialization() {
         Map<String, Object> ctx = new HashMap<String, Object>();
         ctx.put("loadfactor", 0.75);
         ctx.put("maxlimits", 5);
-        final SimTable table = new SimTable(ctx);
+        final SimTable table = new SimTable("test", ctx);
 
         table.add(2, new float[] { 0.9f, 0.1f, 0f });
         table.add(3, new float[] { 0.9f, 0f, 0.1f });
@@ -311,7 +311,7 @@ public class SimTableTests {
         table.add(2, new float[] { 0.9f, 0.1f, 0f });
         table.add(3, new float[] { 0.9f, 0f, 0.1f });
 
-        final SimTable another = new SimTable();
+        final SimTable another = new SimTable("test");
 
         final Kryo kryo = new Kryo();
         PipedInputStream pis = new PipedInputStream();

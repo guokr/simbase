@@ -126,7 +126,7 @@ public class SimBase {
 
 	public void load(String key) {
 		if (!base.containsKey(key)) {
-			base.put(key, new SimEngine(context));
+			base.put(key, new SimEngine(key, context));
 		}
 		try {
 			base.get(key).load(key);
@@ -189,35 +189,35 @@ public class SimBase {
 
 	public void revise(String key, String[] schema) {
 		if (!base.containsKey(key)) {
-			base.put(key, new SimEngine(this.context));
+			base.put(key, new SimEngine(key, this.context));
 		}
 		base.get(key).revise(schema);
 	}
 
 	public void add(String key, int docid, float[] distr) {
 		if (!base.containsKey(key)) {
-			base.put(key, new SimEngine(this.context));
+			base.put(key, new SimEngine(key, this.context));
 		}
 		base.get(key).add(docid, distr);
 	}
 
 	public void append(String key, int docid, Object[] pairs) {
 		if (!base.containsKey(key)) {
-			base.put(key, new SimEngine(this.context));
+			base.put(key, new SimEngine(key, this.context));
 		}
 		base.get(key).append(docid, pairs);
 	}
 
 	public void put(String key, int docid, float[] distr) {
 		if (!base.containsKey(key)) {
-			base.put(key, new SimEngine(context));
+			base.put(key, new SimEngine(key, context));
 		}
 		base.get(key).put(docid, distr);
 	}
 
 	public void update(String key, int docid, Object[] pairs) {
 		if (!base.containsKey(key)) {
-			base.put(key, new SimEngine(context));
+			base.put(key, new SimEngine(key, context));
 		}
 		base.get(key).update(docid, pairs);
 	}

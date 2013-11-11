@@ -8,7 +8,7 @@ public class MemoryBenchmark {
 
 	public static void main(String[] args) {
 		long accumulated = 0;
-		SimTable engine = new SimTable();
+		SimTable engine = new SimTable("test");
 		for (int i = 0; i < 100000; i++) {
 
 			float total = 0;

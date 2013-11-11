@@ -35,14 +35,17 @@ public class SimTable implements KryoSerializable {
     private Map<String, Object>         context;
     private double                      loadfactor;
     private int                         maxlimits;
+    private String                      tableName;
 
-    public SimTable() {
+    public SimTable(String tableName) {
+        tableName = tableName;
         loadfactor = 0.75;
         maxlimits = 20;
     }
 
-    public SimTable(Map<String, Object> context) {
-        this.context = context;
+    public SimTable(String tableName, Map<String, Object> context) {
+        tableName = tableName;
+        context = context;
         loadfactor = (Double) context.get("loadfactor");
         maxlimits = (Integer) context.get("maxlimits");
     }
@@ -282,9 +285,9 @@ public class SimTable implements KryoSerializable {
     public SimTable clone() {
         SimTable peer;
         if (context == null) {
-            peer = new SimTable();
+            peer = new SimTable(tableName);
         } else {
-            peer = new SimTable(context);
+            peer = new SimTable(tableName, context);
         }
 
         peer.loadfactor = loadfactor;
@@ -333,6 +336,7 @@ public class SimTable implements KryoSerializable {
     }
 
     public void reload(SimTable table) {
+        tableName = table.tableName;
         loadfactor = table.loadfactor;
         maxlimits = table.maxlimits;
         probs = table.probs;
