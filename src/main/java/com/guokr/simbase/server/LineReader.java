@@ -132,10 +132,12 @@ public class LineReader {
             buffer.get(bytes);
             result = new String(bytes, SimUtils.UTF_8);
             index = index + nbytes;
+            buffer.position(index);
         }
 
         if (trySame(delims, buffer, index) == len) {
             index = index + len;
+            buffer.position(index);
         } else {
             result = null;
             String msg = String.format("Invalid character at: %d", index);
