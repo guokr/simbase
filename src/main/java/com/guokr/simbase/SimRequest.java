@@ -10,62 +10,8 @@ public class SimRequest {
     private int          toberead;
     private List<Object> last;
 
-    public void string(int size) {
-        if (toberead != 0) {
-            throw new IllegalStateException("reading for previous argument not finished");
-        }
-        toberead = size;
-    }
-
-    public void intlist(int size) {
-        if (toberead != 0) {
-            throw new IllegalStateException("reading for previous argument not finished");
-        }
-        toberead = size;
-        last = new ArrayList<Object>();
-        content.add(last);
-    }
-
-    public void floatlist(int size) {
-        if (toberead != 0) {
-            throw new IllegalStateException("reading for previous argument not finished");
-        }
-        toberead = size;
-        last = new ArrayList<Object>();
-        content.add(last);
-    }
-
     public SimRequest(int size) {
         this.size = size;
-    }
-
-    public void add(int arg) {
-        if (content.size() < size) {
-            if (toberead == 0) {
-                content.add(arg);
-            } else {
-                last.add(arg);
-                toberead--;
-            }
-        }
-    }
-
-    public void add(float arg) {
-        if (content.size() < size) {
-            if (toberead == 0) {
-                content.add(arg);
-            } else {
-                last.add(arg);
-                toberead--;
-            }
-        }
-    }
-
-    public void add(String arg) {
-        if (content.size() < size) {
-            content.add(arg);
-            toberead = toberead - arg.length();
-        }
     }
 
     public String name() {
@@ -80,8 +26,73 @@ public class SimRequest {
         return size - 1;
     }
 
+    public void list(int size) {
+        if (toberead != 0) {
+            throw new IllegalStateException("reading for previous argument not finished");
+        }
+        toberead = size;
+        last = new ArrayList<Object>();
+        content.add(last);
+    }
+
+    public void add(Object arg) {
+        if (content.size() < size) {
+            if (toberead == 0) {
+                content.add(arg);
+            } else {
+                last.add(arg);
+                toberead--;
+            }
+        }
+    }
+
     public Object arg(int idx) {
         return content.get(idx);
+    }
+
+    public int argint(int idx) {
+        return (int)content.get(idx);
+    }
+
+    public float argfloat(int idx) {
+        return (float)content.get(idx);
+    }
+
+    public String argstring(int idx) {
+        return (String)content.get(idx);
+    }
+
+    public int[] argarrayint(int idx) {
+        @SuppressWarnings("unchecked")
+        List<Object> list = (List<Object>) content.get(idx);
+        int len = list.size();
+        int[] result = new int[list.size()];
+        for (int i = 0; i < len; i++) {
+            result[i] = (int)list.get(i);
+        }
+        return result;
+    }
+
+    public float[] argarrayfloat(int idx) {
+        @SuppressWarnings("unchecked")
+        List<Object> list = (List<Object>) content.get(idx);
+        int len = list.size();
+        float[] result = new float[list.size()];
+        for (int i = 0; i < len; i++) {
+            result[i] = (float)list.get(i);
+        }
+        return result;
+    }
+
+    public String[] argarraystring(int idx) {
+        @SuppressWarnings("unchecked")
+        List<Object> list = (List<Object>) content.get(idx);
+        int len = list.size();
+        String[] result = new String[list.size()];
+        for (int i = 0; i < len; i++) {
+            result[i] = (String)list.get(i);
+        }
+        return result;
     }
 
 }

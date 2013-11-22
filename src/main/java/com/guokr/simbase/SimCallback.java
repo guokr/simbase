@@ -19,6 +19,14 @@ public abstract class SimCallback {
         buffer.put(SimUtils.CRLF);
     }
 
+    public void ok(String msg) {
+        byte[] bytes = SimUtils.bytes(msg);
+        buffer = ByteBuffer.allocate(bytes.length + 3);
+        buffer.put(SimUtils.PLUS);
+        buffer.put(bytes);
+        buffer.put(SimUtils.CRLF);
+    }
+
     public void error(String msg) {
         byte[] bytes = SimUtils.bytes(msg);
         buffer = ByteBuffer.allocate(bytes.length + 3);
@@ -27,8 +35,8 @@ public abstract class SimCallback {
         buffer.put(SimUtils.CRLF);
     }
 
-    public void status(int val) {
-        byte[] bytes = SimUtils.bytes(val);
+    public void status(int code) {
+        byte[] bytes = SimUtils.bytes(code);
         buffer = ByteBuffer.allocate(bytes.length + 3);
         buffer.put(SimUtils.COLON);
         buffer.put(bytes);

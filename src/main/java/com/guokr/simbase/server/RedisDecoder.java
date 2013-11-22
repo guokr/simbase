@@ -88,35 +88,34 @@ public class RedisDecoder {
                 } else {
                     lineReader.rollback();
                     state = State.READ_STRING;
-                    requests.string(nbytes);
                 }
                 break;
             case READ_NINTS:
                 nnums = lineReader.readSizeBy(buffer, SimUtils.SPACE);
                 state = State.READ_INTEGER;
-                requests.intarray(nnums);
+                requests.list(nnums);
                 break;
             case READ_NFLTS:
                 nnums = lineReader.readSizeBy(buffer, SimUtils.SPACE);
                 state = State.READ_FLOAT;
-                requests.floatarray(nnums);
+                requests.list(nnums);
                 break;
             case READ_INTEGER:
                 if (nnums > 1) {
-                    requests.arrayadd(lineReader.readIntegerBy(buffer, SimUtils.SPACE));
+                    requests.add(lineReader.readIntegerBy(buffer, SimUtils.SPACE));
                     nnums--;
                 } else if (nnums == 1) {
-                    requests.arrayadd(lineReader.readIntegerBy(buffer, SimUtils.CRLF));
+                    requests.add(lineReader.readIntegerBy(buffer, SimUtils.CRLF));
                     nnums--;
                     state = State.READ_ARGUMENT;
                 }
                 break;
             case READ_FLOAT:
                 if (nnums > 1) {
-                    requests.arrayadd(lineReader.readFloatBy(buffer, SimUtils.SPACE));
+                    requests.add(lineReader.readFloatBy(buffer, SimUtils.SPACE));
                     nnums--;
                 } else if (nnums == 1) {
-                    requests.arrayadd(lineReader.readFloatBy(buffer, SimUtils.CRLF));
+                    requests.add(lineReader.readFloatBy(buffer, SimUtils.CRLF));
                     nnums--;
                     state = State.READ_ARGUMENT;
                 }

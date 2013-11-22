@@ -7,8 +7,13 @@ import com.guokr.simbase.SimCommand;
 public class Ping extends SimCommand {
 
     @Override
+    public String signature() {
+        return "";
+    }
+
+    @Override
     public void invoke(SimEngine engine, SimCallback callback) {
-        callback.stringValue("pong");
+        callback.ok("PONG");
         callback.flip();
         callback.response();
     }

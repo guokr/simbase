@@ -23,24 +23,12 @@ public class RedisRequests implements Iterable<SimRequest> {
         list.add(last);
     }
 
-    public void string(int size) {
-        last.string(size);
+    public void list(int size) {
+        last.list(size);
     }
 
-    public void intarray(int size) {
-        last.intlist(size);
-    }
-
-    public void floatarray(int size) {
-        last.floatlist(size);
-    }
-
-    public void arrayadd(int num) {
-        last.add(num);
-    }
-
-    public void arrayadd(float num) {
-        last.add(num);
+    public void add(Object obj) {
+        last.add(obj);
     }
 
     public void set(String string) {

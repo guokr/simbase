@@ -7,7 +7,12 @@ import com.guokr.simbase.SimEngine;
 public class BGet extends SimCommand {
 
     @Override
-    public void invoke(SimEngine engine, Object bkey, SimCallback callback) {
+    public String signature() {
+        return "s";
+    }
+
+    @Override
+    public void invoke(SimEngine engine, String bkey, SimCallback callback) {
         engine.bget(callback, (String) bkey);
         callback.flip();
         callback.response();

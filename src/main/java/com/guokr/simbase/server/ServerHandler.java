@@ -7,8 +7,9 @@ import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import com.guokr.simbase.SimEngine;
 import com.guokr.simbase.SimCallback;
+import com.guokr.simbase.SimCommand;
+import com.guokr.simbase.SimEngine;
 import com.guokr.simbase.SimRegistry;
 import com.guokr.simbase.SimRequest;
 import com.guokr.simbase.SimUtils;
@@ -33,18 +34,68 @@ public class ServerHandler implements IHandler {
                     @Override
                     public void run() {
                         SimCallback callback = new ServerCallback(cb);
+                        SimCommand command = registry.get(request.name());
+                        String sig = command.signature();
                         switch (request.argsize()) {
                         case 0:
-                            registry.get(request.name()).invoke(engine, callback);
+                            command.invoke(engine, callback);
                             break;
                         case 1:
-                            registry.get(request.name()).invoke(engine, request.arg(0), callback);
+                            command.invoke(engine, request.argstring(0), callback);
                             break;
                         case 2:
-                            registry.get(request.name()).invoke(engine, request.arg(0), request.arg(1), callback);
+                            sig = sig.substring(1);
+                            if (sig.equals("s")) {
+                                command.invoke(engine, request.argstring(0), request.argstring(1), callback);
+                            } else if (sig.equals("i")) {
+                                command.invoke(engine, request.argstring(0), request.argint(1), callback);
+                            } else if (sig.equals("f")) {
+                                command.invoke(engine, request.argstring(0), request.argfloat(1), callback);
+                            } else if (sig.equals("S")) {
+                                command.invoke(engine, request.argstring(0), request.argarraystring(1), callback);
+                            } else if (sig.equals("I")) {
+                                command.invoke(engine, request.argstring(0), request.argarrayint(1), callback);
+                            } else if (sig.equals("F")) {
+                                command.invoke(engine, request.argstring(0), request.argarrayfloat(1), callback);
+                            }
                             break;
                         case 3:
-                            registry.get(request.name()).invoke(engine, request.arg(0), request.arg(1), request.arg(2), callback);
+                            sig = sig.substring(1);
+                            if (sig.equals("ss")) {
+                                command.invoke(engine, request.argstring(0), request.argstring(1), request.argstring(2), callback);
+                            } else if (sig.equals("si")) {
+                                command.invoke(engine, request.argstring(0), request.argstring(1), request.argint(2), callback);
+                            } else if (sig.equals("sf")) {
+                                command.invoke(engine, request.argstring(0), request.argstring(1), request.argfloat(2), callback);
+                            } else if (sig.equals("sS")) {
+                                command.invoke(engine, request.argstring(0), request.argstring(1), request.argarraystring(2), callback);
+                            } else if (sig.equals("sI")) {
+                                command.invoke(engine, request.argstring(0), request.argstring(1), request.argarrayint(2), callback);
+                            } else if (sig.equals("sF")) {
+                                command.invoke(engine, request.argstring(0), request.argstring(1), request.argarrayfloat(2), callback);
+                            } else if (sig.equals("is")) {
+                                command.invoke(engine, request.argstring(0), request.argint(1), request.argstring(2), callback);
+                            } else if (sig.equals("ii")) {
+                                command.invoke(engine, request.argstring(0), request.argint(1), request.argint(2), callback);
+                            } else if (sig.equals("if")) {
+                                command.invoke(engine, request.argstring(0), request.argint(1), request.argfloat(2), callback);
+                            } else if (sig.equals("iS")) {
+                                command.invoke(engine, request.argstring(0), request.argint(1), request.argarraystring(2), callback);
+                            } else if (sig.equals("iI")) {
+                                command.invoke(engine, request.argstring(0), request.argint(1), request.argarrayint(2), callback);
+                            } else if (sig.equals("iF")) {
+                                command.invoke(engine, request.argstring(0), request.argint(1), request.argarrayfloat(2), callback);
+                            } else if (sig.equals("fs")) {
+                                command.invoke(engine, request.argstring(0), request.argfloat(1), request.argstring(2), callback);
+                            } else if (sig.equals("fi")) {
+                                command.invoke(engine, request.argstring(0), request.argfloat(1), request.argint(2), callback);
+                            } else if (sig.equals("ff")) {
+                                command.invoke(engine, request.argstring(0), request.argfloat(1), request.argfloat(2), callback);
+                            } else if (sig.equals("fS")) {
+                                command.invoke(engine, request.argstring(0), request.argfloat(1), request.argarraystring(2), callback);
+                            } else if (sig.equals("fI")) {
+                                command.invoke(engine, request.argstring(0), request.argfloat(1), request.argarrayint(2), callback);
+                            }
                             break;
                         }
                     }

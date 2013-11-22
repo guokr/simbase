@@ -7,8 +7,13 @@ import com.guokr.simbase.SimEngine;
 public class BMk extends SimCommand {
 
     @Override
-    public void invoke(SimEngine engine, Object bkey, Object base, SimCallback callback) {
-        engine.bmk(callback, (String) bkey, (String[]) base);
+    public String signature() {
+        return "sS";
+    }
+
+    @Override
+    public void invoke(SimEngine engine, String bkey, String[] base, SimCallback callback) {
+        engine.bmk(callback, bkey, base);
         callback.flip();
         callback.response();
     }

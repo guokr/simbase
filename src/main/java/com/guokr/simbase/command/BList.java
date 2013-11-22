@@ -7,6 +7,11 @@ import com.guokr.simbase.SimEngine;
 public class BList extends SimCommand {
 
     @Override
+    public String signature() {
+        return "";
+    }
+
+    @Override
     public void invoke(SimEngine engine, SimCallback callback) {
         engine.blist(callback);
         callback.flip();
