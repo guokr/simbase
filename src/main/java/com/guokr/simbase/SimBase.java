@@ -7,8 +7,8 @@ import java.util.Map;
 
 import org.yaml.snakeyaml.Yaml;
 
+import com.guokr.simbase.command.Ping;
 import com.guokr.simbase.engine.SimEngineImpl;
-import com.guokr.simbase.handler.Ping;
 import com.guokr.simbase.server.ServerHandler;
 import com.guokr.simbase.server.SimServer;
 
