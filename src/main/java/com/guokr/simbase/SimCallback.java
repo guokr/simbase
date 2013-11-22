@@ -4,7 +4,7 @@ import java.nio.ByteBuffer;
 
 public abstract class SimCallback {
 
-    public ByteBuffer buffer = null;
+    public ByteBuffer buffer;
 
     public void flip() {
         if (buffer != null) {

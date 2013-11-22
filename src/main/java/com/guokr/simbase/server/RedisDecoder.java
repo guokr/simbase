@@ -129,7 +129,16 @@ public class RedisDecoder {
                 break;
             }
         }
+
+        if (state == State.READ_ARGUMENT) {
+            state = State.READ_END;
+        }
         return state == State.READ_END ? requests : null;
+    }
+
+    public void reset() {
+        state = State.READ_BEGIN;
+        lineReader.reset();
     }
 
 }

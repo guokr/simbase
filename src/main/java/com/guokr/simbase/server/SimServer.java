@@ -96,8 +96,7 @@ public class SimServer implements Runnable {
                     requests.channel = channel;
                     requests.remoteAddr = (InetSocketAddress) ch.socket().getRemoteSocketAddress();
                     handler.handle(requests, new RespCallback(key, this));
-                    // pipelining not supported : need queue to ensure order
-                    // atta.decoder.reset();
+                    atta.decoder.reset();
                 } else {
                     SimUtils.printTrace("requests null");
                 }

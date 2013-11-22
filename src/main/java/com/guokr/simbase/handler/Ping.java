@@ -3,6 +3,8 @@ package com.guokr.simbase.handler;
 import clojure.lang.IFn;
 import clojure.lang.ISeq;
 
+import com.guokr.simbase.server.ServerCallback;
+
 public class Ping implements IFn {
 
     @Override
@@ -35,8 +37,12 @@ public class Ping implements IFn {
     }
 
     @Override
-    public Object invoke(Object arg0, Object arg1) {
-        return invoke();
+    public Object invoke(Object engine, Object callback) {
+        ServerCallback cb = (ServerCallback) callback;
+        cb.stringValue("pong");
+        cb.flip();
+        cb.response.run(cb.buffer);
+        return true;
     }
 
     @Override
