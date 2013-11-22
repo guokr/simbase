@@ -4,16 +4,16 @@ import com.guokr.simbase.SimCallback;
 import com.guokr.simbase.SimCommand;
 import com.guokr.simbase.SimEngine;
 
-public class BGet extends SimCommand {
+public class RMk extends SimCommand {
 
     @Override
     public String signature() {
-        return "s";
+        return "ss";
     }
 
     @Override
-    public void invoke(SimEngine engine, String bkey, SimCallback callback) {
-        engine.bget(callback, bkey);
+    public void invoke(SimEngine engine, String vkeySource, String vkeyTarget, SimCallback callback) {
+        engine.rmk(callback, vkeySource, vkeyTarget);
         callback.flip();
         callback.response();
     }
