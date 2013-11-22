@@ -13,18 +13,19 @@ import java.util.concurrent.Executors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.guokr.simbase.SimEngine;
 import com.guokr.simbase.SimCallback;
 import com.guokr.simbase.SimContext;
 import com.guokr.simbase.errors.SimErrors;
 import com.guokr.simbase.store.Basis;
 
-public class SimEngine {
+public class SimEngineImpl implements SimEngine {
 
     enum Kind {
         BASIS, VECTORS, RECOMM
     };
 
-    private static final Logger          logger     = LoggerFactory.getLogger(SimEngine.class);
+    private static final Logger          logger     = LoggerFactory.getLogger(SimEngineImpl.class);
 
     private SimContext                   context;
 
@@ -39,7 +40,7 @@ public class SimEngine {
     private Map<String, SimBasis>        bases      = new HashMap<String, SimBasis>();
     private Map<String, ExecutorService> dataExecs  = new HashMap<String, ExecutorService>();
 
-    public SimEngine(SimContext simContext) {
+    public SimEngineImpl(SimContext simContext) {
         this.context = simContext;
         this.loadData();
         this.startCron();
@@ -106,6 +107,10 @@ public class SimEngine {
         cron.schedule(savetask, cronInterval, cronInterval);
     }
 
+    /* (non-Javadoc)
+     * @see com.guokr.simbase.engine.ISimEngine#cfg(com.guokr.simbase.SimCallback, java.lang.String)
+     */
+    @Override
     public void cfg(final SimCallback callback, final String key) {
         mngmExec.execute(new Runnable() {
             @Override
@@ -121,6 +126,10 @@ public class SimEngine {
         });
     }
 
+    /* (non-Javadoc)
+     * @see com.guokr.simbase.engine.ISimEngine#cfg(com.guokr.simbase.SimCallback, java.lang.String, java.lang.String)
+     */
+    @Override
     public void cfg(final SimCallback callback, final String key, final String val) {
         mngmExec.execute(new Runnable() {
             @Override
@@ -137,6 +146,10 @@ public class SimEngine {
         });
     }
 
+    /* (non-Javadoc)
+     * @see com.guokr.simbase.engine.ISimEngine#load(com.guokr.simbase.SimCallback, java.lang.String)
+     */
+    @Override
     public void load(final SimCallback callback, final String bkey) {
         validateKeyFormat(bkey);
         validateNotExistence(bkey);
@@ -155,6 +168,10 @@ public class SimEngine {
         });
     }
 
+    /* (non-Javadoc)
+     * @see com.guokr.simbase.engine.ISimEngine#save(com.guokr.simbase.SimCallback, java.lang.String)
+     */
+    @Override
     public void save(final SimCallback callback, final String bkey) {
         validateKind("save", bkey, Kind.BASIS);
         dataExecs.get(bkey).execute(new Runnable() {
@@ -172,6 +189,10 @@ public class SimEngine {
         });
     }
 
+    /* (non-Javadoc)
+     * @see com.guokr.simbase.engine.ISimEngine#xincr(com.guokr.simbase.SimCallback, java.lang.String, java.lang.String)
+     */
+    @Override
     public void xincr(final SimCallback callback, final String vkey, final String key) {
         validateKind("xincr", vkey, Kind.VECTORS);
         dataExecs.get(basisOf.get(vkey)).execute(new Runnable() {
@@ -188,6 +209,10 @@ public class SimEngine {
         });
     }
 
+    /* (non-Javadoc)
+     * @see com.guokr.simbase.engine.ISimEngine#xget(com.guokr.simbase.SimCallback, java.lang.String, java.lang.String)
+     */
+    @Override
     public void xget(final SimCallback callback, final String vkey, final String key) {
         validateKind("xget", vkey, Kind.VECTORS);
         dataExecs.get(basisOf.get(vkey)).execute(new Runnable() {
@@ -204,6 +229,10 @@ public class SimEngine {
         });
     }
 
+    /* (non-Javadoc)
+     * @see com.guokr.simbase.engine.ISimEngine#xlookup(com.guokr.simbase.SimCallback, java.lang.String, int)
+     */
+    @Override
     public void xlookup(final SimCallback callback, final String vkey, final int vecid) {
         validateKind("xlookup", vkey, Kind.VECTORS);
         dataExecs.get(basisOf.get(vkey)).execute(new Runnable() {
@@ -220,6 +249,10 @@ public class SimEngine {
         });
     }
 
+    /* (non-Javadoc)
+     * @see com.guokr.simbase.engine.ISimEngine#del(com.guokr.simbase.SimCallback, java.lang.String)
+     */
+    @Override
     public void del(final SimCallback callback, final String key) {
         validateExistence(key);
         dataExecs.get(basisOf.get(key)).execute(new Runnable() {
@@ -242,6 +275,10 @@ public class SimEngine {
         });
     }
 
+    /* (non-Javadoc)
+     * @see com.guokr.simbase.engine.ISimEngine#blist(com.guokr.simbase.SimCallback)
+     */
+    @Override
     public void blist(final SimCallback callback) {
         mngmExec.execute(new Runnable() {
             @Override
@@ -259,6 +296,10 @@ public class SimEngine {
         });
     }
 
+    /* (non-Javadoc)
+     * @see com.guokr.simbase.engine.ISimEngine#bmk(com.guokr.simbase.SimCallback, java.lang.String, java.lang.String[])
+     */
+    @Override
     public void bmk(final SimCallback callback, final String bkey, final String[] base) {
         validateKeyFormat(bkey);
         mngmExec.execute(new Runnable() {
@@ -281,6 +322,10 @@ public class SimEngine {
         });
     }
 
+    /* (non-Javadoc)
+     * @see com.guokr.simbase.engine.ISimEngine#brev(com.guokr.simbase.SimCallback, java.lang.String, java.lang.String[])
+     */
+    @Override
     public void brev(final SimCallback callback, final String bkey, final String[] base) {
         validateKind("brev", bkey, Kind.BASIS);
         dataExecs.get(bkey).execute(new Runnable() {
@@ -297,6 +342,10 @@ public class SimEngine {
         callback.ok();
     }
 
+    /* (non-Javadoc)
+     * @see com.guokr.simbase.engine.ISimEngine#bget(com.guokr.simbase.SimCallback, java.lang.String)
+     */
+    @Override
     public void bget(final SimCallback callback, final String bkey) {
         validateKind("bget", bkey, Kind.BASIS);
         dataExecs.get(bkey).execute(new Runnable() {
@@ -313,6 +362,10 @@ public class SimEngine {
         });
     }
 
+    /* (non-Javadoc)
+     * @see com.guokr.simbase.engine.ISimEngine#vlist(com.guokr.simbase.SimCallback, java.lang.String)
+     */
+    @Override
     public void vlist(final SimCallback callback, final String bkey) {
         validateKind("vlist", bkey, Kind.BASIS);
         mngmExec.execute(new Runnable() {
@@ -331,6 +384,10 @@ public class SimEngine {
         });
     }
 
+    /* (non-Javadoc)
+     * @see com.guokr.simbase.engine.ISimEngine#vmk(com.guokr.simbase.SimCallback, java.lang.String, java.lang.String)
+     */
+    @Override
     public void vmk(final SimCallback callback, final String bkey, final String vkey) {
         validateKind("vmk", bkey, Kind.BASIS);
         validateKeyFormat(vkey);
@@ -361,6 +418,10 @@ public class SimEngine {
 
     // CURD operations for one vector in vector-set
 
+    /* (non-Javadoc)
+     * @see com.guokr.simbase.engine.ISimEngine#vget(com.guokr.simbase.SimCallback, java.lang.String, int)
+     */
+    @Override
     public void vget(final SimCallback callback, final String vkey, final int vecid) {
         validateKind("vget", vkey, Kind.VECTORS);
         final String bkey = basisOf.get(vkey);
@@ -378,6 +439,10 @@ public class SimEngine {
         });
     }
 
+    /* (non-Javadoc)
+     * @see com.guokr.simbase.engine.ISimEngine#vset(com.guokr.simbase.SimCallback, java.lang.String, int, float[])
+     */
+    @Override
     public void vset(final SimCallback callback, final String vkey, final int vecid, final float[] distr) {
         validateKind("vset", vkey, Kind.VECTORS);
         final String bkey = basisOf.get(vkey);
@@ -395,6 +460,10 @@ public class SimEngine {
         callback.ok();
     }
 
+    /* (non-Javadoc)
+     * @see com.guokr.simbase.engine.ISimEngine#vacc(com.guokr.simbase.SimCallback, java.lang.String, int, float[])
+     */
+    @Override
     public void vacc(final SimCallback callback, final String vkey, final int vecid, final float[] distr) {
         this.validateKind("vacc", vkey, Kind.VECTORS);
         final String bkey = basisOf.get(vkey);
@@ -412,6 +481,10 @@ public class SimEngine {
         callback.ok();
     }
 
+    /* (non-Javadoc)
+     * @see com.guokr.simbase.engine.ISimEngine#vrem(com.guokr.simbase.SimCallback, java.lang.String, int)
+     */
+    @Override
     public void vrem(final SimCallback callback, final String vkey, final int vecid) {
         this.validateKind("vrem", vkey, Kind.VECTORS);
         final String bkey = basisOf.get(vkey);
@@ -429,6 +502,10 @@ public class SimEngine {
         callback.ok();
     }
 
+    /* (non-Javadoc)
+     * @see com.guokr.simbase.engine.ISimEngine#jget(com.guokr.simbase.SimCallback, java.lang.String, int)
+     */
+    @Override
     public void jget(final SimCallback callback, final String vkey, final int vecid) {
         validateExistence(vkey);
         final String bkey = basisOf.get(vkey);
@@ -446,6 +523,10 @@ public class SimEngine {
         });
     }
 
+    /* (non-Javadoc)
+     * @see com.guokr.simbase.engine.ISimEngine#jset(com.guokr.simbase.SimCallback, java.lang.String, int, java.lang.String)
+     */
+    @Override
     public void jset(final SimCallback callback, final String vkey, final int vecid, final String jsonlike) {
         validateKind("jset", vkey, Kind.VECTORS);
         final String bkey = basisOf.get(vkey);
@@ -463,6 +544,10 @@ public class SimEngine {
         callback.ok();
     }
 
+    /* (non-Javadoc)
+     * @see com.guokr.simbase.engine.ISimEngine#jacc(com.guokr.simbase.SimCallback, java.lang.String, int, java.lang.String)
+     */
+    @Override
     public void jacc(final SimCallback callback, final String vkey, final int vecid, final String jsonlike) {
         this.validateKind("jacc", vkey, Kind.VECTORS);
         final String bkey = basisOf.get(vkey);
@@ -480,11 +565,19 @@ public class SimEngine {
         callback.ok();
     }
 
+    /* (non-Javadoc)
+     * @see com.guokr.simbase.engine.ISimEngine#jrem(com.guokr.simbase.SimCallback, java.lang.String, int)
+     */
+    @Override
     public void jrem(final SimCallback callback, String vkey, int vecid) {
         vrem(callback, vkey, vecid);
     }
 
     // Internal use for client-side sparsification
+    /* (non-Javadoc)
+     * @see com.guokr.simbase.engine.ISimEngine#iget(com.guokr.simbase.SimCallback, java.lang.String, int)
+     */
+    @Override
     public void iget(final SimCallback callback, final String vkey, final int vecid) {
         validateExistence(vkey);
         final String bkey = basisOf.get(vkey);
@@ -503,6 +596,10 @@ public class SimEngine {
     }
 
     // Internal use for client-side sparsification
+    /* (non-Javadoc)
+     * @see com.guokr.simbase.engine.ISimEngine#iset(com.guokr.simbase.SimCallback, java.lang.String, int, int[])
+     */
+    @Override
     public void iset(final SimCallback callback, final String vkey, final int vecid, final int[] pairs) {
         validateKind("iset", vkey, Kind.VECTORS);
         final String bkey = basisOf.get(vkey);
@@ -521,6 +618,10 @@ public class SimEngine {
     }
 
     // Internal use for client-side sparsification
+    /* (non-Javadoc)
+     * @see com.guokr.simbase.engine.ISimEngine#iacc(com.guokr.simbase.SimCallback, java.lang.String, int, int[])
+     */
+    @Override
     public void iacc(final SimCallback callback, final String vkey, final int vecid, final int[] pairs) {
         this.validateKind("iacc", vkey, Kind.VECTORS);
         final String bkey = basisOf.get(vkey);
@@ -539,10 +640,18 @@ public class SimEngine {
     }
 
     // Internal use for client-side sparsification
+    /* (non-Javadoc)
+     * @see com.guokr.simbase.engine.ISimEngine#irem(com.guokr.simbase.SimCallback, java.lang.String, int)
+     */
+    @Override
     public void irem(final SimCallback callback, String vkey, int vecid) {
         vrem(callback, vkey, vecid);
     }
 
+    /* (non-Javadoc)
+     * @see com.guokr.simbase.engine.ISimEngine#rlist(com.guokr.simbase.SimCallback, java.lang.String)
+     */
+    @Override
     public void rlist(final SimCallback callback, final String vkey) {
         validateKind("rlist", vkey, Kind.VECTORS);
         mngmExec.execute(new Runnable() {
@@ -561,6 +670,10 @@ public class SimEngine {
         });
     }
 
+    /* (non-Javadoc)
+     * @see com.guokr.simbase.engine.ISimEngine#rmk(com.guokr.simbase.SimCallback, java.lang.String, java.lang.String)
+     */
+    @Override
     public void rmk(final SimCallback callback, final String vkeySource, final String vkeyTarget) {
         validateKind("rmk", vkeySource, Kind.VECTORS);
         validateKind("rmk", vkeyTarget, Kind.VECTORS);
@@ -583,6 +696,10 @@ public class SimEngine {
         });
     }
 
+    /* (non-Javadoc)
+     * @see com.guokr.simbase.engine.ISimEngine#rget(com.guokr.simbase.SimCallback, java.lang.String, int, java.lang.String)
+     */
+    @Override
     public void rget(final SimCallback callback, final String vkeySource, final int vecid, final String vkeyTarget) {
         validateKind("rget", vkeySource, Kind.VECTORS);
         validateKind("rget", vkeyTarget, Kind.VECTORS);
@@ -603,6 +720,10 @@ public class SimEngine {
         });
     }
 
+    /* (non-Javadoc)
+     * @see com.guokr.simbase.engine.ISimEngine#rrec(com.guokr.simbase.SimCallback, java.lang.String, int, java.lang.String)
+     */
+    @Override
     public void rrec(final SimCallback callback, final String vkeySource, final int vecid, final String vkeyTarget) {
         validateKind("rget", vkeySource, Kind.VECTORS);
         validateKind("rget", vkeyTarget, Kind.VECTORS);

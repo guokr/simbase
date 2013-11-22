@@ -3,17 +3,15 @@ package com.guokr.simbase;
 import java.util.HashMap;
 import java.util.Map;
 
-import clojure.lang.IFn;
-
 public class SimRegistry {
 
-    private Map<String, IFn> registry = new HashMap<String, IFn>();
+    private Map<String, SimCommand> registry = new HashMap<String, SimCommand>();
 
-    public void add(String key, IFn fn) {
-        registry.put(key, fn);
+    public void add(String key, SimCommand cmd) {
+        registry.put(key, cmd);
     }
 
-    public IFn get(String key) {
+    public SimCommand get(String key) {
         return registry.get(key);
     }
 

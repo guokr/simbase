@@ -101,4 +101,6 @@ public abstract class SimCallback {
         buffer.put(SimUtils.CRLF);
     }
 
+    public abstract void response();
+
 }

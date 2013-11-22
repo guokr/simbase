@@ -10,4 +10,8 @@ public class ServerCallback extends SimCallback {
         this.response = cb;
     }
 
+    public void response() {
+        this.response.run(this.buffer);
+    }
+
 }
