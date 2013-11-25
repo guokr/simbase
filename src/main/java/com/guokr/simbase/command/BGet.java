@@ -14,8 +14,6 @@ public class BGet extends SimCommand {
     @Override
     public void invoke(SimEngine engine, String bkey, SimCallback callback) {
         engine.bget(callback, bkey);
-        callback.flip();
-        callback.response();
     }
 
 }

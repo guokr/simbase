@@ -14,8 +14,6 @@ public class BList extends SimCommand {
     @Override
     public void invoke(SimEngine engine, SimCallback callback) {
         engine.blist(callback);
-        callback.flip();
-        callback.response();
     }
 
 }

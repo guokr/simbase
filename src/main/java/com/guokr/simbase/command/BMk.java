@@ -14,8 +14,6 @@ public class BMk extends SimCommand {
     @Override
     public void invoke(SimEngine engine, String bkey, String[] base, SimCallback callback) {
         engine.bmk(callback, bkey, base);
-        callback.flip();
-        callback.response();
     }
 
 }

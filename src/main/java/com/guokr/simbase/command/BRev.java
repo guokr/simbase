@@ -14,8 +14,6 @@ public class BRev extends SimCommand {
     @Override
     public void invoke(SimEngine engine, String bkey, String[] base, SimCallback callback) {
         engine.brev(callback, bkey, base);
-        callback.flip();
-        callback.response();
     }
 
 }
