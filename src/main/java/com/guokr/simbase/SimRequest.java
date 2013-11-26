@@ -95,4 +95,13 @@ public class SimRequest {
         return result;
     }
 
+    public String[] rest(int idx) {
+        int len = this.content.size();
+        String[] results = new String[len - idx];
+        for (int i = idx; i < len; i++) {
+            results[i - idx] = this.content.get(i).toString();
+        }
+        return results;
+    }
+
 }

@@ -36,7 +36,7 @@ public class ServerHandler implements IHandler {
                         SimCallback callback = new ServerCallback(cb);
                         SimCommand command = registry.get(request.name());
                         String sig = command.signature();
-                        switch (request.argsize()) {
+                        switch (sig.length()) {
                         case 0:
                             command.invoke(engine, callback);
                             break;
@@ -52,7 +52,7 @@ public class ServerHandler implements IHandler {
                             } else if (sig.equals("f")) {
                                 command.invoke(engine, request.argstring(0), request.argfloat(1), callback);
                             } else if (sig.equals("S")) {
-                                command.invoke(engine, request.argstring(0), request.argarraystring(1), callback);
+                                command.invoke(engine, request.argstring(0), request.rest(1), callback);
                             } else if (sig.equals("I")) {
                                 command.invoke(engine, request.argstring(0), request.argarrayint(1), callback);
                             } else if (sig.equals("F")) {
@@ -68,7 +68,7 @@ public class ServerHandler implements IHandler {
                             } else if (sig.equals("sf")) {
                                 command.invoke(engine, request.argstring(0), request.argstring(1), request.argfloat(2), callback);
                             } else if (sig.equals("sS")) {
-                                command.invoke(engine, request.argstring(0), request.argstring(1), request.argarraystring(2), callback);
+                                command.invoke(engine, request.argstring(0), request.argstring(1), request.rest(2), callback);
                             } else if (sig.equals("sI")) {
                                 command.invoke(engine, request.argstring(0), request.argstring(1), request.argarrayint(2), callback);
                             } else if (sig.equals("sF")) {
@@ -80,7 +80,7 @@ public class ServerHandler implements IHandler {
                             } else if (sig.equals("if")) {
                                 command.invoke(engine, request.argstring(0), request.argint(1), request.argfloat(2), callback);
                             } else if (sig.equals("iS")) {
-                                command.invoke(engine, request.argstring(0), request.argint(1), request.argarraystring(2), callback);
+                                command.invoke(engine, request.argstring(0), request.argint(1), request.rest(2), callback);
                             } else if (sig.equals("iI")) {
                                 command.invoke(engine, request.argstring(0), request.argint(1), request.argarrayint(2), callback);
                             } else if (sig.equals("iF")) {
@@ -92,7 +92,7 @@ public class ServerHandler implements IHandler {
                             } else if (sig.equals("ff")) {
                                 command.invoke(engine, request.argstring(0), request.argfloat(1), request.argfloat(2), callback);
                             } else if (sig.equals("fS")) {
-                                command.invoke(engine, request.argstring(0), request.argfloat(1), request.argarraystring(2), callback);
+                                command.invoke(engine, request.argstring(0), request.argfloat(1), request.rest(2), callback);
                             } else if (sig.equals("fI")) {
                                 command.invoke(engine, request.argstring(0), request.argfloat(1), request.argarrayint(2), callback);
                             }

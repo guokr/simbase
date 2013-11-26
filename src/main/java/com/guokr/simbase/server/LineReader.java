@@ -1,38 +1,33 @@
 package com.guokr.simbase.server;
 
 import java.nio.ByteBuffer;
+import java.util.Stack;
 
 import com.guokr.simbase.SimUtils;
 
 public class LineReader {
 
-    int index = 0, mark = -1;
+    int index = 0;
+    Stack<Integer> mark = new Stack<Integer>();
 
     public LineReader() {
     }
 
     public void reset() {
         index = 0;
-        mark = -1;
+        mark.clear();
     }
 
     public void begin() {
-        if (mark != -1) {
-            throw new IllegalStateException("embeded transcation is not allowed!");
-        }
-        mark = index;
+        mark.push(index);
     }
 
     public void commit() {
-        if (mark != -1) {
-            mark = -1;
-        }
+        mark.pop();
     }
 
     public void rollback() {
-        if (mark != -1) {
-            index = mark;
-        }
+        index = mark.pop();
     }
 
     public int trySame(byte[] checked, ByteBuffer buffer, int index) {
@@ -45,8 +40,9 @@ public class LineReader {
 
     public byte readByte(ByteBuffer buffer) {
         byte result = buffer.get(index);
-        if (mark == -1) {
-            buffer.position(index++);
+        index++;
+        if (mark.empty()) {
+            buffer.position(index);
         }
         return result;
     }
@@ -77,7 +73,7 @@ public class LineReader {
             next = buffer.get(index++);
         }
 
-        if (mark == -1) {
+        if (mark.empty()) {
             buffer.position(index);
         }
 
@@ -112,7 +108,7 @@ public class LineReader {
             next = buffer.get(index++);
         }
 
-        if (mark == -1) {
+        if (mark.empty()) {
             buffer.position(index);
         }
 

@@ -55,6 +55,10 @@ public class SimUtils {
         System.err.print(str.getBuffer().toString());
     }
 
+    public static byte[] size(int length) {
+        return bytes(String.valueOf(length));
+    }
+
     public static byte[] size(byte[] bytes) {
         int length = bytes.length;
         return bytes(String.valueOf(length));
