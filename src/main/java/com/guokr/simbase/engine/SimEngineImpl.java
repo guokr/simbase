@@ -274,14 +274,15 @@ public class SimEngineImpl implements SimEngine {
 
     @Override
     public void bmk(final SimCallback callback, final String bkey, final String[] base) {
-        validateKeyFormat(bkey);
         mngmExec.execute(new Runnable() {
             @Override
             public void run() {
                 try {
+                    validateKeyFormat(bkey);
+
                     Basis basis = new Basis(base);
 
-                    bases.put(bkey, new SimBasis(context.getSub("defaults", "vectorset"), basis));
+                    bases.put(bkey, new SimBasis(context.getSub("defaults", "basis"), basis));
                     basisOf.put(bkey, bkey);
                     dataExecs.put(bkey, Executors.newSingleThreadExecutor());
 
@@ -305,6 +306,7 @@ public class SimEngineImpl implements SimEngine {
             @Override
             public void run() {
                 try {
+                    validateKeyFormat(bkey);
                     bases.get(bkey).brev(base);
                     callback.ok();
                 } catch (Throwable ex) {
@@ -321,11 +323,11 @@ public class SimEngineImpl implements SimEngine {
 
     @Override
     public void bget(final SimCallback callback, final String bkey) {
-        validateKind("bget", bkey, Kind.BASIS);
         dataExecs.get(bkey).execute(new Runnable() {
             @Override
             public void run() {
                 try {
+                    validateKind("bget", bkey, Kind.BASIS);
                     callback.stringList(bases.get(bkey).bget());
                 } catch (Throwable ex) {
                     int code = SimErrors.lookup("bget", ex);
@@ -341,11 +343,11 @@ public class SimEngineImpl implements SimEngine {
 
     @Override
     public void vlist(final SimCallback callback, final String bkey) {
-        validateKind("vlist", bkey, Kind.BASIS);
         mngmExec.execute(new Runnable() {
             @Override
             public void run() {
                 try {
+                    validateKind("vlist", bkey, Kind.BASIS);
                     List<String> vkeys = vectorsOf.get(bkey);
                     Collections.sort(vkeys);
                     callback.stringList((String[]) vkeys.toArray(new String[vkeys.size()]));

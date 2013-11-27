@@ -184,10 +184,12 @@ public class SimContext extends HashMap<String, Object> {
     public SimContext getSub(String... keys) {
         Map<String, Object> intermedia = this;
         for (String key : keys) {
-            try {
-                intermedia = (Map<String, Object>) intermedia.get(key);
-            } catch (ClassCastException e) {
-                intermedia = null;
+            if (intermedia != null) {
+                try {
+                    intermedia = (Map<String, Object>) intermedia.get(key);
+                } catch (ClassCastException e) {
+                    intermedia = null;
+                }
             }
         }
         if (intermedia == null) {
