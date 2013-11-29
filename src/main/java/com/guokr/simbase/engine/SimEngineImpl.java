@@ -54,19 +54,22 @@ public class SimEngineImpl implements SimEngine {
 
     private void validateExistence(String toCheck) throws IllegalArgumentException {
         if (!basisOf.containsKey(toCheck)) {
-            throw new IllegalArgumentException("Data entry[" + toCheck + "] should not exist on server before this operation!");
+            throw new IllegalArgumentException("Data entry[" + toCheck
+                    + "] should not exist on server before this operation!");
         }
     }
 
     private void validateNotExistence(String toCheck) throws IllegalArgumentException {
         if (basisOf.containsKey(toCheck)) {
-            throw new IllegalArgumentException("Data entry[" + toCheck + "] should not exist on server before this operation!");
+            throw new IllegalArgumentException("Data entry[" + toCheck
+                    + "] should not exist on server before this operation!");
         }
     }
 
     private void validateKind(String op, String toCheck, Kind kindShouldBe) throws IllegalArgumentException {
         if (!kindOf.containsKey(toCheck) || !kindShouldBe.equals(kindOf.get(toCheck))) {
-            throw new IllegalArgumentException("Invalid operation[" + op + "] on kind[" + kindShouldBe + "] with:" + toCheck);
+            throw new IllegalArgumentException("Invalid operation[" + op + "] on kind[" + kindShouldBe + "] with:"
+                    + toCheck);
         }
     }
 
@@ -284,6 +287,7 @@ public class SimEngineImpl implements SimEngine {
 
                     bases.put(bkey, new SimBasis(context.getSub("defaults", "basis"), basis));
                     basisOf.put(bkey, bkey);
+                    kindOf.put(bkey, Kind.BASIS);
                     dataExecs.put(bkey, Executors.newSingleThreadExecutor());
 
                     callback.ok();
@@ -349,7 +353,11 @@ public class SimEngineImpl implements SimEngine {
                 try {
                     validateKind("vlist", bkey, Kind.BASIS);
                     List<String> vkeys = vectorsOf.get(bkey);
-                    Collections.sort(vkeys);
+                    if (vkeys == null) {
+                        vkeys = new ArrayList<String>();
+                    } else {
+                        Collections.sort(vkeys);
+                    }
                     callback.stringList((String[]) vkeys.toArray(new String[vkeys.size()]));
                 } catch (Throwable ex) {
                     int code = SimErrors.lookup("vlist", ex);
