@@ -5,10 +5,8 @@ import java.util.List;
 
 public class SimRequest {
 
-    private List<Object> content = new ArrayList<Object>();
+    private List<String> content = new ArrayList<String>();
     private int          size;
-    private int          toberead;
-    private List<Object> last;
 
     public SimRequest(int size) {
         this.size = size;
@@ -26,76 +24,43 @@ public class SimRequest {
         return size - 1;
     }
 
-    public void list(int size) {
-        if (toberead != 0) {
-            throw new IllegalStateException("reading for previous argument not finished");
-        }
-        toberead = size;
-        last = new ArrayList<Object>();
-        content.add(last);
-    }
-
-    public void add(Object arg) {
+    public void add(String s) {
         if (content.size() < size) {
-            if (toberead == 0) {
-                content.add(arg);
-            } else {
-                last.add(arg);
-                toberead--;
-            }
+            content.add(s);
         }
     }
 
-    public Object arg(int idx) {
+    public int argi(int idx) {
+        return Integer.parseInt(content.get(idx));
+    }
+
+    public float argf(int idx) {
+        return Float.parseFloat(content.get(idx));
+    }
+
+    public String args(int idx) {
         return content.get(idx);
     }
 
-    public int argint(int idx) {
-        return (int)content.get(idx);
-    }
-
-    public float argfloat(int idx) {
-        return (float)content.get(idx);
-    }
-
-    public String argstring(int idx) {
-        return (String)content.get(idx);
-    }
-
-    public int[] argarrayint(int idx) {
-        @SuppressWarnings("unchecked")
-        List<Object> list = (List<Object>) content.get(idx);
-        int len = list.size();
-        int[] result = new int[list.size()];
-        for (int i = 0; i < len; i++) {
-            result[i] = (int)list.get(i);
+    public int[] argI(int idx) {
+        int len = this.content.size();
+        int[] results = new int[len - idx];
+        for (int i = idx; i < len; i++) {
+            results[i - idx] = Integer.parseInt(this.content.get(i));
         }
-        return result;
+        return results;
     }
 
-    public float[] argarrayfloat(int idx) {
-        @SuppressWarnings("unchecked")
-        List<Object> list = (List<Object>) content.get(idx);
-        int len = list.size();
-        float[] result = new float[list.size()];
-        for (int i = 0; i < len; i++) {
-            result[i] = (float)list.get(i);
+    public float[] argF(int idx) {
+        int len = this.content.size();
+        float[] results = new float[len - idx];
+        for (int i = idx; i < len; i++) {
+            results[i - idx] = Float.parseFloat(this.content.get(i));
         }
-        return result;
+        return results;
     }
 
-    public String[] argarraystring(int idx) {
-        @SuppressWarnings("unchecked")
-        List<Object> list = (List<Object>) content.get(idx);
-        int len = list.size();
-        String[] result = new String[list.size()];
-        for (int i = 0; i < len; i++) {
-            result[i] = (String)list.get(i);
-        }
-        return result;
-    }
-
-    public String[] rest(int idx) {
+    public String[] argS(int idx) {
         int len = this.content.size();
         String[] results = new String[len - idx];
         for (int i = idx; i < len; i++) {

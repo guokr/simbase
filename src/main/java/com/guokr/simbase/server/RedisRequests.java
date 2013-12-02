@@ -23,16 +23,8 @@ public class RedisRequests implements Iterable<SimRequest> {
         list.add(last);
     }
 
-    public void list(int size) {
-        last.list(size);
-    }
-
-    public void add(Object obj) {
-        last.add(obj);
-    }
-
-    public void set(String string) {
-        last.add(string);
+    public void add(String s) {
+        last.add(s);
     }
 
     @Override
