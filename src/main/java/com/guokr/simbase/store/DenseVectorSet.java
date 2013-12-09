@@ -5,147 +5,130 @@ import gnu.trove.list.array.TFloatArrayList;
 import gnu.trove.map.TIntIntMap;
 import gnu.trove.map.hash.TIntIntHashMap;
 
-import java.util.Map;
+public class DenseVectorSet implements VectorSet {
 
-public class DenseVectorSet extends AbstractVectorSet {
-	private TIntIntMap vecidToidx = new TIntIntHashMap();
-	TFloatList hive = new TFloatArrayList();
+    private TFloatList probs   = new TFloatArrayList();
+    private TIntIntMap indexer = new TIntIntHashMap();
 
-	public DenseVectorSet(Map<String, Object> config, Basis basis) {
-		super(config, basis);
-	}
+    private float      accumuFactor;
+    int                sparseFactor;
 
-	public int size() {
-		return vecidToidx.size();
-	}
+    private Basis      base;
 
-	private void validateVecid(int vecid) throws Exception {
-		if (!vecidToidx.containsKey(vecid)) {
-			throw new Exception("Invalid vector id");
-		}
-	}
+    public DenseVectorSet(Basis base) {
+        this(base, 0.99f, 4096);
+    }
 
-	private void validateDistr(float[] distr) throws Exception {
-		if (distr.length > getBasis().size()) {
-			throw new Exception("Invalid vector length");
-		}
-		float f = 0;
-		for (float d : distr) {
-			f += d;
-		}
-		if (1 - f < 0.0001) {
-			throw new Exception("The sum of argument distr is more than 1.0");
-		}
-	}
+    public DenseVectorSet(Basis base, float accumuFactor, int sparseFactor) {
+        this.base = base;
+        this.accumuFactor = accumuFactor;
+        this.sparseFactor = sparseFactor;
+    }
 
-	public void set(int vecid, float[] distr) throws Exception {
-		validateDistr(distr);
+    @Override
+    public void remove(int vecid) {
+        if (indexer.containsKey(vecid)) {
+            int cursor = indexer.get(vecid);
+            while (true) {
+                float val = probs.get(cursor);
+                if (val < 0f) {
+                    break;
+                }
+                if (val >= 1f) {
+                    probs.set(cursor, -1);
+                    cursor++;
+                    val = probs.get(cursor);
+                    probs.set(cursor, -1);
+                    break;
+                }
 
-		int idx = 0;
-		int size = 0;
-		if (vecidToidx.containsKey(vecid)) {
-			idx = vecidToidx.get(vecid);
-			size = getSlotSize(idx);
-			if (size < distr.length) {
-				discardSlot(idx);
-				allocSlot(size, vecid, distr);
-			} else {
-				updateSlot(idx, distr);
-			}
-		} else {
-			size = distr.length;
-			allocSlot(size, vecid, distr);
-		}
-	}
+                probs.set(cursor, -1);
+                cursor++;
+            }
+        }
 
-	private int getSlotSize(int idx) {
-		int size = 0;
-		while (hive.get(idx++) < 1) {
-			size++;
-		}
-		return size;
-	}
+        indexer.remove(vecid);
+    }
 
-	private void updateSlot(int idx, float[] distr) {
-		float length = 0;
-		int lenIdx = idx++;
-		for (float val : distr) {
-			assert hive.get(idx) < 1;
-			hive.set(idx++, val);
-			length += val * val;
-		}
-		assert hive.get(idx) > 1;
-		hive.set(lenIdx, length);
-	}
+    @Override
+    public float[] get(int vecid) {
+        float[] result = new float[this.base.size()];
+        if (indexer.containsKey(vecid)) {
+            float ftmp = 0;
+            int cursor = 0;
+            int start = indexer.get(vecid);
+            while ((ftmp = probs.get(start + cursor++)) >= 0 && (ftmp < 1)) {
+                result[cursor] = ftmp;
+            }
+        }
+        return result;
+    }
 
-	private void discardSlot(int begin) {
-		while (hive.get(begin) < 1) {
-			hive.set(begin++, -1);
-		}
-		hive.set(begin, -1);
-	}
+    @Override
+    public void add(int vecid, float[] distr) {
+        if (!indexer.containsKey(vecid)) {
+            float length = 0;
+            int start = probs.size();
+            indexer.put(vecid, start);
+            for (float val : distr) {
+                probs.add(val);
+                length += val * val;
+            }
+            probs.add((float) (vecid + 1));
+            probs.add(length);
+        }
+    }
 
-	private void allocSlot(int size, int vecid, float[] distr) {
-		float length = 0;
-		int idx = hive.size();
+    @Override
+    public void set(int vecid, float[] distr) {
+        if (indexer.containsKey(vecid)) {
+            float length = 0;
+            int cursor = indexer.get(vecid);
+            for (float val : distr) {
+                probs.set(cursor, val);
+                length += val * val;
+                cursor++;
+            }
+            probs.set(cursor++, (float) (vecid + 1));
+            probs.set(cursor, length);
+        }
+    }
 
-		hive.add(0);
+    @Override
+    public void accumulate(int vecid, float[] distr) {
+        if (indexer.containsKey(vecid)) {
+            float length = 0;
+            int cursor = indexer.get(vecid);
+            for (float newval : distr) {
+                float oldval = probs.get(cursor);
+                float val = accumuFactor * oldval + (1f - accumuFactor) * newval;
+                probs.set(cursor, val);
+                length += val * val;
+                cursor++;
+            }
+            probs.set(cursor++, (float) (vecid + 1));
+            probs.set(cursor, length);
+        }
+    }
 
-		for (float val : distr) {
-			hive.add(val);
-			length += val * val;
-		}
-		hive.add((float) (vecid + 1));
-		hive.set(idx, length);
+    @Override
+    public int[] _get(int vecid) {
+        return base.sparsify(sparseFactor, get(vecid));
+    }
 
-		vecidToidx.put(vecid, idx);
-	}
+    @Override
+    public void _add(int vecid, int[] pairs) {
+        this.add(vecid, base.densify(sparseFactor, pairs));
+    }
 
-	public void accumulate(int vecid, float[] distr) {
-		// TODO Auto-generated method stub
-	}
+    @Override
+    public void _set(int vecid, int[] pairs) {
+        this.set(vecid, base.densify(sparseFactor, pairs));
+    }
 
-	public float[] get(int vecid) throws Exception {
-		validateVecid(vecid);
-		float[] res = null;
-		int idx = vecidToidx.get(vecid);
-		int size = getSlotSize(idx);
-		res = new float[size];
-		idx++; // 跳过norm数据
-		for (int i = 0; i < size; i++) {
-			res[i] = hive.get(idx + i);
-		}
-		return res;
-	}
+    @Override
+    public void _accumulate(int vecid, int[] pairs) {
+        this.accumulate(vecid, base.densify(sparseFactor, pairs));
+    }
 
-	public void remove(int vecid) throws Exception {
-		validateVecid(vecid);
-		int idx = vecidToidx.get(vecid);
-		vecidToidx.remove(vecid);
-		discardSlot(idx);
-	}
-
-	public float norm(int vecid) throws Exception {
-		validateVecid(vecid);
-		return hive.get(vecidToidx.get(vecid));
-	}
-
-	public DenseVectorSet clone() {
-		DenseVectorSet newSet = new DenseVectorSet(getConfig(), getBasis());
-		int[] vecids = vecidToidx.keys();
-		int idx;
-		float f;
-		for (int vecid : vecids) {
-			idx = vecidToidx.get(vecid);
-			f = hive.get(idx++);
-			newSet.vecidToidx.put(vecid, newSet.hive.size());
-			while (f < 1) {
-				newSet.hive.add(f);
-				f = hive.get(idx++);
-			}
-			newSet.hive.add(f); // 结束标记
-		}
-		return newSet;
-
-	}
 }

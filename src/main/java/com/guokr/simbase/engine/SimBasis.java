@@ -9,7 +9,9 @@ import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
 import com.guokr.simbase.SimContext;
 import com.guokr.simbase.store.Basis;
+import com.guokr.simbase.store.DenseVectorSet;
 import com.guokr.simbase.store.Recommendation;
+import com.guokr.simbase.store.SparseVectorSet;
 import com.guokr.simbase.store.VectorSet;
 
 public class SimBasis implements KryoSerializable {
@@ -36,8 +38,12 @@ public class SimBasis implements KryoSerializable {
         this.base.revise(base);
     }
 
-    public void vmk(String vkey) {
-        this.vectorSets.put(vkey, new VectorSet(context.getSub(vkey), this.base));
+    public void vmk(String vkey, String type) {
+        if (type.equals("dense")) {
+            this.vectorSets.put(vkey, new DenseVectorSet(this.base));
+        } else {
+            this.vectorSets.put(vkey, new SparseVectorSet(this.base));
+        }
     }
 
     public float[] vget(String vkey, int vecid) {
@@ -56,24 +62,16 @@ public class SimBasis implements KryoSerializable {
         this.vectorSets.get(vkey).remove(vecid);
     }
 
-    public String jget(String vkey, int vecid) {
-        return null;
-    }
-
-    public void jset(String vkey, int vecid, String jsonlike) {
-    }
-
-    public void jacc(String vkey, int vecid, String jsonlike) {
-    }
-
     public int[] iget(String vkey, int vecid) {
-        return null;
+        return this.vectorSets.get(vkey)._get(vecid);
     }
 
     public void iset(String vkey, int vecid, int[] pairs) {
+        this.vectorSets.get(vkey)._set(vecid, pairs);
     }
 
     public void iacc(String vkey, int vecid, int[] pairs) {
+        this.vectorSets.get(vkey)._accumulate(vecid, pairs);
     }
 
     public void rmk(String vkeySource, String vkeyTarget) {

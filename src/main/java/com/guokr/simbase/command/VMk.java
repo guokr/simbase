@@ -8,12 +8,12 @@ public class VMk extends SimCommand {
 
     @Override
     public String signature() {
-        return "ss";
+        return "sss";
     }
 
     @Override
-    public void invoke(SimEngine engine, String bkey, String vkey, SimCallback callback) {
-        engine.vmk(callback, bkey, vkey);
+    public void invoke(SimEngine engine, String bkey, String vkey, String type, SimCallback callback) {
+        engine.vmk(callback, bkey, vkey, type);
         callback.flip();
         callback.response();
     }

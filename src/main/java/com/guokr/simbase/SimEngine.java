@@ -29,7 +29,7 @@ public interface SimEngine {
 
     public abstract void vlist(SimCallback callback, String bkey);
 
-    public abstract void vmk(SimCallback callback, String bkey, String vkey);
+    public abstract void vmk(SimCallback callback, String bkey, String vkey, String type);
 
     public abstract void vget(SimCallback callback, String vkey, int vecid);
 
@@ -38,14 +38,6 @@ public interface SimEngine {
     public abstract void vacc(SimCallback callback, String vkey, int vecid, float[] distr);
 
     public abstract void vrem(SimCallback callback, String vkey, int vecid);
-
-    public abstract void jget(SimCallback callback, String vkey, int vecid);
-
-    public abstract void jset(SimCallback callback, String vkey, int vecid, String jsonlike);
-
-    public abstract void jacc(SimCallback callback, String vkey, int vecid, String jsonlike);
-
-    public abstract void jrem(SimCallback callback, String vkey, int vecid);
 
     // Internal use for client-side sparsification
     public abstract void iget(SimCallback callback, String vkey, int vecid);

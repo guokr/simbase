@@ -1,192 +1,165 @@
 package com.guokr.simbase.store;
 
-import gnu.trove.iterator.TIntIterator;
+import gnu.trove.iterator.TIntFloatIterator;
+import gnu.trove.list.TFloatList;
+import gnu.trove.list.array.TFloatArrayList;
 import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.map.TIntFloatMap;
 import gnu.trove.map.TIntIntMap;
+import gnu.trove.map.hash.TIntFloatHashMap;
 import gnu.trove.map.hash.TIntIntHashMap;
 
-import java.util.Map;
+public class SparseVectorSet implements VectorSet {
 
-/*
- * 多维向量集合的稀疏实现
- * 向量必须为整数向量，所有向量依次存放在int数组中
- * int数组二进制结构：
- * [维度个数][向量长度][维度编号] [相应维度数值] ...重复前两项
- */
-public class SparseVectorSet extends AbstractVectorSet {
-	private TIntIntMap vecidToidx = new TIntIntHashMap();
-	TIntArrayList hive = new TIntArrayList();
+    private TFloatList probs   = new TFloatArrayList();
+    private TIntIntMap indexer = new TIntIntHashMap();
 
-	public SparseVectorSet(Map<String, Object> config, Basis base) {
-		super(config, base);
-	}
+    private float      accumuFactor;
+    private int        sparseFactor;
 
-	public int size() {
-		return vecidToidx.size();
-	}
+    private Basis      base;
 
-	public int norm(int vecid) throws Exception {
-		int idx = vecidToIdx(vecid);
-		return hive.get(idx + 1);
-	}
+    public SparseVectorSet(Basis base) {
+        this(base, 0.99f, 4096);
+    }
 
-	private int vecidToIdx(int vecid) throws Exception {
-		validateVecid(vecid);
-		return vecidToidx.get(vecid);
-	}
+    public SparseVectorSet(Basis base, float accumuFactor, int sparseFactor) {
+        this.base = base;
+        this.accumuFactor = accumuFactor;
+        this.sparseFactor = sparseFactor;
+    }
 
-	private void validateVecid(int vecid) throws Exception {
-		if (!vecidToidx.containsKey(vecid)) {
-			throw new Exception("invalid vector id");
-		}
-	}
+    private void validateParams(int vecid, int[] pairs) {
+        if (vecid < 0) {
+            throw new IllegalArgumentException("the vector id must be a positive number!");
+        }
+        if (pairs.length % 2 != 0) {
+            throw new IllegalArgumentException("the size of the input array must be a even number!");
+        }
+        for (int val : pairs) {
+            if (val < 0) {
+                throw new IllegalArgumentException("the elements in the input array must be greater than zero!");
+            }
+        }
 
-	private void validatePair(int[] pair) throws Exception {
-		if (pair.length % 2 != 0) {
-			throw new Exception("invalid vector pair length.");
-		}
+    }
 
-		if (pair.length / 2 > getBasis().size()) {
-			throw new Exception("invalid vector size.");
-		}
-		for (int i = 0; i < pair.length; i += 2) {
-			if (pair[i] >= getBasis().size() || pair[i] < 0) {
-				throw new Exception("vector index beyond the basis size.");
-			}
-		}
-	}
+    @Override
+    public void remove(int vecid) {
+        if (indexer.containsKey(vecid)) {
+            int cursor = indexer.get(vecid);
+            while (true) {
+                float val = probs.get(cursor);
+                if (val < 0) {
+                    break;
+                }
+                probs.set(cursor, -1);
+                cursor++;
+            }
+        }
 
-	public void set(int vecid, int[] pair) throws Exception {
-		validatePair(pair);
+        indexer.remove(vecid);
+    }
 
-		if (vecidToidx.containsKey(vecid)) {
-			int idx = vecidToIdx(vecid);
-			int len = getVectorDimNum(vecid);
-			if (len < pair.length / 2) {
-				discardVector(vecid, idx);
-				allocVector(vecid, pair);
-			} else {
-				updateVector(vecid, pair);
-			}
-		} else {
-			allocVector(vecid, pair);
-		}
-	}
+    @Override
+    public float[] get(int vecid) {
+        return base.densify(sparseFactor, _get(vecid));
+    }
 
-	private void updateVector(int vecid, int[] pair) throws Exception {
-		/*
-		 * 私有接口不再检查参数
-		 */
-		int idx = vecidToIdx(vecid);
-		int vectlen = 0;
-		int vectlenIdx = 0;
+    @Override
+    public void add(int vecid, float[] distr) {
+        _add(vecid, base.sparsify(sparseFactor, distr));
+    }
 
-		hive.set(idx++, pair.length / 2); // 有可能变小
-		vectlenIdx = idx++;
-		for (int i = 0; i < pair.length; i += 2) {
-			hive.set(idx++, pair[i]);
-			hive.set(idx++, pair[i + 1]);
-			vectlen += pair[i + 1] * pair[i + 1];
-		}
-		hive.set(vectlenIdx, vectlen);
-	}
+    @Override
+    public void set(int vecid, float[] distr) {
+        _set(vecid, base.sparsify(sparseFactor, distr));
+    }
 
-	private void allocVector(int vecid, int[] pair) throws Exception {
-		int idx = hive.size();
-		int len = pair.length / 2;
-		int vectlenIdx = 0;
-		int vectlen = 0;
+    @Override
+    public void accumulate(int vecid, float[] distr) {
+        _accumulate(vecid, base.sparsify(sparseFactor, distr));
+    }
 
-		hive.add(len);
-		hive.add(0);
-		vectlenIdx = hive.size() - 1;
-		for (int i = 0; i < pair.length; i++) {
-			hive.add(pair[i]);
-			if (i % 2 == 1) {
-				vectlen += pair[i] * pair[i];
-			}
-		}
-		hive.set(vectlenIdx, vectlen);
-		vecidToidx.put(vecid, idx);
-	}
+    @Override
+    public int[] _get(int vecid) {
+        TIntArrayList resultList = new TIntArrayList();
+        if (indexer.containsKey(vecid)) {
+            int cursor = indexer.get(vecid);
+            while (true) {
+                int pos = (int) probs.get(cursor++);
+                int val = (int) probs.get(cursor++);
+                if (pos >= 0 && val >= 0) {
+                    resultList.add(pos);
+                    resultList.add(val);
+                } else {
+                    break;
+                }
+            }
+        }
+        int[] result = new int[resultList.size()];
+        resultList.toArray(result);
+        return result;
+    }
 
-	private void discardVector(int vecid, int idx) throws Exception {
-		int len = getVectorDimNum(vecid);
+    @Override
+    public void _add(int vecid, int[] pairs) {
+        validateParams(vecid, pairs);
+        if (!indexer.containsKey(vecid)) {
+            int start = probs.size();
+            indexer.put(vecid, start);
+            for (int val : pairs) {
+                probs.add(val);
+            }
+            probs.add(-(vecid + 1));
+        }
+    }
 
-		hive.set(idx++, Integer.MIN_VALUE); // 清除计数
-		hive.set(idx, Integer.MIN_VALUE); // 清除长度
+    @Override
+    public void _set(int vecid, int[] pairs) {
+        validateParams(vecid, pairs);
+        remove(vecid);
+        _add(vecid, pairs);
+    }
 
-		for (int i = idx + 1; i < idx + 2 * len + 1; i++) {
-			hive.set(i++, Integer.MIN_VALUE); // 维度字段
-			hive.set(i, Integer.MIN_VALUE); // 维度数据
-		}
-		vecidToidx.remove(vecid);
-	}
+    @Override
+    public void _accumulate(int vecid, int[] pairs) {
+        validateParams(vecid, pairs);
 
-	private int getVectorDimNum(int vecid) throws Exception {
-		int idx = vecidToIdx(vecid);
-		return hive.get(idx);
-	}
+        TIntFloatMap results = new TIntFloatHashMap();
+        if (indexer.containsKey(vecid)) {
+            int cursor = indexer.get(vecid);
+            while (true) {
+                int pos = (int) probs.get(cursor++);
+                float val = probs.get(cursor++) * accumuFactor;
+                if (pos >= 0 && val >= 0) {
+                    results.put(pos, val);
+                } else {
+                    break;
+                }
+            }
+        }
 
-	public void accumulate(int vecid, int[] distr) {
-		// TODO Auto-generated method stub
+        int cursor = 0;
+        while (cursor < pairs.length) {
+            int pos = pairs[cursor++];
+            float val = (float) pairs[cursor++] * (1f - accumuFactor);
+            if (results.containsKey(pos)) {
+                results.put(pos, results.get(pos) + val);
+            } else {
+                results.put(pos, val);
+            }
+        }
 
-	}
+        remove(vecid);
 
-	public int[] get(int vecid) {
-		int len, idx;
-		try {
-			len = getVectorDimNum(vecid);
-			idx = vecidToIdx(vecid);
-		} catch (Exception e) {
-			return null;
-		}
-
-		int[] res = new int[getBasis().size()];
-		for (int i = idx + 2; i < idx + 2 * len + 2; i++) {
-			int dim = hive.get(i++);
-			int d = hive.get(i);
-			res[dim] = d;
-		}
-		return res;
-	}
-
-	public void remove(int vecid) {
-		try {
-			int idx = vecidToIdx(vecid);
-			int len = getVectorDimNum(vecid);
-
-			vecidToidx.remove(vecid);
-			for (int i = idx; i < idx + 2 * len + 2; i++) {
-				hive.set(i, Integer.MIN_VALUE);
-			}
-		} catch (Exception e) {
-			return;
-		}
-	}
-
-	public SparseVectorSet clone() {
-		SparseVectorSet newSet = new SparseVectorSet(this.getConfig(),
-				this.getBasis());
-		int[] vecids = vecidToidx.keys();
-		int idx;
-		int dimNum;
-		int len;
-		int i;
-		for (int vecid : vecids) {
-			idx = vecidToidx.get(vecid);
-			dimNum = hive.get(idx++);
-			len = hive.get(idx++);
-
-			newSet.vecidToidx.put(vecid, newSet.hive.size());
-			newSet.hive.add(dimNum);
-			newSet.hive.add(len);
-			for (i = 0; i < dimNum; i++) {
-				newSet.hive.add(hive.get(idx++));
-				newSet.hive.add(hive.get(idx++));
-			}
-		}
-
-		return newSet;
-	}
+        int start = probs.size();
+        indexer.put(vecid, start);
+        TIntFloatIterator iter = results.iterator();
+        while (iter.hasNext()) {
+            probs.add(iter.key());
+            probs.add(iter.value());
+        }
+        probs.add(-(vecid + 1));
+    }
 }

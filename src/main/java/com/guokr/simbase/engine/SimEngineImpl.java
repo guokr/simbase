@@ -372,7 +372,7 @@ public class SimEngineImpl implements SimEngine {
     }
 
     @Override
-    public void vmk(final SimCallback callback, final String bkey, final String vkey) {
+    public void vmk(final SimCallback callback, final String bkey, final String vkey, final String type) {
         validateKind("vmk", bkey, Kind.BASIS);
         validateKeyFormat(vkey);
         validateNotExistence(vkey);
@@ -380,7 +380,7 @@ public class SimEngineImpl implements SimEngine {
             @Override
             public void run() {
                 try {
-                    bases.get(bkey).vmk(vkey);
+                    bases.get(bkey).vmk(vkey, type);
 
                     basisOf.put(vkey, bkey);
                     List<String> vkeys = vectorsOf.get(bkey);
@@ -434,16 +434,16 @@ public class SimEngineImpl implements SimEngine {
             public void run() {
                 try {
                     bases.get(bkey).vset(vkey, vecid, distr);
+                    callback.ok();
                 } catch (Throwable ex) {
                     int code = SimErrors.lookup("vset", ex);
                     logger.error(SimErrors.info(code), ex);
+                } finally {
+                    callback.flip();
+                    callback.response();
                 }
             }
         });
-
-        callback.ok();
-        callback.flip();
-        callback.response();
     }
 
     @Override
@@ -486,65 +486,6 @@ public class SimEngineImpl implements SimEngine {
         callback.ok();
         callback.flip();
         callback.response();
-    }
-
-    @Override
-    public void jget(final SimCallback callback, final String vkey, final int vecid) {
-        validateExistence(vkey);
-        final String bkey = basisOf.get(vkey);
-        dataExecs.get(bkey).execute(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    callback.stringValue(bases.get(bkey).jget(vkey, vecid));
-                } catch (Throwable ex) {
-                    int code = SimErrors.lookup("jget", ex);
-                    logger.error(SimErrors.info(code), ex);
-                    callback.error(SimErrors.descr(code));
-                }
-            }
-        });
-    }
-
-    @Override
-    public void jset(final SimCallback callback, final String vkey, final int vecid, final String jsonlike) {
-        validateKind("jset", vkey, Kind.VECTORS);
-        final String bkey = basisOf.get(vkey);
-        dataExecs.get(bkey).execute(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    bases.get(bkey).jset(vkey, vecid, jsonlike);
-                } catch (Throwable ex) {
-                    int code = SimErrors.lookup("jset", ex);
-                    logger.error(SimErrors.info(code), ex);
-                }
-            }
-        });
-        callback.ok();
-    }
-
-    @Override
-    public void jacc(final SimCallback callback, final String vkey, final int vecid, final String jsonlike) {
-        this.validateKind("jacc", vkey, Kind.VECTORS);
-        final String bkey = basisOf.get(vkey);
-        dataExecs.get(bkey).execute(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    bases.get(bkey).jacc(vkey, vecid, jsonlike);
-                } catch (Throwable ex) {
-                    int code = SimErrors.lookup("jacc", ex);
-                    logger.error(SimErrors.info(code), ex);
-                }
-            }
-        });
-        callback.ok();
-    }
-
-    @Override
-    public void jrem(final SimCallback callback, String vkey, int vecid) {
-        vrem(callback, vkey, vecid);
     }
 
     // Internal use for client-side sparsification
