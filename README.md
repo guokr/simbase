@@ -10,9 +10,9 @@ Concepts
 
 Simbase use a concept model as below:
 
-                       | - - - |
+                       + - - - +
           +----------->| Basis |<------------------+
-          |  belongs   | _ _ _ |      belongs      |
+          |  belongs   + _ _ _ +      belongs      |
           |                                        |
           |                                        |
     + - - - - - +        source           + - - - - - - - -+ 
