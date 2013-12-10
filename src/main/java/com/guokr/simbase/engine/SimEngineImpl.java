@@ -372,7 +372,7 @@ public class SimEngineImpl implements SimEngine {
     }
 
     @Override
-    public void vmk(final SimCallback callback, final String bkey, final String vkey, final String type) {
+    public void vmk(final SimCallback callback, final String bkey, final String vkey) {
         validateKind("vmk", bkey, Kind.BASIS);
         validateKeyFormat(vkey);
         validateNotExistence(vkey);
@@ -380,7 +380,7 @@ public class SimEngineImpl implements SimEngine {
             @Override
             public void run() {
                 try {
-                    bases.get(bkey).vmk(vkey, type);
+                    bases.get(bkey).vmk(vkey);
 
                     basisOf.put(vkey, bkey);
                     List<String> vkeys = vectorsOf.get(bkey);

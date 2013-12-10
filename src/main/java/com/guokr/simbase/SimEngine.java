@@ -29,7 +29,7 @@ public interface SimEngine {
 
     public abstract void vlist(SimCallback callback, String bkey);
 
-    public abstract void vmk(SimCallback callback, String bkey, String vkey, String type);
+    public abstract void vmk(SimCallback callback, String bkey, String vkey);
 
     public abstract void vget(SimCallback callback, String vkey, int vecid);
 

@@ -16,7 +16,7 @@ public class DenseVectorSet implements VectorSet {
     private Basis      base;
 
     public DenseVectorSet(Basis base) {
-        this(base, 0.99f, 4096);
+        this(base, 0.01f, 4096);
     }
 
     public DenseVectorSet(Basis base, float accumuFactor, int sparseFactor) {
@@ -101,7 +101,7 @@ public class DenseVectorSet implements VectorSet {
             int cursor = indexer.get(vecid);
             for (float newval : distr) {
                 float oldval = probs.get(cursor);
-                float val = accumuFactor * oldval + (1f - accumuFactor) * newval;
+                float val = (1f - accumuFactor) * oldval + accumuFactor * newval;
                 probs.set(cursor, val);
                 length += val * val;
                 cursor++;

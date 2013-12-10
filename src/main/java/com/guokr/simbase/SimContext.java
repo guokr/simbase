@@ -198,4 +198,19 @@ public class SimContext extends HashMap<String, Object> {
         return new SimContext(intermedia);
     }
 
+    public int retriveInt(int defaultVal, String... keys) {
+        int val = getInt(keys);
+        return val == 0 ? defaultVal : val;
+    }
+
+    public float retriveFloat(float defaultVal, String... keys) {
+        float val = getFloat(keys);
+        return val == 0f ? defaultVal : val;
+    }
+
+    public String retriveString(String defaultVal, String... keys) {
+        String val = getString(keys);
+        return val.equals("") ? defaultVal : val;
+    }
+
 }

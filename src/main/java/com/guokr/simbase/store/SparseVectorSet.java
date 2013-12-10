@@ -20,7 +20,7 @@ public class SparseVectorSet implements VectorSet {
     private Basis      base;
 
     public SparseVectorSet(Basis base) {
-        this(base, 0.99f, 4096);
+        this(base, 0.01f, 4096);
     }
 
     public SparseVectorSet(Basis base, float accumuFactor, int sparseFactor) {
@@ -131,7 +131,7 @@ public class SparseVectorSet implements VectorSet {
             int cursor = indexer.get(vecid);
             while (true) {
                 int pos = (int) probs.get(cursor++);
-                float val = probs.get(cursor++) * accumuFactor;
+                float val = probs.get(cursor++) * (1f - accumuFactor);
                 if (pos >= 0 && val >= 0) {
                     results.put(pos, val);
                 } else {
@@ -143,7 +143,7 @@ public class SparseVectorSet implements VectorSet {
         int cursor = 0;
         while (cursor < pairs.length) {
             int pos = pairs[cursor++];
-            float val = (float) pairs[cursor++] * (1f - accumuFactor);
+            float val = (float) pairs[cursor++] * accumuFactor;
             if (results.containsKey(pos)) {
                 results.put(pos, results.get(pos) + val);
             } else {
