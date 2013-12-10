@@ -11,13 +11,13 @@ Concepts
 Simbase use a concept model as below:
 
                        | - - - |
-          ------------>| Basis |<------------------|
+          +----------->| Basis |<------------------+
           |  belongs   | _ _ _ |      belongs      |
           |                                        |
           |                                        |
-    | - - - - - |        source           | - - - - - - - -| 
+    + - - - - - +        source           + - - - - - - - -+ 
     | VectorSet |<------------------------| Recommendation |
-    | - - - - - |                         | - - - - - - - -|
+    + - - - - - +                         + - - - - - - - -+
           ^              target                    |
           |________________________________________|
 
@@ -28,11 +28,11 @@ Simbase use a concept model as below:
 
 A real example follow this model is as below:
 
-         | - - - - - |                 | - - - - - - - -| 
-    |--->|  Articles |<----------------|  User Profiles |
-    |    | - - - - - |                 | - - - - - - - -|
+         + - - - - - +                 + - - - - - - - -+ 
+    +--->|  Articles |<----------------|  User Profiles |
+    |    + - - - - - +                 + - - - - - - - -+
     |          |
-    -----------|
+    +----------+
 
 This graph shows
 
@@ -127,6 +127,30 @@ Recommendation related
     > rrec userprofile 87654321 article
     
     Recommend articles for user 87654321
+
+Licenses
+---------
+
+Simbase is dual licensed under the Apache License 2.0 and
+Eclipse Public License 1.0. Simbase is free for commercial use
+and distribution under the terms of either license.
+
+Special thanks
+---------------
+
+Special thanks for Feng Sheng, we borrow lots of code from his
+great project http-kit ( https://github.com/http-kit/http-kit/ ).
+
+Also thanks for Kunwei Zhang from Tsinghua for his smart idea.  
+
+Contributers
+-------------
+
+* Mingli Yuan ( https://github.com/mountain )
+* Wanjian Wu ( https://github.com/jseagull )
+* Yang Zhang ( https://github.com/zmouren )
+* Jianjiang Zhu ( https://github.com/zjjott )
+* Jiacai Liu ( https://github.com/jiacai2050 )
 
 
 
