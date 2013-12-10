@@ -8,6 +8,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.guokr.simbase.events.BasisListener;
+
 public class Basis {
     private String[]             base;
     private List<String>         schema;
@@ -96,5 +98,8 @@ public class Basis {
         int[] result = new int[resultList.size()];
         resultList.toArray(result);
         return result;
+    }
+
+    public void addListener(BasisListener listener) {
     }
 }

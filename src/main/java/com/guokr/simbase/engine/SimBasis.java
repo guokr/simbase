@@ -8,6 +8,9 @@ import com.esotericsoftware.kryo.KryoSerializable;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
 import com.guokr.simbase.SimContext;
+import com.guokr.simbase.events.BasisListener;
+import com.guokr.simbase.events.RecommendationListener;
+import com.guokr.simbase.events.VectorSetListener;
 import com.guokr.simbase.store.Basis;
 import com.guokr.simbase.store.DenseVectorSet;
 import com.guokr.simbase.store.Recommendation;
@@ -56,8 +59,12 @@ public class SimBasis implements KryoSerializable {
         return this.vectorSets.get(vkey).get(vecid);
     }
 
-    public void vset(String vkey, int vecid, float[] distr) {
+    public void vadd(String vkey, int vecid, float[] distr) {
         this.vectorSets.get(vkey).add(vecid, distr);
+    }
+
+    public void vset(String vkey, int vecid, float[] distr) {
+        this.vectorSets.get(vkey).set(vecid, distr);
     }
 
     public void vacc(String vkey, int vecid, float[] distr) {
@@ -72,6 +79,10 @@ public class SimBasis implements KryoSerializable {
         return this.vectorSets.get(vkey)._get(vecid);
     }
 
+    public void iadd(String vkey, int vecid, int[] pairs) {
+        this.vectorSets.get(vkey)._add(vecid, pairs);
+    }
+
     public void iset(String vkey, int vecid, int[] pairs) {
         this.vectorSets.get(vkey)._set(vecid, pairs);
     }
@@ -82,15 +93,15 @@ public class SimBasis implements KryoSerializable {
 
     public void rmk(String vkeySource, String vkeyTarget) {
         String rkey = rkey(vkeySource, vkeyTarget);
-        this.recommendations.put(rkey, new Recommendation(context.getSub(rkey)));
+        this.recommendations.put(rkey, new Recommendation());
     }
 
     public String rget(String vkeySource, int vecid, String vkeyTarget) {
-        return this.recommendations.get(rkey(vkeySource, vkeyTarget)).jsonize(vecid);
+        return this.recommendations.get(rkey(vkeySource, vkeyTarget)).get(vecid);
     }
 
     public int[] rrec(String vkeySource, int vecid, String vkeyTarget) {
-        return this.recommendations.get(rkey(vkeySource, vkeyTarget)).ids(vecid);
+        return this.recommendations.get(rkey(vkeySource, vkeyTarget)).rec(vecid);
     }
 
     @Override
@@ -99,6 +110,18 @@ public class SimBasis implements KryoSerializable {
 
     @Override
     public void write(Kryo arg0, Output arg1) {
+    }
+
+    public void addListener(BasisListener listener) {
+        base.addListener(listener);
+    }
+
+    public void addListener(String vkey, VectorSetListener listener) {
+        vectorSets.get(vkey).addListener(listener);
+    }
+
+    public void addListener(String srcVkey, String tgtVkey, RecommendationListener listener) {
+        recommendations.get(rkey(srcVkey, tgtVkey)).addListener(listener);
     }
 
 }

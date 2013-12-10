@@ -1,5 +1,7 @@
 package com.guokr.simbase.store;
 
+import com.guokr.simbase.events.VectorSetListener;
+
 public interface VectorSet {
 
     public void remove(int vecid);
@@ -19,5 +21,7 @@ public interface VectorSet {
     void _set(int vecid, int[] pairs);
 
     void _accumulate(int vecid, int[] pairs);
+
+    public void addListener(VectorSetListener listener);
 
 }

@@ -1,26 +1,53 @@
 package com.guokr.simbase.store;
 
-import com.guokr.simbase.SimContext;
+import com.guokr.simbase.events.RecommendationListener;
+import com.guokr.simbase.events.VectorSetListener;
 
-public class Recommendation implements IRecommendation {
+public class Recommendation implements VectorSetListener {
+    private String func;
+    private String order;
     private int limit;
 
-    public Recommendation(SimContext simContext) {
-        this.limit = simContext.getInt("limit");
+    public Recommendation() {
+        this.func = "cos";
+        this.order = "desc";
+        this.limit = 20;
     }
 
-    @Override
-    public void add(int vecid, float profile) {
+    public Recommendation(String func, String order, int limits) {
+        this.func = func;
+        this.order = order;
+        this.limit = limits;
+    }
+
+    public void add(int vecid, float[] vector) {
 
     }
 
-    @Override
-    public int[] ids(int vecid) {
+    public String get(int vecid) {
+        return null;
+    }
+
+    public int[] rec(int vecid) {
         return null;
     }
 
     @Override
-    public String jsonize(int vecid) {
-        return null;
+    public void onVectorAdded(int vecid, float[] inputed) {
+    }
+
+    @Override
+    public void onVectorSetted(int vecid, float[] old, float[] inputed) {
+    }
+
+    @Override
+    public void onVectorAccumulated(int vecid, float[] inputed, float[] accumulated) {
+    }
+
+    @Override
+    public void onVectorRemoved(int vecid) {
+    }
+
+    public void addListener(RecommendationListener listener) {
     }
 }

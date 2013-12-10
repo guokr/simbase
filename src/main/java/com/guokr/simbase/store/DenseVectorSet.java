@@ -1,5 +1,7 @@
 package com.guokr.simbase.store;
 
+import com.guokr.simbase.events.VectorSetListener;
+
 import gnu.trove.list.TFloatList;
 import gnu.trove.list.array.TFloatArrayList;
 import gnu.trove.map.TIntIntMap;
@@ -129,6 +131,10 @@ public class DenseVectorSet implements VectorSet {
     @Override
     public void _accumulate(int vecid, int[] pairs) {
         this.accumulate(vecid, base.densify(sparseFactor, pairs));
+    }
+
+    @Override
+    public void addListener(VectorSetListener listener) {
     }
 
 }

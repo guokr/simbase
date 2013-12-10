@@ -17,6 +17,9 @@ import com.guokr.simbase.SimCallback;
 import com.guokr.simbase.SimContext;
 import com.guokr.simbase.SimEngine;
 import com.guokr.simbase.errors.SimErrors;
+import com.guokr.simbase.events.BasisListener;
+import com.guokr.simbase.events.RecommendationListener;
+import com.guokr.simbase.events.VectorSetListener;
 import com.guokr.simbase.store.Basis;
 
 public class SimEngineImpl implements SimEngine {
@@ -54,22 +57,19 @@ public class SimEngineImpl implements SimEngine {
 
     private void validateExistence(String toCheck) throws IllegalArgumentException {
         if (!basisOf.containsKey(toCheck)) {
-            throw new IllegalArgumentException("Data entry[" + toCheck
-                    + "] should not exist on server before this operation!");
+            throw new IllegalArgumentException("Data entry[" + toCheck + "] should not exist on server before this operation!");
         }
     }
 
     private void validateNotExistence(String toCheck) throws IllegalArgumentException {
         if (basisOf.containsKey(toCheck)) {
-            throw new IllegalArgumentException("Data entry[" + toCheck
-                    + "] should not exist on server before this operation!");
+            throw new IllegalArgumentException("Data entry[" + toCheck + "] should not exist on server before this operation!");
         }
     }
 
     private void validateKind(String op, String toCheck, Kind kindShouldBe) throws IllegalArgumentException {
         if (!kindOf.containsKey(toCheck) || !kindShouldBe.equals(kindOf.get(toCheck))) {
-            throw new IllegalArgumentException("Invalid operation[" + op + "] on kind[" + kindShouldBe + "] with:"
-                    + toCheck);
+            throw new IllegalArgumentException("Invalid operation[" + op + "] on kind[" + kindShouldBe + "] with:" + toCheck);
         }
     }
 
@@ -426,35 +426,56 @@ public class SimEngineImpl implements SimEngine {
     }
 
     @Override
-    public void vset(final SimCallback callback, final String vkey, final int vecid, final float[] distr) {
+    public void vadd(SimCallback callback, final String vkey, final int vecid, final float[] vector) {
         validateKind("vset", vkey, Kind.VECTORS);
         final String bkey = basisOf.get(vkey);
         dataExecs.get(bkey).execute(new Runnable() {
             @Override
             public void run() {
                 try {
-                    bases.get(bkey).vset(vkey, vecid, distr);
-                    callback.ok();
+                    bases.get(bkey).vadd(vkey, vecid, vector);
                 } catch (Throwable ex) {
                     int code = SimErrors.lookup("vset", ex);
                     logger.error(SimErrors.info(code), ex);
-                } finally {
-                    callback.flip();
-                    callback.response();
                 }
             }
         });
+
+        callback.ok();
+        callback.flip();
+        callback.response();
     }
 
     @Override
-    public void vacc(final SimCallback callback, final String vkey, final int vecid, final float[] distr) {
+    public void vset(final SimCallback callback, final String vkey, final int vecid, final float[] vector) {
+        validateKind("vset", vkey, Kind.VECTORS);
+        final String bkey = basisOf.get(vkey);
+        dataExecs.get(bkey).execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    bases.get(bkey).vset(vkey, vecid, vector);
+                } catch (Throwable ex) {
+                    int code = SimErrors.lookup("vset", ex);
+                    logger.error(SimErrors.info(code), ex);
+                }
+            }
+        });
+
+        callback.ok();
+        callback.flip();
+        callback.response();
+    }
+
+    @Override
+    public void vacc(final SimCallback callback, final String vkey, final int vecid, final float[] vector) {
         this.validateKind("vacc", vkey, Kind.VECTORS);
         final String bkey = basisOf.get(vkey);
         dataExecs.get(bkey).execute(new Runnable() {
             @Override
             public void run() {
                 try {
-                    bases.get(bkey).vacc(vkey, vecid, distr);
+                    bases.get(bkey).vacc(vkey, vecid, vector);
                 } catch (Throwable ex) {
                     int code = SimErrors.lookup("vacc", ex);
                     logger.error(SimErrors.info(code), ex);
@@ -507,7 +528,27 @@ public class SimEngineImpl implements SimEngine {
         });
     }
 
-    // Internal use for client-side sparsification
+    @Override
+    public void iadd(SimCallback callback, final String vkey, final int vecid, final int[] pairs) {
+        validateKind("iadd", vkey, Kind.VECTORS);
+        final String bkey = basisOf.get(vkey);
+        dataExecs.get(bkey).execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    bases.get(bkey).iadd(vkey, vecid, pairs);
+                } catch (Throwable ex) {
+                    int code = SimErrors.lookup("iset", ex);
+                    logger.error(SimErrors.info(code), ex);
+                }
+            }
+        });
+
+        callback.ok();
+        callback.flip();
+        callback.response();
+    }
+
     @Override
     public void iset(final SimCallback callback, final String vkey, final int vecid, final int[] pairs) {
         validateKind("iset", vkey, Kind.VECTORS);
@@ -523,10 +564,12 @@ public class SimEngineImpl implements SimEngine {
                 }
             }
         });
+
         callback.ok();
+        callback.flip();
+        callback.response();
     }
 
-    // Internal use for client-side sparsification
     @Override
     public void iacc(final SimCallback callback, final String vkey, final int vecid, final int[] pairs) {
         this.validateKind("iacc", vkey, Kind.VECTORS);
@@ -545,7 +588,6 @@ public class SimEngineImpl implements SimEngine {
         callback.ok();
     }
 
-    // Internal use for client-side sparsification
     @Override
     public void irem(final SimCallback callback, String vkey, int vecid) {
         vrem(callback, vkey, vecid);
@@ -643,6 +685,38 @@ public class SimEngineImpl implements SimEngine {
                     callback.flip();
                     callback.response();
                 }
+            }
+        });
+    }
+
+    @Override
+    public void listen(final String bkey, final BasisListener listener) {
+        dataExecs.get(bkey).execute(new Runnable() {
+            @Override
+            public void run() {
+                bases.get(bkey).addListener(listener);
+            }
+        });
+    }
+
+    @Override
+    public void listen(final String vkey, final VectorSetListener listener) {
+        final String bkey = basisOf.get(vkey);
+        dataExecs.get(bkey).execute(new Runnable() {
+            @Override
+            public void run() {
+                bases.get(bkey).addListener(vkey, listener);
+            }
+        });
+    }
+
+    @Override
+    public void listen(final String srcVkey, final String tgtVkey, final RecommendationListener listener) {
+        final String bkey = basisOf.get(srcVkey);
+        dataExecs.get(bkey).execute(new Runnable() {
+            @Override
+            public void run() {
+                bases.get(bkey).addListener(srcVkey, tgtVkey, listener);
             }
         });
     }

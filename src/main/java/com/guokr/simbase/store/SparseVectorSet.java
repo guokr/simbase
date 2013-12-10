@@ -1,5 +1,7 @@
 package com.guokr.simbase.store;
 
+import com.guokr.simbase.events.VectorSetListener;
+
 import gnu.trove.iterator.TIntFloatIterator;
 import gnu.trove.list.TFloatList;
 import gnu.trove.list.array.TFloatArrayList;
@@ -161,5 +163,9 @@ public class SparseVectorSet implements VectorSet {
             probs.add(iter.value());
         }
         probs.add(-(vecid + 1));
+    }
+
+    @Override
+    public void addListener(VectorSetListener listener) {
     }
 }
