@@ -1,21 +1,27 @@
 package com.guokr.simbase.store;
 
-import com.guokr.simbase.events.VectorSetListener;
-
 import gnu.trove.list.TFloatList;
 import gnu.trove.list.array.TFloatArrayList;
 import gnu.trove.map.TIntIntMap;
 import gnu.trove.map.hash.TIntIntHashMap;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import com.guokr.simbase.events.VectorSetListener;
+
 public class DenseVectorSet implements VectorSet {
 
-    private TFloatList probs   = new TFloatArrayList();
-    private TIntIntMap indexer = new TIntIntHashMap();
+    private TFloatList              probs   = new TFloatArrayList();
+    private TIntIntMap              indexer = new TIntIntHashMap();
 
-    private float      accumuFactor;
-    int                sparseFactor;
+    private float                   accumuFactor;
+    private int                     sparseFactor;
 
-    private Basis      base;
+    private Basis                   base;
+
+    private boolean                 listening;
+    private List<VectorSetListener> listeners;
 
     public DenseVectorSet(Basis base) {
         this(base, 0.01f, 4096);
@@ -25,6 +31,8 @@ public class DenseVectorSet implements VectorSet {
         this.base = base;
         this.accumuFactor = accumuFactor;
         this.sparseFactor = sparseFactor;
+        this.listening = true;
+        this.listeners = new ArrayList<VectorSetListener>();
     }
 
     @Override
@@ -50,6 +58,12 @@ public class DenseVectorSet implements VectorSet {
         }
 
         indexer.remove(vecid);
+
+        if (listening) {
+            for (VectorSetListener l : listeners) {
+                l.onVectorRemoved(this, vecid);
+            }
+        }
     }
 
     @Override
@@ -67,41 +81,56 @@ public class DenseVectorSet implements VectorSet {
     }
 
     @Override
-    public void add(int vecid, float[] distr) {
+    public void add(int vecid, float[] vector) {
         if (!indexer.containsKey(vecid)) {
             float length = 0;
             int start = probs.size();
             indexer.put(vecid, start);
-            for (float val : distr) {
+            for (float val : vector) {
                 probs.add(val);
                 length += val * val;
             }
             probs.add((float) (vecid + 1));
             probs.add(length);
+
+            if (listening) {
+                for (VectorSetListener l : listeners) {
+                    l.onVectorAdded(this, vecid, vector);
+                }
+            }
         }
     }
 
     @Override
-    public void set(int vecid, float[] distr) {
+    public void set(int vecid, float[] vector) {
         if (indexer.containsKey(vecid)) {
             float length = 0;
             int cursor = indexer.get(vecid);
-            for (float val : distr) {
+            for (float val : vector) {
                 probs.set(cursor, val);
                 length += val * val;
                 cursor++;
             }
             probs.set(cursor++, (float) (vecid + 1));
             probs.set(cursor, length);
+
+            if (listening) {
+                float[] old = get(vecid);
+                for (VectorSetListener l : listeners) {
+                    l.onVectorSetted(this, vecid, old, vector);
+                }
+            }
         }
     }
 
     @Override
-    public void accumulate(int vecid, float[] distr) {
-        if (indexer.containsKey(vecid)) {
+    public void accumulate(int vecid, float[] vector) {
+        if (!indexer.containsKey(vecid)) {
+            add(vecid, vector);
+        } else {
             float length = 0;
             int cursor = indexer.get(vecid);
-            for (float newval : distr) {
+            for (float newval : vector) {
                 float oldval = probs.get(cursor);
                 float val = (1f - accumuFactor) * oldval + accumuFactor * newval;
                 probs.set(cursor, val);
@@ -110,6 +139,13 @@ public class DenseVectorSet implements VectorSet {
             }
             probs.set(cursor++, (float) (vecid + 1));
             probs.set(cursor, length);
+
+            if (listening) {
+                float[] accumulated = get(vecid);
+                for (VectorSetListener l : listeners) {
+                    l.onVectorAccumulated(this, vecid, vector, accumulated);
+                }
+            }
         }
     }
 
@@ -135,6 +171,7 @@ public class DenseVectorSet implements VectorSet {
 
     @Override
     public void addListener(VectorSetListener listener) {
+        listeners.add(listener);
     }
 
 }

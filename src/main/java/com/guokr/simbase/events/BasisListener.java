@@ -1,7 +1,9 @@
 package com.guokr.simbase.events;
 
+import com.guokr.simbase.store.Basis;
+
 public interface BasisListener {
 
-    public void onBasisRevised(String bkey, String[] oldSchema, String[] newSchema);
+    public void onBasisRevised(Basis source, String[] oldSchema, String[] newSchema);
 
 }

@@ -1,7 +1,5 @@
 package com.guokr.simbase.store;
 
-import com.guokr.simbase.events.VectorSetListener;
-
 import gnu.trove.iterator.TIntFloatIterator;
 import gnu.trove.list.TFloatList;
 import gnu.trove.list.array.TFloatArrayList;
@@ -11,15 +9,23 @@ import gnu.trove.map.TIntIntMap;
 import gnu.trove.map.hash.TIntFloatHashMap;
 import gnu.trove.map.hash.TIntIntHashMap;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import com.guokr.simbase.events.VectorSetListener;
+
 public class SparseVectorSet implements VectorSet {
 
-    private TFloatList probs   = new TFloatArrayList();
-    private TIntIntMap indexer = new TIntIntHashMap();
+    private TFloatList              probs   = new TFloatArrayList();
+    private TIntIntMap              indexer = new TIntIntHashMap();
 
-    private float      accumuFactor;
-    private int        sparseFactor;
+    private float                   accumuFactor;
+    private int                     sparseFactor;
 
-    private Basis      base;
+    private Basis                   base;
+
+    private boolean                 listening;
+    private List<VectorSetListener> listeners;
 
     public SparseVectorSet(Basis base) {
         this(base, 0.01f, 4096);
@@ -29,6 +35,8 @@ public class SparseVectorSet implements VectorSet {
         this.base = base;
         this.accumuFactor = accumuFactor;
         this.sparseFactor = sparseFactor;
+        this.listening = true;
+        this.listeners = new ArrayList<VectorSetListener>();
     }
 
     private void validateParams(int vecid, int[] pairs) {
@@ -61,6 +69,12 @@ public class SparseVectorSet implements VectorSet {
         }
 
         indexer.remove(vecid);
+
+        if (listening) {
+            for (VectorSetListener l : listeners) {
+                l.onVectorRemoved(this, vecid);
+            }
+        }
     }
 
     @Override
@@ -69,18 +83,18 @@ public class SparseVectorSet implements VectorSet {
     }
 
     @Override
-    public void add(int vecid, float[] distr) {
-        _add(vecid, base.sparsify(sparseFactor, distr));
+    public void add(int vecid, float[] vector) {
+        _add(vecid, base.sparsify(sparseFactor, vector));
     }
 
     @Override
-    public void set(int vecid, float[] distr) {
-        _set(vecid, base.sparsify(sparseFactor, distr));
+    public void set(int vecid, float[] vector) {
+        _set(vecid, base.sparsify(sparseFactor, vector));
     }
 
     @Override
-    public void accumulate(int vecid, float[] distr) {
-        _accumulate(vecid, base.sparsify(sparseFactor, distr));
+    public void accumulate(int vecid, float[] vector) {
+        _accumulate(vecid, base.sparsify(sparseFactor, vector));
     }
 
     @Override
@@ -114,58 +128,92 @@ public class SparseVectorSet implements VectorSet {
                 probs.add(val);
             }
             probs.add(-(vecid + 1));
+
+            if (listening) {
+                float[] input = base.densify(sparseFactor, pairs);
+                for (VectorSetListener l : listeners) {
+                    l.onVectorAdded(this, vecid, input);
+                }
+            }
         }
     }
 
     @Override
     public void _set(int vecid, int[] pairs) {
         validateParams(vecid, pairs);
-        remove(vecid);
-        _add(vecid, pairs);
+        if (indexer.containsKey(vecid)) {
+            float[] old = base.densify(sparseFactor, _get(vecid));
+
+            listening = false;
+            remove(vecid);
+            _add(vecid, pairs);
+            listening = true;
+
+            if (listening) {
+                float[] input = base.densify(sparseFactor, pairs);
+                for (VectorSetListener l : listeners) {
+                    l.onVectorSetted(this, vecid, old, input);
+                }
+            }
+        }
     }
 
     @Override
     public void _accumulate(int vecid, int[] pairs) {
         validateParams(vecid, pairs);
+        if (!indexer.containsKey(vecid)) {
+            _add(vecid, pairs);
+        } else {
+            TIntFloatMap results = new TIntFloatHashMap();
+            if (indexer.containsKey(vecid)) {
+                int cursor = indexer.get(vecid);
+                while (true) {
+                    int pos = (int) probs.get(cursor++);
+                    float val = probs.get(cursor++) * (1f - accumuFactor);
+                    if (pos >= 0 && val >= 0) {
+                        results.put(pos, val);
+                    } else {
+                        break;
+                    }
+                }
+            }
 
-        TIntFloatMap results = new TIntFloatHashMap();
-        if (indexer.containsKey(vecid)) {
-            int cursor = indexer.get(vecid);
-            while (true) {
-                int pos = (int) probs.get(cursor++);
-                float val = probs.get(cursor++) * (1f - accumuFactor);
-                if (pos >= 0 && val >= 0) {
-                    results.put(pos, val);
+            int cursor = 0;
+            while (cursor < pairs.length) {
+                int pos = pairs[cursor++];
+                float val = (float) pairs[cursor++] * accumuFactor;
+                if (results.containsKey(pos)) {
+                    results.put(pos, results.get(pos) + val);
                 } else {
-                    break;
+                    results.put(pos, val);
+                }
+            }
+
+            listening = false;
+            remove(vecid);
+            listening = true;
+
+            int start = probs.size();
+            indexer.put(vecid, start);
+            TIntFloatIterator iter = results.iterator();
+            while (iter.hasNext()) {
+                probs.add(iter.key());
+                probs.add(iter.value());
+            }
+            probs.add(-(vecid + 1));
+
+            if (listening) {
+                float[] input = base.densify(sparseFactor, pairs);
+                float[] accumulated = base.densify(sparseFactor, _get(vecid));
+                for (VectorSetListener l : listeners) {
+                    l.onVectorAccumulated(this, vecid, input, accumulated);
                 }
             }
         }
-
-        int cursor = 0;
-        while (cursor < pairs.length) {
-            int pos = pairs[cursor++];
-            float val = (float) pairs[cursor++] * accumuFactor;
-            if (results.containsKey(pos)) {
-                results.put(pos, results.get(pos) + val);
-            } else {
-                results.put(pos, val);
-            }
-        }
-
-        remove(vecid);
-
-        int start = probs.size();
-        indexer.put(vecid, start);
-        TIntFloatIterator iter = results.iterator();
-        while (iter.hasNext()) {
-            probs.add(iter.key());
-            probs.add(iter.value());
-        }
-        probs.add(-(vecid + 1));
     }
 
     @Override
     public void addListener(VectorSetListener listener) {
+        listeners.add(listener);
     }
 }

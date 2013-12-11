@@ -8,11 +8,11 @@ public interface VectorSet {
 
     public float[] get(int vecid);
 
-    public void add(int vecid, float[] distr);
+    public void add(int vecid, float[] vector);
 
-    public void set(int vecid, float[] distr);
+    public void set(int vecid, float[] vector);
 
-    public void accumulate(int vecid, float[] distr);
+    public void accumulate(int vecid, float[] vector);
 
     public int[] _get(int vecid);
 

@@ -14,11 +14,13 @@ public class Basis {
     private String[]             base;
     private List<String>         schema;
     private Map<String, Integer> compIndex;
+    private List<BasisListener>  listeners;
 
     public Basis() {
         this.base = new String[0];
         this.schema = new ArrayList<String>();
         this.compIndex = new HashMap<String, Integer>();
+        this.listeners = new ArrayList<BasisListener>();
     }
 
     public Basis(String[] comps) {
@@ -29,6 +31,7 @@ public class Basis {
         for (String comp : this.schema) {
             this.compIndex.put(comp, index++);
         }
+        this.listeners = new ArrayList<BasisListener>();
     }
 
     public String[] all() {
@@ -63,7 +66,12 @@ public class Basis {
                 this.compIndex.put(dim, this.schema.size());
             }
         }
+        String[] old = this.base;
         this.base = base.clone();
+        
+        for(BasisListener l: listeners) {
+            l.onBasisRevised(this, old, base);
+        }
     }
 
     float[] densify(int sparseFactor, int[] pairs) {
@@ -101,5 +109,6 @@ public class Basis {
     }
 
     public void addListener(BasisListener listener) {
+        this.listeners.add(listener);
     }
 }
