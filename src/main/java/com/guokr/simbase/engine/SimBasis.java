@@ -92,8 +92,15 @@ public class SimBasis implements KryoSerializable {
     }
 
     public void rmk(String vkeySource, String vkeyTarget) {
+        VectorSet source = vectorSets.get(vkeySource);
+        VectorSet target = vectorSets.get(vkeyTarget);
+        Recommendation rec = new Recommendation(source, target, "cos", "desc", 20);
+
         String rkey = rkey(vkeySource, vkeyTarget);
-        this.recommendations.put(rkey, new Recommendation());
+        this.recommendations.put(rkey, rec);
+
+        source.addListener(rec);
+        target.addListener(rec);
     }
 
     public String rget(String vkeySource, int vecid, String vkeyTarget) {

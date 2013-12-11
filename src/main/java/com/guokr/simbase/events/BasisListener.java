@@ -4,6 +4,6 @@ import com.guokr.simbase.store.Basis;
 
 public interface BasisListener {
 
-    public void onBasisRevised(Basis source, String[] oldSchema, String[] newSchema);
+    public void onBasisRevised(Basis evtSrc, String[] oldSchema, String[] newSchema);
 
 }

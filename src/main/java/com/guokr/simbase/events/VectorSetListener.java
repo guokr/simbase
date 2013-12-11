@@ -4,12 +4,12 @@ import com.guokr.simbase.store.VectorSet;
 
 public interface VectorSetListener {
 
-    public void onVectorAdded(VectorSet source, int vecid, float[] inputed);
+    public void onVectorAdded(VectorSet evtSrc, int vecid, float[] inputed);
 
-    public void onVectorSetted(VectorSet source, int vecid, float[] old, float[] inputed);
+    public void onVectorSetted(VectorSet evtSrc, int vecid, float[] old, float[] inputed);
 
-    public void onVectorAccumulated(VectorSet source, int vecid, float[] inputed, float[] accumulated);
+    public void onVectorAccumulated(VectorSet evtSrc, int vecid, float[] inputed, float[] accumulated);
 
-    public void onVectorRemoved(VectorSet source, int vecid);
+    public void onVectorRemoved(VectorSet evtSrc, int vecid);
 
 }
