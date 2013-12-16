@@ -31,7 +31,7 @@ public class SimBase {
     private SimServer server;
 
     public SimBase(SimConfig conf) throws IOException {
-        SimEngine engine = new SimEngineImpl(conf.getSub("engine"));
+        SimEngine engine = new SimEngineImpl(conf.getSub("engine", "engine"));
         SimRegistry registry = new SimRegistry();
 
         registry.add("ping", new Ping());
@@ -53,7 +53,7 @@ public class SimBase {
         registry.add("rget", new RGet());
         registry.add("rrec", new RRec());
 
-        server = new SimServer(conf.getSub("server"), new ServerHandler(32, "", 100, registry, engine));
+        server = new SimServer(conf.getSub("server", "server"), new ServerHandler(32, "", 100, registry, engine));
     }
 
     public void run() throws IOException {

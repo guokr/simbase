@@ -285,7 +285,7 @@ public class SimEngineImpl implements SimEngine {
 
                     Basis basis = new Basis(base);
 
-                    bases.put(bkey, new SimBasis(context.getSub("defaults", "basis"), basis));
+                    bases.put(bkey, new SimBasis(context.getSub("basis", bkey), basis));
                     basisOf.put(bkey, bkey);
                     kindOf.put(bkey, Kind.BASIS);
                     dataExecs.put(bkey, Executors.newSingleThreadExecutor());

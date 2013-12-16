@@ -67,7 +67,11 @@ public class Basis {
             }
         }
         String[] old = this.base;
-        this.base = base.clone();
+        String[] newbase = new String[base.length];
+        for(String dim : base) {
+            newbase[this.compIndex.get(dim)] = dim;
+        }
+        this.base = newbase;
         
         for(BasisListener l: listeners) {
             l.onBasisRevised(this, old, base);

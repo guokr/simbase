@@ -42,13 +42,14 @@ public class SimBasis implements KryoSerializable {
     }
 
     public void vmk(String vkey) {
-        String type = context.retriveString("sparse", vkey, "type");
-        float accumuFactor = context.retriveFloat(0.01f, vkey, "accumuFactor");
-        int sparseFactor = context.retriveInt(4096, vkey, "sparseFactor");
+        String type = context.getString("vectorSetType");
+        SimContext subcontext = context.getSub(type, vkey);
+        float accumuFactor = subcontext.getFloat("accumuFactor");
+        int sparseFactor = subcontext.getInt("sparseFactor");
 
-        if (type.equals("dense")) {
+        if (type.equals("denseVectorSet")) {
             this.vectorSets.put(vkey, new DenseVectorSet(this.base, accumuFactor, sparseFactor));
-        } else if (type.equals("sparse")) {
+        } else if (type.equals("sparseVectorSet")) {
             this.vectorSets.put(vkey, new SparseVectorSet(this.base, accumuFactor, sparseFactor));
         } else {
             throw new IllegalArgumentException("wrong type of vector set in config!");

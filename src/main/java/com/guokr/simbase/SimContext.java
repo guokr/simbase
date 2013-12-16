@@ -1,11 +1,18 @@
 package com.guokr.simbase;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+
+import com.guokr.simbase.errors.SimContextException;
+import com.guokr.simbase.errors.engine.SimEngineException;
 
 public class SimContext extends HashMap<String, Object> {
 
     private static final long serialVersionUID = -8288998975274604087L;
+
+    protected String          type;
+    protected SimContext      defaults;
 
     public SimContext() {
         super();
@@ -13,6 +20,12 @@ public class SimContext extends HashMap<String, Object> {
 
     public SimContext(Map<String, Object> raw) {
         super(raw);
+    }
+
+    public SimContext(String type, SimContext defaults, Map<String, Object> raw) {
+        super(raw);
+        this.type = type;
+        this.defaults = defaults;
     }
 
     @SuppressWarnings("unchecked")
@@ -38,8 +51,10 @@ public class SimContext extends HashMap<String, Object> {
         }
         if (result != null) {
             return result.intValue();
+        } else if (defaults != null) {
+            return defaults.getSub(type, type).getInt(keys);
         } else {
-            return 0;
+            throw new SimContextException("no default int value found for keys" + Arrays.asList(keys) + " in type[" + type + "]");
         }
     }
 
@@ -65,7 +80,10 @@ public class SimContext extends HashMap<String, Object> {
             idx--;
         }
         if (result == null) {
-            result = new int[0];
+            result = defaults.getSub(type, type).getIntArray(keys);
+        }
+        if (result == null) {
+            throw new SimContextException("no default int array found for keys" + Arrays.asList(keys) + " in type[" + type + "]");
         }
         return result;
     }
@@ -93,8 +111,12 @@ public class SimContext extends HashMap<String, Object> {
         }
         if (result != null) {
             return result.floatValue();
+        } else if (defaults != null) {
+            System.out.println(defaults);
+            System.out.println(defaults.getSub(type, type));
+            return defaults.getSub(type, type).getFloat(keys);
         } else {
-            return 0.0f;
+            throw new SimContextException("no default float value found for keys" + Arrays.asList(keys) + " in type[" + type + "]");
         }
     }
 
@@ -120,7 +142,10 @@ public class SimContext extends HashMap<String, Object> {
             idx--;
         }
         if (result == null) {
-            result = new float[0];
+            result = defaults.getSub(type, type).getFloatArray(keys);
+        }
+        if (result == null) {
+            throw new SimContextException("no default float value found for keys" + Arrays.asList(keys) + " in type[" + type + "]");
         }
         return result;
     }
@@ -133,9 +158,13 @@ public class SimContext extends HashMap<String, Object> {
         for (String key : keys) {
             if (idx > 1) {
                 try {
+                    System.out.println(intermedia);
                     intermedia = (Map<String, Object>) intermedia.get(key);
                 } catch (ClassCastException e) {
                     intermedia = null;
+                }
+                if (intermedia == null) {
+                    throw new SimEngineException("configruation[" + key + "] is missing");
                 }
             } else {
                 try {
@@ -148,8 +177,10 @@ public class SimContext extends HashMap<String, Object> {
         }
         if (result != null) {
             return result;
+        } else if (defaults != null) {
+            return defaults.getSub(type, type).getString(keys);
         } else {
-            return "";
+            throw new SimContextException("no default string value found for keys" + Arrays.asList(keys) + " in type[" + type + "]");
         }
     }
 
@@ -175,42 +206,36 @@ public class SimContext extends HashMap<String, Object> {
             idx--;
         }
         if (result == null) {
-            result = new String[0];
+            result = defaults.getSub(type, type).getStringArray(keys);
+        }
+        if (result == null) {
+            throw new SimContextException("no default string value found for keys" + Arrays.asList(keys) + " in type[" + type + "]");
         }
         return result;
     }
 
     @SuppressWarnings("unchecked")
-    public SimContext getSub(String... keys) {
+    public SimContext getSub(String type, String... keys) {
         Map<String, Object> intermedia = this;
-        for (String key : keys) {
-            if (intermedia != null) {
-                try {
-                    intermedia = (Map<String, Object>) intermedia.get(key);
-                } catch (ClassCastException e) {
-                    intermedia = null;
+        if (keys == null) {
+            intermedia = new HashMap<String, Object>();
+        } else {
+            for (String key : keys) {
+                if (intermedia != null) {
+                    try {
+                        intermedia = (Map<String, Object>) intermedia.get(key);
+                    } catch (ClassCastException e) {
+                        intermedia = null;
+                    }
                 }
             }
+            if (defaults != null) {
+                intermedia = defaults.getSub(type, keys);
+            }
+            if (intermedia == null) {
+                intermedia = new HashMap<String, Object>();
+            }
         }
-        if (intermedia == null) {
-            intermedia = new HashMap<String, Object>();
-        }
-        return new SimContext(intermedia);
+        return new SimContext(type, defaults, intermedia);
     }
-
-    public int retriveInt(int defaultVal, String... keys) {
-        int val = getInt(keys);
-        return val == 0 ? defaultVal : val;
-    }
-
-    public float retriveFloat(float defaultVal, String... keys) {
-        float val = getFloat(keys);
-        return val == 0f ? defaultVal : val;
-    }
-
-    public String retriveString(String defaultVal, String... keys) {
-        String val = getString(keys);
-        return val.equals("") ? defaultVal : val;
-    }
-
 }
