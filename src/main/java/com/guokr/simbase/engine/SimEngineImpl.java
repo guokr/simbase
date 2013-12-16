@@ -382,6 +382,7 @@ public class SimEngineImpl implements SimEngine {
                 try {
                     bases.get(bkey).vmk(vkey);
 
+                    kindOf.put(vkey, Kind.VECTORS);
                     basisOf.put(vkey, bkey);
                     List<String> vkeys = vectorsOf.get(bkey);
                     if (vkeys == null) {

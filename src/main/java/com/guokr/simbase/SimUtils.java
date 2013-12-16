@@ -89,23 +89,10 @@ public class SimUtils {
     }
 
     public static byte[] bytes(float val) {
-        ByteBuffer buffer = localbuffer.get();
-        buffer.clear();
-        buffer.putFloat(val);
-        return buffer.array().clone();
-    }
-
-    public static byte[] bytes(float[] list) {
-        int len = list.length;
-        byte[] result = new byte[4 * len];
-        for (int i = 0; i < len; i++) {
-            byte[] array = bytes(list[i]);
-            result[4 * i] = array[0];
-            result[4 * i + 1] = array[1];
-            result[4 * i + 2] = array[2];
-            result[4 * i + 3] = array[3];
-        }
-        return result;
+        if (val == (int) val)
+            return String.format("%d", (int) val).getBytes();
+        else
+            return String.format("%s", val).getBytes();
     }
 
     public static byte[] bytes(String[] list) {
@@ -116,7 +103,6 @@ public class SimUtils {
             for (byte b : array) {
                 blist.add(b);
             }
-            //blist.add(0);
         }
 
         int pos = 0;

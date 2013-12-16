@@ -73,8 +73,12 @@ public class DenseVectorSet implements VectorSet {
             float ftmp = 0;
             int cursor = 0;
             int start = indexer.get(vecid);
-            while ((ftmp = probs.get(start + cursor++)) >= 0 && (ftmp < 1)) {
-                result[cursor] = ftmp;
+            while (cursor < result.length) {
+                ftmp = probs.get(start + cursor);
+                if (ftmp >= 0 && ftmp <= 1) {
+                    result[cursor] = ftmp;
+                }
+                cursor++;
             }
         }
         return result;
@@ -104,6 +108,8 @@ public class DenseVectorSet implements VectorSet {
     @Override
     public void set(int vecid, float[] vector) {
         if (indexer.containsKey(vecid)) {
+            float[] old = get(vecid);
+
             float length = 0;
             int cursor = indexer.get(vecid);
             for (float val : vector) {
@@ -115,11 +121,12 @@ public class DenseVectorSet implements VectorSet {
             probs.set(cursor, length);
 
             if (listening) {
-                float[] old = get(vecid);
                 for (VectorSetListener l : listeners) {
                     l.onVectorSetted(this, vecid, old, vector);
                 }
             }
+        } else {
+            add(vecid, vector);
         }
     }
 

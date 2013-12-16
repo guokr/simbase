@@ -77,14 +77,20 @@ public abstract class SimCallback {
     }
 
     public void floatList(float[] list) {
-        byte[] bytes = SimUtils.bytes(list);
-        byte[] size = SimUtils.size(bytes);
-        buffer = ByteBuffer.allocate(bytes.length + size.length + 5);
-        buffer.put(SimUtils.DOLLAR);
+        byte[] size = SimUtils.size(list.length);
+        buffer = ByteBuffer.allocate(1024 * list.length + 1024);
+        buffer.put(SimUtils.STAR);
         buffer.put(size);
         buffer.put(SimUtils.CRLF);
-        buffer.put(bytes);
-        buffer.put(SimUtils.CRLF);
+        for(float val : list) {
+            byte[] bytes = SimUtils.bytes(val);
+            size = SimUtils.size(bytes);
+            buffer.put(SimUtils.DOLLAR);
+            buffer.put(size);
+            buffer.put(SimUtils.CRLF);
+            buffer.put(bytes);
+            buffer.put(SimUtils.CRLF);
+        }
     }
 
     public void stringValue(String val) {
