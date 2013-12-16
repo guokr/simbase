@@ -90,7 +90,7 @@ public class SimContext extends HashMap<String, Object> {
 
     @SuppressWarnings("unchecked")
     public float getFloat(String... keys) {
-        Float result = null;
+        Double result = null;
         Map<String, Object> intermedia = this;
         int idx = keys.length;
         for (String key : keys) {
@@ -102,7 +102,7 @@ public class SimContext extends HashMap<String, Object> {
                 }
             } else {
                 try {
-                    result = (Float) intermedia.get(key);
+                    result = (Double) intermedia.get(key);
                 } catch (ClassCastException e) {
                     result = null;
                 }
@@ -112,8 +112,6 @@ public class SimContext extends HashMap<String, Object> {
         if (result != null) {
             return result.floatValue();
         } else if (defaults != null) {
-            System.out.println(defaults);
-            System.out.println(defaults.getSub(type, type));
             return defaults.getSub(type, type).getFloat(keys);
         } else {
             throw new SimContextException("no default float value found for keys" + Arrays.asList(keys) + " in type[" + type + "]");
