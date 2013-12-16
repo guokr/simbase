@@ -22,7 +22,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 import com.guokr.simbase.SimUtils;
 import com.guokr.simbase.SimContext;
-import com.guokr.simbase.errors.server.ProtocolException;
+import com.guokr.simbase.errors.ProtocolException;
 
 public class SimServer implements Runnable {
 

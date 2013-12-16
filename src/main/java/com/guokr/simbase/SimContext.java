@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.guokr.simbase.errors.SimContextException;
-import com.guokr.simbase.errors.engine.SimEngineException;
+import com.guokr.simbase.errors.SimEngineException;
 
 public class SimContext extends HashMap<String, Object> {
 

@@ -1,4 +1,4 @@
-package com.guokr.simbase.errors.engine;
+package com.guokr.simbase.errors;
 
 public class SimEngineException extends RuntimeException {
 

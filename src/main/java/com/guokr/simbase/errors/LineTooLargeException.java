@@ -1,4 +1,4 @@
-package com.guokr.simbase.errors.server;
+package com.guokr.simbase.errors;
 
 public class LineTooLargeException extends Exception {
 

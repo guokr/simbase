@@ -3,7 +3,7 @@ package com.guokr.simbase.server;
 import java.nio.ByteBuffer;
 
 import com.guokr.simbase.SimUtils;
-import com.guokr.simbase.errors.server.ProtocolException;
+import com.guokr.simbase.errors.ProtocolException;
 
 public class RedisDecoder {
 
