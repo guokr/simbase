@@ -14,8 +14,6 @@ public class VList extends SimCommand {
     @Override
     public void invoke(SimEngine engine, String bkey, SimCallback callback) {
         engine.vlist(callback, bkey);
-        callback.flip();
-        callback.response();
     }
 
 }

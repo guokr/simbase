@@ -14,8 +14,6 @@ public class VMk extends SimCommand {
     @Override
     public void invoke(SimEngine engine, String bkey, String vkey, SimCallback callback) {
         engine.vmk(callback, bkey, vkey);
-        callback.flip();
-        callback.response();
     }
 
 }

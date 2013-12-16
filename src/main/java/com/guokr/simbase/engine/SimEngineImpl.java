@@ -426,8 +426,8 @@ public class SimEngineImpl implements SimEngine {
     }
 
     @Override
-    public void vadd(SimCallback callback, final String vkey, final int vecid, final float[] vector) {
-        validateKind("vset", vkey, Kind.VECTORS);
+    public void vadd(final SimCallback callback, final String vkey, final int vecid, final float[] vector) {
+        validateKind("vadd", vkey, Kind.VECTORS);
         final String bkey = basisOf.get(vkey);
         dataExecs.get(bkey).execute(new Runnable() {
             @Override
@@ -435,7 +435,7 @@ public class SimEngineImpl implements SimEngine {
                 try {
                     bases.get(bkey).vadd(vkey, vecid, vector);
                 } catch (Throwable ex) {
-                    int code = SimErrors.lookup("vset", ex);
+                    int code = SimErrors.lookup("vadd", ex);
                     logger.error(SimErrors.info(code), ex);
                 }
             }

@@ -14,8 +14,6 @@ public class VGet extends SimCommand {
     @Override
     public void invoke(SimEngine engine, String vkey, int vecid, SimCallback callback) {
         engine.vget(callback, vkey, vecid);
-        callback.flip();
-        callback.response();
     }
 
 }

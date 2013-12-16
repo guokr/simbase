@@ -17,6 +17,7 @@ import com.guokr.simbase.command.RList;
 import com.guokr.simbase.command.RMk;
 import com.guokr.simbase.command.RRec;
 import com.guokr.simbase.command.VAcc;
+import com.guokr.simbase.command.VAdd;
 import com.guokr.simbase.command.VGet;
 import com.guokr.simbase.command.VList;
 import com.guokr.simbase.command.VMk;
@@ -43,6 +44,7 @@ public class SimBase {
 
         registry.add("vlist", new VList());
         registry.add("vmk", new VMk());
+        registry.add("vadd", new VAdd());
         registry.add("vset", new VSet());
         registry.add("vget", new VGet());
         registry.add("vacc", new VAcc());

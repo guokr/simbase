@@ -4,7 +4,7 @@ import com.guokr.simbase.SimCallback;
 import com.guokr.simbase.SimCommand;
 import com.guokr.simbase.SimEngine;
 
-public class VSet extends SimCommand {
+public class VAdd extends SimCommand {
 
     @Override
     public String signature() {
@@ -13,7 +13,7 @@ public class VSet extends SimCommand {
 
     @Override
     public void invoke(SimEngine engine, String vkey, int vecid, float[] distr, SimCallback callback) {
-        engine.vset(callback, vkey, vecid, distr);
+        engine.vadd(callback, vkey, vecid, distr);
     }
 
 }

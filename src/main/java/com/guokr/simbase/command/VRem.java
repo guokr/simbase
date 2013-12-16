@@ -14,8 +14,6 @@ public class VRem extends SimCommand {
     @Override
     public void invoke(SimEngine engine, String vkey, int vecid, SimCallback callback) {
         engine.vrem(callback, vkey, vecid);
-        callback.flip();
-        callback.response();
     }
 
 }

@@ -14,8 +14,6 @@ public class VAcc extends SimCommand {
     @Override
     public void invoke(SimEngine engine, String vkey, int vecid, float[] distr, SimCallback callback) {
         engine.vacc(callback, vkey, vecid, distr);
-        callback.flip();
-        callback.response();
     }
 
 }
