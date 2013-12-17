@@ -14,7 +14,6 @@ public class Ping extends SimCommand {
     @Override
     public void invoke(SimEngine engine, SimCallback callback) {
         callback.ok("PONG");
-        callback.flip();
         callback.response();
     }
 

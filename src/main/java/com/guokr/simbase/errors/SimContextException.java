@@ -1,6 +1,6 @@
 package com.guokr.simbase.errors;
 
-public class SimContextException extends RuntimeException {
+public class SimContextException extends SimException {
 
     private static final long serialVersionUID = 4295837255563564513L;
 
@@ -16,4 +16,7 @@ public class SimContextException extends RuntimeException {
         super(msg, t);
     }
 
+    public SimContextException(String msg, Throwable t, String... context) {
+        super(msg, t, context);
+    }
 }
