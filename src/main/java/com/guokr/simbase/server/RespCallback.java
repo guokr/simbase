@@ -5,7 +5,7 @@ import java.nio.channels.SelectionKey;
 
 public class RespCallback {
     private final SelectionKey key;
-    private final SimServer server;
+    private final SimServer    server;
 
     public RespCallback(SelectionKey key, SimServer server) {
         this.key = key;

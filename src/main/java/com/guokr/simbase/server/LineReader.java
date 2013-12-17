@@ -7,8 +7,8 @@ import com.guokr.simbase.SimUtils;
 
 public class LineReader {
 
-    int index = 0;
-    Stack<Integer> mark = new Stack<Integer>();
+    int            index = 0;
+    Stack<Integer> mark  = new Stack<Integer>();
 
     public LineReader() {
     }

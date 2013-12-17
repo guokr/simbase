@@ -57,22 +57,19 @@ public class SimEngineImpl implements SimEngine {
 
     private void validateExistence(String toCheck) throws IllegalArgumentException {
         if (!basisOf.containsKey(toCheck)) {
-            throw new IllegalArgumentException("Data entry[" + toCheck
-                    + "] should not exist on server before this operation!");
+            throw new IllegalArgumentException("Data entry[" + toCheck + "] should not exist on server before this operation!");
         }
     }
 
     private void validateNotExistence(String toCheck) throws IllegalArgumentException {
         if (basisOf.containsKey(toCheck)) {
-            throw new IllegalArgumentException("Data entry[" + toCheck
-                    + "] should not exist on server before this operation!");
+            throw new IllegalArgumentException("Data entry[" + toCheck + "] should not exist on server before this operation!");
         }
     }
 
     private void validateKind(String op, String toCheck, Kind kindShouldBe) throws IllegalArgumentException {
         if (!kindOf.containsKey(toCheck) || !kindShouldBe.equals(kindOf.get(toCheck))) {
-            throw new IllegalArgumentException("Invalid operation[" + op + "] on kind[" + kindShouldBe + "] with:"
-                    + toCheck);
+            throw new IllegalArgumentException("Invalid operation[" + op + "] on kind[" + kindShouldBe + "] with:" + toCheck);
         }
     }
 
@@ -656,7 +653,7 @@ public class SimEngineImpl implements SimEngine {
             @Override
             public void run() {
                 try {
-                    callback.stringValue(bases.get(bkey).rget(vkeySource, vecid, vkeyTarget));
+                    callback.stringList(bases.get(bkey).rget(vkeySource, vecid, vkeyTarget));
                 } catch (Throwable ex) {
                     int code = SimErrors.lookup("rget", ex);
                     logger.error(SimErrors.info(code), ex);

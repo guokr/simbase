@@ -1,18 +1,8 @@
 package com.guokr.simbase.errors;
 
 public class SimErrors {
-    
-    Object[] errors = new Object[] {
-            100001,
-            "",
-            "",
-            100002,
-            "",
-            "",
-            100003,
-            "",
-            "",
-    };
+
+    Object[] errors = new Object[] { 100001, "", "", 100002, "", "", 100003, "", "", };
 
     public static String info(int code) {
         return "";// TODO

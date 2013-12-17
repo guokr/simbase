@@ -1,6 +1,5 @@
 package com.guokr.simbase.server;
 
-
 public class RedisAtta extends ServerAtta {
 
     public RedisAtta() {
