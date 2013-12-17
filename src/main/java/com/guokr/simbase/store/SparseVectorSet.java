@@ -222,8 +222,4 @@ public class SparseVectorSet implements VectorSet {
     public void rescore(int vecid, float length, float[] vector, Recommendation rec) {
     }
 
-    @Override
-    public void fixscore(int vecid, float length, float[] vector, Recommendation rec) {
-    }
-
 }

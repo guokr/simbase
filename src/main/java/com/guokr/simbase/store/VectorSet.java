@@ -6,8 +6,6 @@ public interface VectorSet {
 
     public void rescore(int vecid, float length, float[] vector, Recommendation rec);
 
-    public void fixscore(int vecid, float length, float[] vector, Recommendation rec);
-
     public void remove(int vecid);
 
     public float[] get(int vecid);
