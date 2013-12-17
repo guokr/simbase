@@ -11,6 +11,10 @@ import com.guokr.simbase.command.BGet;
 import com.guokr.simbase.command.BList;
 import com.guokr.simbase.command.BMk;
 import com.guokr.simbase.command.BRev;
+import com.guokr.simbase.command.IAcc;
+import com.guokr.simbase.command.IAdd;
+import com.guokr.simbase.command.IGet;
+import com.guokr.simbase.command.ISet;
 import com.guokr.simbase.command.Ping;
 import com.guokr.simbase.command.RGet;
 import com.guokr.simbase.command.RList;
@@ -49,6 +53,10 @@ public class SimBase {
         registry.add("vget", new VGet());
         registry.add("vacc", new VAcc());
         registry.add("vrem", new VRem());
+        registry.add("iadd", new IAdd());
+        registry.add("iget", new IGet());
+        registry.add("iset", new ISet());
+        registry.add("iacc", new IAcc());
 
         registry.add("rlist", new RList());
         registry.add("rmk", new RMk());

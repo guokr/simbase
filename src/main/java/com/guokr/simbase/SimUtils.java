@@ -69,10 +69,7 @@ public class SimUtils {
     }
 
     public static byte[] bytes(int val) {
-        ByteBuffer buffer = localbuffer.get();
-        buffer.clear();
-        buffer.putInt(val);
-        return buffer.array().clone();
+        return String.format("%d", val).getBytes();
     }
 
     public static byte[] bytes(int[] list) {

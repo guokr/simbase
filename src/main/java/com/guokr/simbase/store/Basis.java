@@ -68,23 +68,24 @@ public class Basis {
         }
         String[] old = this.base;
         String[] newbase = new String[base.length];
-        for(String dim : base) {
+        for (String dim : base) {
             newbase[this.compIndex.get(dim)] = dim;
         }
         this.base = newbase;
-        
-        for(BasisListener l: listeners) {
+
+        for (BasisListener l : listeners) {
             l.onBasisRevised(this, old, base);
         }
     }
 
     float[] densify(int sparseFactor, int[] pairs) {
         int size = size();
+        int length = pairs.length;
         float[] result = new float[size];
 
         int index = 0, cursor = 0;
         while (cursor < size) {
-            if (cursor == pairs[index]) {
+            if (index < length && cursor == pairs[index]) {
                 result[cursor] = ((float) pairs[index + 1]) / sparseFactor;
                 index = index + 2;
             } else {
@@ -98,14 +99,14 @@ public class Basis {
 
     int[] sparsify(int sparseFactor, float[] distr) {
         TIntArrayList resultList = new TIntArrayList();
-        float ftmp = 0;
         int cursor = 0;
-        while ((ftmp = distr[cursor++]) >= 0 && (ftmp < 1)) {
-            int itmp = (int) ftmp * sparseFactor;
+        for (float ftmp : distr) {
+            int itmp = Math.round(ftmp * sparseFactor);
             if (itmp > 0) {
                 resultList.add(cursor);
                 resultList.add(itmp);
             }
+            cursor++;
         }
         int[] result = new int[resultList.size()];
         resultList.toArray(result);
