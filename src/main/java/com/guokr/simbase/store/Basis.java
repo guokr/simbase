@@ -99,14 +99,14 @@ public class Basis {
 
     int[] sparsify(int sparseFactor, float[] distr) {
         TIntArrayList resultList = new TIntArrayList();
-        float ftmp = 0;
         int cursor = 0;
-        while ((ftmp = distr[cursor++]) >= 0 && (ftmp < 1)) {
-            int itmp = (int) ftmp * sparseFactor;
+        for (float ftmp : distr) {
+            int itmp = Math.round(ftmp * sparseFactor);
             if (itmp > 0) {
                 resultList.add(cursor);
                 resultList.add(itmp);
             }
+            cursor++;
         }
         int[] result = new int[resultList.size()];
         resultList.toArray(result);

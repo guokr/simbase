@@ -107,7 +107,7 @@ public class SparseVectorSet implements VectorSet {
                 if (pos < 0) {
                     break;
                 }
-                int val = (int) probs.get(cursor++);
+                int val = Math.round(probs.get(cursor++));
                 resultList.add(pos);
                 resultList.add(val);
             }
