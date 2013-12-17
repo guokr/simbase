@@ -104,13 +104,12 @@ public class SparseVectorSet implements VectorSet {
             int cursor = indexer.get(vecid);
             while (true) {
                 int pos = (int) probs.get(cursor++);
-                int val = (int) probs.get(cursor++);
-                if (pos >= 0 && val >= 0) {
-                    resultList.add(pos);
-                    resultList.add(val);
-                } else {
+                if (pos < 0) {
                     break;
                 }
+                int val = (int) probs.get(cursor++);
+                resultList.add(pos);
+                resultList.add(val);
             }
         }
         int[] result = new int[resultList.size()];
@@ -155,6 +154,8 @@ public class SparseVectorSet implements VectorSet {
                     l.onVectorSetted(this, vecid, old, input);
                 }
             }
+        } else {
+            _add(vecid, pairs);
         }
     }
 
@@ -165,20 +166,19 @@ public class SparseVectorSet implements VectorSet {
             _add(vecid, pairs);
         } else {
             TIntFloatMap results = new TIntFloatHashMap();
-            if (indexer.containsKey(vecid)) {
-                int cursor = indexer.get(vecid);
-                while (true) {
-                    int pos = (int) probs.get(cursor++);
-                    float val = probs.get(cursor++) * (1f - accumuFactor);
-                    if (pos >= 0 && val >= 0) {
-                        results.put(pos, val);
-                    } else {
-                        break;
-                    }
+
+            int cursor = indexer.get(vecid);
+            while (true) {
+                int pos = (int) probs.get(cursor++);
+                if (pos < 0) {
+                    break;
                 }
+                float val = probs.get(cursor++) * (1f - accumuFactor);
+                results.put(pos, val);
+
             }
 
-            int cursor = 0;
+            cursor = 0;
             while (cursor < pairs.length) {
                 int pos = pairs[cursor++];
                 float val = (float) pairs[cursor++] * accumuFactor;
@@ -197,6 +197,7 @@ public class SparseVectorSet implements VectorSet {
             indexer.put(vecid, start);
             TIntFloatIterator iter = results.iterator();
             while (iter.hasNext()) {
+                iter.advance();
                 probs.add(iter.key());
                 probs.add(iter.value());
             }

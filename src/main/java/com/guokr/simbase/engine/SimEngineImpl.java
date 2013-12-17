@@ -57,19 +57,22 @@ public class SimEngineImpl implements SimEngine {
 
     private void validateExistence(String toCheck) throws IllegalArgumentException {
         if (!basisOf.containsKey(toCheck)) {
-            throw new IllegalArgumentException("Data entry[" + toCheck + "] should not exist on server before this operation!");
+            throw new IllegalArgumentException("Data entry[" + toCheck
+                    + "] should not exist on server before this operation!");
         }
     }
 
     private void validateNotExistence(String toCheck) throws IllegalArgumentException {
         if (basisOf.containsKey(toCheck)) {
-            throw new IllegalArgumentException("Data entry[" + toCheck + "] should not exist on server before this operation!");
+            throw new IllegalArgumentException("Data entry[" + toCheck
+                    + "] should not exist on server before this operation!");
         }
     }
 
     private void validateKind(String op, String toCheck, Kind kindShouldBe) throws IllegalArgumentException {
         if (!kindOf.containsKey(toCheck) || !kindShouldBe.equals(kindOf.get(toCheck))) {
-            throw new IllegalArgumentException("Invalid operation[" + op + "] on kind[" + kindShouldBe + "] with:" + toCheck);
+            throw new IllegalArgumentException("Invalid operation[" + op + "] on kind[" + kindShouldBe + "] with:"
+                    + toCheck);
         }
     }
 
@@ -524,6 +527,9 @@ public class SimEngineImpl implements SimEngine {
                     int code = SimErrors.lookup("iget", ex);
                     logger.error(SimErrors.info(code), ex);
                     callback.error(SimErrors.descr(code));
+                } finally {
+                    callback.flip();
+                    callback.response();
                 }
             }
         });
@@ -587,11 +593,8 @@ public class SimEngineImpl implements SimEngine {
             }
         });
         callback.ok();
-    }
-
-    @Override
-    public void irem(final SimCallback callback, String vkey, int vecid) {
-        vrem(callback, vkey, vecid);
+        callback.flip();
+        callback.response();
     }
 
     @Override

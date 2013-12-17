@@ -52,8 +52,6 @@ public interface SimEngine {
 
     public void iacc(SimCallback callback, String vkey, int vecid, int[] pairs);
 
-    public void irem(SimCallback callback, String vkey, int vecid);
-
     public void rlist(SimCallback callback, String vkey);
 
     public void rmk(SimCallback callback, String vkeySource, String vkeyTarget);
