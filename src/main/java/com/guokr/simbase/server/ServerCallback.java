@@ -14,6 +14,7 @@ public class ServerCallback extends SimCallback {
         if (this.buffer == null) {
             this.error("Unknown server error!");
         }
+        this.buffer.flip();
         this.response.run(this.buffer);
     }
 

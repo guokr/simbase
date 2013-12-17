@@ -3,6 +3,8 @@ package com.guokr.simbase;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.guokr.simbase.errors.SimCommandException;
+
 public class SimRegistry {
 
     private Map<String, SimCommand> registry = new HashMap<String, SimCommand>();
@@ -12,7 +14,11 @@ public class SimRegistry {
     }
 
     public SimCommand get(String key) {
-        return registry.get(key);
+        SimCommand command = registry.get(key);
+        if (command == null) {
+            throw new SimCommandException("unknown command", null, "command", key);
+        }
+        return command;
     }
 
 }

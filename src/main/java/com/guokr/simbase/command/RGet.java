@@ -14,7 +14,6 @@ public class RGet extends SimCommand {
     @Override
     public void invoke(SimEngine engine, String vkeySource, int vecid, String vkeyTarget, SimCallback callback) {
         engine.rget(callback, vkeySource, vecid, vkeyTarget);
-        callback.flip();
         callback.response();
     }
 
