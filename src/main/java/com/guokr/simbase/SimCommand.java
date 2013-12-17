@@ -1,6 +1,5 @@
 package com.guokr.simbase;
 
-
 public abstract class SimCommand {
 
     public abstract String signature();

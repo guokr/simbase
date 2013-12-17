@@ -520,7 +520,7 @@ public class SimEngineImpl implements SimEngine {
         dataExecs.get(bkey).execute(new SafeRunner("rget", callback) {
             @Override
             public void invoke() {
-                callback.stringValue(bases.get(bkey).rget(vkeySource, vecid, vkeyTarget));
+                callback.stringList(bases.get(bkey).rget(vkeySource, vecid, vkeyTarget));
             }
         });
     }

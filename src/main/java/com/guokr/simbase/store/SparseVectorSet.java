@@ -217,4 +217,13 @@ public class SparseVectorSet implements VectorSet {
     public void addListener(VectorSetListener listener) {
         listeners.add(listener);
     }
+
+    @Override
+    public void rescore(int vecid, float length, float[] vector, Recommendation rec) {
+    }
+
+    @Override
+    public void fixscore(int vecid, float length, float[] vector, Recommendation rec) {
+    }
+
 }

@@ -12,8 +12,8 @@ public class RedisRequests implements Iterable<SimRequest> {
     public AsyncChannel      channel;
     public InetSocketAddress remoteAddr;
 
-    private List<SimRequest>  list        = new ArrayList<SimRequest>();
-    private SimRequest last; 
+    private List<SimRequest> list = new ArrayList<SimRequest>();
+    private SimRequest       last;
 
     public RedisRequests() {
     }
