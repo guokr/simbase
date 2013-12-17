@@ -4,6 +4,8 @@ import com.guokr.simbase.events.VectorSetListener;
 
 public interface VectorSet {
 
+    public void score(int vecid, float length, float[] vector, Recommendation rec);
+
     public void remove(int vecid);
 
     public float[] get(int vecid);

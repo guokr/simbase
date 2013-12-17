@@ -181,4 +181,28 @@ public class DenseVectorSet implements VectorSet {
         listeners.add(listener);
     }
 
+    @Override
+    public void score(int vecid, float length, float[] vector, Recommendation rec) {
+        Sorter sorter = rec.create(vecid);        
+        float scoring = 0;
+        int idx = 0, end = probs.size(), len = vector.length;
+        for (int offset = 0; offset < end; offset++) {
+            float val = probs.get(offset);
+            if (val >= 0) {
+                if (val < 1) {
+                    if (idx < len) {
+                        float another = vector[idx];// ArrayIndexOutOfBoundsException
+                        scoring += another * val;
+                    }
+                } else {
+                    float cosine = scoring * scoring / length / probs.get(offset + 1);
+                    sorter.add((int) val - 1, cosine);
+                    idx = 0;
+                    scoring = 0;
+                    offset = offset + 1;
+                }
+            }
+        }
+    }
+
 }

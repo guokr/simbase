@@ -4,17 +4,17 @@ public class Sorter {
 
 	private int limits = 20;
 	private int size = 0;
-	private int[] docids;
+	private int[] vecids;
 	private float[] scores;
 
 	public Sorter(int limits) {
 		this.limits = limits;
 		int maxlen = 1 + limits;
-		this.docids = new int[maxlen];
+		this.vecids = new int[maxlen];
 		this.scores = new float[maxlen];
 
 		for (int i = 0; i < maxlen; i++) {
-			this.docids[i] = -1;
+			this.vecids[i] = -1;
 			this.scores[i] = -1.0f;
 		}
 	}
@@ -22,7 +22,7 @@ public class Sorter {
 	private int indexOf(int docid) {
 		int pos = -1;
 		for (int i = 0; i < this.size; i++) {
-			if (this.docids[i] == docid) {
+			if (this.vecids[i] == docid) {
 				pos = i;
 				break;
 			}
@@ -60,40 +60,40 @@ public class Sorter {
         remove(docid);
 		int pos = lookup(score);
 		if (pos == 0 && this.size == 0) {
-			this.docids[pos] = docid;
+			this.vecids[pos] = docid;
 			this.scores[pos] = score;
 			this.size = this.size + 1;
 		} else {
 			if (pos > -1) {
 				this.size = this.size + 1;
-				int[] tdocids = this.docids;
+				int[] tdocids = this.vecids;
 				float[] tscores = this.scores;
-				this.docids = new int[this.size];
+				this.vecids = new int[this.size];
 				this.scores = new float[this.size];
 
-				System.arraycopy(tdocids, 0, this.docids, 0, pos);
-				System.arraycopy(tdocids, pos, this.docids, pos + 1, this.size
+				System.arraycopy(tdocids, 0, this.vecids, 0, pos);
+				System.arraycopy(tdocids, pos, this.vecids, pos + 1, this.size
 						- pos - 1);
 				System.arraycopy(tscores, 0, this.scores, 0, pos);
 				System.arraycopy(tscores, pos, this.scores, pos + 1, this.size
 						- pos - 1);
 
-				this.docids[pos] = docid;
+				this.vecids[pos] = docid;
 				this.scores[pos] = score;
 			}
 		}
 	}
 
-	public int[] docids() {
+	public int[] vecids() {
 		int[] result = new int[size];
-		System.arraycopy(this.docids, 0, result, 0, size);
+		System.arraycopy(this.vecids, 0, result, 0, size);
 		return result;
 	}
 
 	public float get(int docid) {
 		float result = -1.0f;
 		for (int i = 0; i < this.size; i++) {
-			if (this.docids[i] == docid) {
+			if (this.vecids[i] == docid) {
 				result = this.scores[i];
 				break;
 			}
@@ -105,13 +105,13 @@ public class Sorter {
 		int pos = indexOf(docid);
 		if (pos > -1) {
 			this.size = this.size - 1;
-			int[] tdocids = this.docids;
+			int[] tdocids = this.vecids;
 			float[] tscores = this.scores;
-			this.docids = new int[this.size];
+			this.vecids = new int[this.size];
 			this.scores = new float[this.size];
 
-			System.arraycopy(tdocids, 0, this.docids, 0, pos);
-			System.arraycopy(tdocids, pos + 1, this.docids, pos, this.size
+			System.arraycopy(tdocids, 0, this.vecids, 0, pos);
+			System.arraycopy(tdocids, pos + 1, this.vecids, pos, this.size
 					- pos);
 			System.arraycopy(tscores, 0, this.scores, 0, pos);
 			System.arraycopy(tscores, pos + 1, this.scores, pos, this.size
@@ -128,7 +128,7 @@ public class Sorter {
 	public String[] pickle() {
 		String[] result = new String[2 * this.size];
 		for (int i = 0; i < this.size; i++) {
-			result[2 * i] = String.valueOf(this.docids[i]);
+			result[2 * i] = String.valueOf(this.vecids[i]);
 			result[2 * i + 1] = String.valueOf(this.scores[i]);
 		}
 		return result;
