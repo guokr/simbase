@@ -67,9 +67,10 @@ public class Basis {
             }
         }
         String[] old = this.base;
-        String[] newbase = new String[base.length];
-        for (String dim : base) {
-            newbase[this.compIndex.get(dim)] = dim;
+        String[] newbase = new String[this.schema.size()];
+        int pos = 0;
+        for (String dim : this.schema) {
+            newbase[pos++] = dim;
         }
         this.base = newbase;
 
