@@ -57,7 +57,7 @@ public class Recommendation implements VectorSetListener {
 
 	private void processChangedEvt(VectorSet evtSrc, int vecid, float[] inputed) {
 		if (evtSrc == this.source) {
-			evtSrc.rescore(vecid, length(inputed), inputed, this);
+			target.rescore(vecid, length(inputed), inputed, this);
 		} else if (evtSrc == this.target) {
 			int tgtVecId = vecid;
 			TIntObjectIterator<Sorter> iter = sorters.iterator();

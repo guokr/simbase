@@ -182,8 +182,8 @@ public class DenseVectorSet implements VectorSet {
     }
 
     @Override
-    public void rescore(int tgtVecId, float length, float[] vector, Recommendation rec) {
-        rec.create(tgtVecId);
+    public void rescore(int srcVecId, float length, float[] vector, Recommendation rec) {
+        rec.create(srcVecId);
         float scoring = 0;
         int idx = 0, end = probs.size(), len = vector.length;
         for (int offset = 0; offset < end; offset++) {
@@ -196,7 +196,8 @@ public class DenseVectorSet implements VectorSet {
                     }
                 } else {
                     float cosine = scoring * scoring / length / probs.get(offset + 1);
-                    rec.add((int) val - 1, tgtVecId, cosine);
+                    int tgtVecId = (int) val - 1;
+                    rec.add(srcVecId, tgtVecId, cosine);
                     idx = 0;
                     scoring = 0;
                     offset = offset + 1;
