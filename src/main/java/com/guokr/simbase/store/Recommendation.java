@@ -41,7 +41,7 @@ public class Recommendation implements VectorSetListener {
         for (float cmpn : vector) {
             result += cmpn * cmpn;
         }
-        return (float) Math.sqrt(result);
+        return result;
     }
 
     private float score(float[] vector1, float[] vector2) {
@@ -52,20 +52,22 @@ public class Recommendation implements VectorSetListener {
             length2 += vector2[i] * vector2[i];
             result += vector1[i] * vector2[i];
         }
-        return result / (float) Math.sqrt(length1) / (float) Math.sqrt(length2);
+        return result * result / length1 / length2;
     }
 
     private void processChangedEvt(VectorSet evtSrc, int vecid, float[] inputed) {
         if (evtSrc == this.source) {
             target.rescore(vecid, length(inputed), inputed, this);
-        } 
+        }
         if (evtSrc == this.target) {
             int tgtVecId = vecid;
             TIntObjectIterator<Sorter> iter = sorters.iterator();
             while (iter.hasNext()) {
                 iter.advance();
                 int srcVecId = iter.key();
-                add(srcVecId, tgtVecId, score(source.get(srcVecId), inputed));
+                if (!(this.source == this.target && srcVecId == tgtVecId)) {
+                    add(srcVecId, tgtVecId, score(source.get(srcVecId), inputed));
+                }
             }
         }
     }

@@ -195,9 +195,11 @@ public class DenseVectorSet implements VectorSet {
                         scoring += another * val;
                     }
                 } else {
-                    float cosine = scoring / length / probs.get(++offset);
+                    float cosine = scoring * scoring / length / probs.get(++offset);
                     int tgtVecId = (int) val - 1;
-                    rec.add(srcVecId, tgtVecId, cosine);
+                    if (!(this == rec.source && srcVecId == tgtVecId)) {
+                        rec.add(srcVecId, tgtVecId, cosine);
+                    }
                     idx = 0;
                     scoring = 0;
                 }
