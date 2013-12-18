@@ -1,7 +1,9 @@
 package com.guokr.simbase.store;
 
 import gnu.trove.list.TFloatList;
+import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TFloatArrayList;
+import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.TIntIntMap;
 import gnu.trove.map.hash.TIntIntHashMap;
 
@@ -33,6 +35,19 @@ public class DenseVectorSet implements VectorSet {
         this.sparseFactor = sparseFactor;
         this.listening = true;
         this.listeners = new ArrayList<VectorSetListener>();
+    }
+
+    @Override
+    public int[] ids() {
+        TIntList resultList = new TIntArrayList();
+        int end = probs.size();
+        for (int offset = 0; offset < end; offset++) {
+            float val = probs.get(offset);
+            if (val > 0) {
+                resultList.add((int) val - 1);
+            }
+        }
+        return resultList.toArray();
     }
 
     @Override

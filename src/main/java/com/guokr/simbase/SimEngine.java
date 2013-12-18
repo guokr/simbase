@@ -34,6 +34,8 @@ public interface SimEngine {
 
     public void vmk(SimCallback callback, String bkey, String vkey);
 
+    public void vids(SimCallback callback, String vkey);
+
     public void vget(SimCallback callback, String vkey, int vecid);
 
     public void vadd(SimCallback callback, String vkey, int vecid, float[] vector);

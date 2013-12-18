@@ -56,6 +56,10 @@ public class SimBasis implements KryoSerializable {
         }
     }
 
+    public int[] vids(String vkey) {
+        return this.vectorSets.get(vkey).ids();
+    }
+
     public float[] vget(String vkey, int vecid) {
         return this.vectorSets.get(vkey).get(vecid);
     }

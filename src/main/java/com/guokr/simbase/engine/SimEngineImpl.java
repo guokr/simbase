@@ -104,22 +104,19 @@ public class SimEngineImpl implements SimEngine {
 
     private void validateExistence(String toCheck) throws IllegalArgumentException {
         if (!basisOf.containsKey(toCheck)) {
-            throw new IllegalArgumentException("Data entry[" + toCheck
-                    + "] should exist on server before this operation!");
+            throw new IllegalArgumentException("Data entry[" + toCheck + "] should exist on server before this operation!");
         }
     }
 
     private void validateNotExistence(String toCheck) throws IllegalArgumentException {
         if (basisOf.containsKey(toCheck)) {
-            throw new IllegalArgumentException("Data entry[" + toCheck
-                    + "] should not exist on server before this operation!");
+            throw new IllegalArgumentException("Data entry[" + toCheck + "] should not exist on server before this operation!");
         }
     }
 
     private void validateKind(String op, String toCheck, Kind kindShouldBe) throws IllegalArgumentException {
         if (!kindOf.containsKey(toCheck) || !kindShouldBe.equals(kindOf.get(toCheck))) {
-            throw new IllegalArgumentException("Invalid operation[" + op + "] on kind[" + kindShouldBe + "] with:"
-                    + toCheck);
+            throw new IllegalArgumentException("Invalid operation[" + op + "] on kind[" + kindShouldBe + "] with:" + toCheck);
         }
     }
 
@@ -346,6 +343,18 @@ public class SimEngineImpl implements SimEngine {
                 }
                 vkeys.add(vkey);
                 callback.ok();
+            }
+        });
+    }
+
+    @Override
+    public void vids(final SimCallback callback, final String vkey) {
+        validateKind("vget", vkey, Kind.VECTORS);
+        final String bkey = basisOf.get(vkey);
+        dataExecs.get(bkey).execute(new SafeRunner("vids", callback) {
+            @Override
+            public void invoke() {
+                callback.integerList(bases.get(bkey).vids(vkey));
             }
         });
     }

@@ -66,6 +66,21 @@ public class SparseVectorSet implements VectorSet {
     }
 
     @Override
+    public int[] ids() {
+        TIntList resultList = new TIntArrayList();
+        int end = probs.size();
+        for (int offset = 0; offset < end;) {
+            float pos = probs.get(offset);
+            float val = probs.get(offset + 1);
+            if (pos < 0) {
+                resultList.add(-(int) val - 1);
+            }
+            pos += 2;
+        }
+        return resultList.toArray();
+    }
+
+    @Override
     public void remove(int vecid) {
         if (indexer.containsKey(vecid)) {
             int cursor = indexer.get(vecid);

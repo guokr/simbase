@@ -4,7 +4,7 @@ public class Sorter {
 
     private int     limits    = 20;
     private int     size      = 0;
-    private float   waterline = 0;
+    //private float   waterline = 0;
 
     private int[]   vecids;
     private float[] scores;
