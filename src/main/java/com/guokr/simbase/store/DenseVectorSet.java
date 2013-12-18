@@ -191,16 +191,15 @@ public class DenseVectorSet implements VectorSet {
             if (val >= 0) {
                 if (val < 1) {
                     if (idx < len) {
-                        float another = vector[idx];// ArrayIndexOutOfBoundsException
+                        float another = vector[idx++];// ArrayIndexOutOfBoundsException
                         scoring += another * val;
                     }
                 } else {
-                    float cosine = scoring * scoring / length / probs.get(offset + 1);
+                    float cosine = scoring / length / probs.get(++offset);
                     int tgtVecId = (int) val - 1;
                     rec.add(srcVecId, tgtVecId, cosine);
                     idx = 0;
                     scoring = 0;
-                    offset = offset + 1;
                 }
             }
         }

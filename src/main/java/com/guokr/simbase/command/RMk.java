@@ -14,7 +14,6 @@ public class RMk extends SimCommand {
     @Override
     public void invoke(SimEngine engine, String vkeySource, String vkeyTarget, SimCallback callback) {
         engine.rmk(callback, vkeySource, vkeyTarget);
-        callback.response();
     }
 
 }

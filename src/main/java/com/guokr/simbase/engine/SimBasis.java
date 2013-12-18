@@ -101,7 +101,9 @@ public class SimBasis implements KryoSerializable {
         this.recommendations.put(rkey, rec);
 
         source.addListener(rec);
-        target.addListener(rec);
+        if (target != source) {
+            target.addListener(rec);
+        }
     }
 
     public String[] rget(String vkeySource, int vecid, String vkeyTarget) {

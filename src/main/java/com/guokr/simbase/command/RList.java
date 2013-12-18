@@ -12,9 +12,8 @@ public class RList extends SimCommand {
     }
 
     @Override
-    public void invoke(SimEngine engine, String bkey, SimCallback callback) {
-        engine.rlist(callback, bkey);
-        callback.response();
+    public void invoke(SimEngine engine, String vkey, SimCallback callback) {
+        engine.rlist(callback, vkey);
     }
 
 }

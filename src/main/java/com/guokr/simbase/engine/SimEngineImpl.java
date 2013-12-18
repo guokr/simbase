@@ -3,8 +3,10 @@ package com.guokr.simbase.engine;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ExecutorService;
@@ -82,7 +84,7 @@ public class SimEngineImpl implements SimEngine {
     private Map<String, Kind>            kindOf     = new HashMap<String, Kind>();
     private Map<String, String>          basisOf    = new HashMap<String, String>();
     private Map<String, List<String>>    vectorsOf  = new HashMap<String, List<String>>();
-    private Map<String, List<String>>    rtargetsOf = new HashMap<String, List<String>>();
+    private Map<String, Set<String>>     rtargetsOf = new HashMap<String, Set<String>>();
     private ExecutorService              mngmExec   = Executors.newSingleThreadExecutor();
 
     private Map<String, SimBasis>        bases      = new HashMap<String, SimBasis>();
@@ -103,7 +105,7 @@ public class SimEngineImpl implements SimEngine {
     private void validateExistence(String toCheck) throws IllegalArgumentException {
         if (!basisOf.containsKey(toCheck)) {
             throw new IllegalArgumentException("Data entry[" + toCheck
-                    + "] should not exist on server before this operation!");
+                    + "] should exist on server before this operation!");
         }
     }
 
@@ -486,8 +488,12 @@ public class SimEngineImpl implements SimEngine {
             @Override
             public void invoke() {
                 validateKind("rlist", vkey, Kind.VECTORS);
-                List<String> targets = rtargetsOf.get(vkey);
-                Collections.sort(targets);
+                List<String> targets = new ArrayList<String>();
+                Set<String> tgtSet = rtargetsOf.get(vkey);
+                if (tgtSet != null) {
+                    targets.addAll(tgtSet);
+                    Collections.sort(targets);
+                }
                 callback.stringList((String[]) targets.toArray(new String[targets.size()]));
             }
         });
@@ -505,6 +511,11 @@ public class SimEngineImpl implements SimEngine {
                 validateNotExistence(rkey);
                 final String bkey = basisOf.get(vkeySource);
                 bases.get(bkey).rmk(vkeySource, vkeyTarget);
+                basisOf.put(rkey, basisOf.get(vkeySource));
+                if (rtargetsOf.get(vkeySource) == null) {
+                    rtargetsOf.put(vkeySource, new HashSet<String>());
+                }
+                rtargetsOf.get(vkeySource).add(vkeyTarget);
                 callback.ok();
             }
         });
