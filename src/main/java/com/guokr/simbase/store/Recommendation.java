@@ -36,26 +36,36 @@ public class Recommendation implements VectorSetListener {
         this.listeners = new ArrayList<RecommendationListener>();
     }
 
-    private float length(float[] vector) {
-        float result = 0;
-        for (float cmpn : vector) {
-            result += cmpn * cmpn;
+    private int length(int[] pairs) {
+        int result = 0;
+        int len = pairs.length;
+        for (int i = 0; i < len;) {
+            result += pairs[i + 1] * pairs[i + 1];
+            i += 2;
         }
         return result;
     }
 
-    private float score(float[] vector1, float[] vector2) {
-        float result = 0f, length1 = 0f, length2 = 0f;
-        int len = vector1.length;
-        for (int i = 0; i < len; i++) {
-            length1 += vector1[i] * vector1[i];
-            length2 += vector2[i] * vector2[i];
-            result += vector1[i] * vector2[i];
+    private float score(int[] pairs1, int[] pairs2) {
+        float result = 0f;
+        int len1 = pairs1.length;
+        int len2 = pairs2.length;
+        int idx1 = 0, idx2 = 0;
+        while (idx1 < len1 && idx2 < len2) {
+            if (pairs1[idx1] == pairs2[idx2]) {
+                result += pairs1[idx1 + 1] * pairs2[idx2 + 1];
+                idx1 += 2;
+                idx2 += 2;
+            } else if (pairs1[idx1] < pairs2[idx2]) {
+                idx1 += 2;
+            } else {
+                idx2 += 2;
+            }
         }
-        return result * result / length1 / length2;
+        return result * result / length(pairs1) / length(pairs2);
     }
 
-    private void processChangedEvt(VectorSet evtSrc, int vecid, float[] inputed) {
+    private void processChangedEvt(VectorSet evtSrc, int vecid, int[] inputed) {
         if (evtSrc == this.source) {
             target.rescore(vecid, length(inputed), inputed, this);
         }
@@ -66,7 +76,7 @@ public class Recommendation implements VectorSetListener {
                 iter.advance();
                 int srcVecId = iter.key();
                 if (!(this.source == this.target && srcVecId == tgtVecId)) {
-                    add(srcVecId, tgtVecId, score(source.get(srcVecId), inputed));
+                    add(srcVecId, tgtVecId, score(source._get(srcVecId), inputed));
                 }
             }
         }
@@ -114,17 +124,17 @@ public class Recommendation implements VectorSetListener {
     }
 
     @Override
-    public void onVectorAdded(VectorSet evtSrc, int vecid, float[] inputed) {
+    public void onVectorAdded(VectorSet evtSrc, int vecid, int[] inputed) {
         processChangedEvt(evtSrc, vecid, inputed);
     }
 
     @Override
-    public void onVectorSetted(VectorSet evtSrc, int vecid, float[] old, float[] inputed) {
+    public void onVectorSetted(VectorSet evtSrc, int vecid, int[] old, int[] inputed) {
         processChangedEvt(evtSrc, vecid, inputed);
     }
 
     @Override
-    public void onVectorAccumulated(VectorSet evtSrc, int vecid, float[] inputed, float[] accumulated) {
+    public void onVectorAccumulated(VectorSet evtSrc, int vecid, int[] inputed, int[] accumulated) {
         processChangedEvt(evtSrc, vecid, inputed);
     }
 

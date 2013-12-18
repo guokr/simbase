@@ -1,7 +1,8 @@
 package com.guokr.simbase.store;
 
-import gnu.trove.iterator.TIntFloatIterator;
+import gnu.trove.iterator.TIntIterator;
 import gnu.trove.list.TFloatList;
+import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TFloatArrayList;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.TIntFloatMap;
@@ -54,6 +55,16 @@ public class SparseVectorSet implements VectorSet {
 
     }
 
+    private int length(int[] pairs) {
+        int result = 0;
+        int len = pairs.length;
+        for (int i = 0; i < len;) {
+            result += pairs[i + 1] * pairs[i + 1];
+            i += 2;
+        }
+        return result;
+    }
+
     @Override
     public void remove(int vecid) {
         if (indexer.containsKey(vecid)) {
@@ -61,6 +72,8 @@ public class SparseVectorSet implements VectorSet {
             while (true) {
                 float val = probs.get(cursor);
                 if (val < 0) {
+                    probs.set(cursor, -1);
+                    probs.set(cursor + 1, -1);
                     break;
                 }
                 probs.set(cursor, -1);
@@ -127,11 +140,11 @@ public class SparseVectorSet implements VectorSet {
                 probs.add(val);
             }
             probs.add(-(vecid + 1));
+            probs.add(length(pairs));
 
             if (listening) {
-                float[] input = base.densify(sparseFactor, pairs);
                 for (VectorSetListener l : listeners) {
-                    l.onVectorAdded(this, vecid, input);
+                    l.onVectorAdded(this, vecid, pairs);
                 }
             }
         }
@@ -141,7 +154,7 @@ public class SparseVectorSet implements VectorSet {
     public void _set(int vecid, int[] pairs) {
         validateParams(vecid, pairs);
         if (indexer.containsKey(vecid)) {
-            float[] old = base.densify(sparseFactor, _get(vecid));
+            int[] old = _get(vecid);
 
             listening = false;
             remove(vecid);
@@ -149,9 +162,8 @@ public class SparseVectorSet implements VectorSet {
             listening = true;
 
             if (listening) {
-                float[] input = base.densify(sparseFactor, pairs);
                 for (VectorSetListener l : listeners) {
-                    l.onVectorSetted(this, vecid, old, input);
+                    l.onVectorSetted(this, vecid, old, pairs);
                 }
             }
         } else {
@@ -165,6 +177,7 @@ public class SparseVectorSet implements VectorSet {
         if (!indexer.containsKey(vecid)) {
             _add(vecid, pairs);
         } else {
+            TIntList indexes = new TIntArrayList();
             TIntFloatMap results = new TIntFloatHashMap();
 
             int cursor = indexer.get(vecid);
@@ -175,7 +188,7 @@ public class SparseVectorSet implements VectorSet {
                 }
                 float val = probs.get(cursor++) * (1f - accumuFactor);
                 results.put(pos, val);
-
+                indexes.add(pos);
             }
 
             cursor = 0;
@@ -186,8 +199,10 @@ public class SparseVectorSet implements VectorSet {
                     results.put(pos, results.get(pos) + val);
                 } else {
                     results.put(pos, val);
+                    indexes.add(pos);
                 }
             }
+            indexes.sort();
 
             listening = false;
             remove(vecid);
@@ -195,19 +210,22 @@ public class SparseVectorSet implements VectorSet {
 
             int start = probs.size();
             indexer.put(vecid, start);
-            TIntFloatIterator iter = results.iterator();
+            TIntIterator iter = indexes.iterator();
+            float length = 0f;
             while (iter.hasNext()) {
-                iter.advance();
-                probs.add(iter.key());
-                probs.add(iter.value());
+                int key = iter.next();
+                float value = results.get(key);
+                probs.add(key);
+                probs.add(value);
+                length += value * value;
             }
             probs.add(-(vecid + 1));
+            probs.add(length);
 
             if (listening) {
-                float[] input = base.densify(sparseFactor, pairs);
-                float[] accumulated = base.densify(sparseFactor, _get(vecid));
+                int[] accumulated = _get(vecid);
                 for (VectorSetListener l : listeners) {
-                    l.onVectorAccumulated(this, vecid, input, accumulated);
+                    l.onVectorAccumulated(this, vecid, pairs, accumulated);
                 }
             }
         }
@@ -219,7 +237,36 @@ public class SparseVectorSet implements VectorSet {
     }
 
     @Override
-    public void rescore(int vecid, float length, float[] vector, Recommendation rec) {
+    public void rescore(int srcVecId, int length, int[] vector, Recommendation rec) {
+        rec.create(srcVecId);
+        float scoring = 0;
+        int end = probs.size(), srcLen = vector.length;
+        for (int base = 0; base < end;) {
+            int tgtIdx = (int) probs.get(base);
+            int srcOffset = 0, tgtOffset = base;
+            while (tgtIdx >= 0 && srcOffset < srcLen) {
+                int srcIdx = vector[srcOffset];
+                if (srcIdx == tgtIdx) {
+                    scoring += vector[srcOffset + 1] * probs.get(tgtOffset + 1);
+                    tgtOffset += 2;
+                    tgtIdx = (int) probs.get(tgtOffset);
+                    srcOffset += 2;
+                } else if (srcIdx > tgtIdx) {
+                    tgtOffset += 2;
+                    tgtIdx = (int) probs.get(tgtOffset);
+                } else {
+                    srcOffset += 2;
+                }
+            }
+            int tgtVecId = -(int) (probs.get(tgtOffset) + 1);
+            float tgtLength = probs.get(tgtOffset + 1);
+            float cosine = scoring * scoring / length / tgtLength;
+            base = tgtOffset + 2;
+            if (!(this == rec.source && srcVecId == tgtVecId)) {
+                rec.add(srcVecId, tgtVecId, cosine);
+            }
+            scoring = 0;
+        }
     }
 
 }

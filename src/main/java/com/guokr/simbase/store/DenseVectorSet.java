@@ -98,8 +98,9 @@ public class DenseVectorSet implements VectorSet {
             probs.add(length);
 
             if (listening) {
+                int[] sparse = base.sparsify(sparseFactor, vector);
                 for (VectorSetListener l : listeners) {
-                    l.onVectorAdded(this, vecid, vector);
+                    l.onVectorAdded(this, vecid, sparse);
                 }
             }
         }
@@ -108,7 +109,7 @@ public class DenseVectorSet implements VectorSet {
     @Override
     public void set(int vecid, float[] vector) {
         if (indexer.containsKey(vecid)) {
-            float[] old = get(vecid);
+            int[] old = base.sparsify(sparseFactor, get(vecid));
 
             float length = 0;
             int cursor = indexer.get(vecid);
@@ -121,8 +122,9 @@ public class DenseVectorSet implements VectorSet {
             probs.set(cursor, length);
 
             if (listening) {
+                int[] sparse = base.sparsify(sparseFactor, vector);
                 for (VectorSetListener l : listeners) {
-                    l.onVectorSetted(this, vecid, old, vector);
+                    l.onVectorSetted(this, vecid, old, sparse);
                 }
             }
         } else {
@@ -148,9 +150,10 @@ public class DenseVectorSet implements VectorSet {
             probs.set(cursor, length);
 
             if (listening) {
-                float[] accumulated = get(vecid);
+                int[] accumulated = base.sparsify(sparseFactor, get(vecid));
+                int[] sparse = base.sparsify(sparseFactor, vector);
                 for (VectorSetListener l : listeners) {
-                    l.onVectorAccumulated(this, vecid, vector, accumulated);
+                    l.onVectorAccumulated(this, vecid, sparse, accumulated);
                 }
             }
         }
@@ -182,28 +185,27 @@ public class DenseVectorSet implements VectorSet {
     }
 
     @Override
-    public void rescore(int srcVecId, float length, float[] vector, Recommendation rec) {
+    public void rescore(int srcVecId, int length, int[] vector, Recommendation rec) {
         rec.create(srcVecId);
         float scoring = 0;
-        int idx = 0, end = probs.size(), len = vector.length;
-        for (int offset = 0; offset < end; offset++) {
-            float val = probs.get(offset);
-            if (val >= 0) {
-                if (val < 1) {
-                    if (idx < len) {
-                        float another = vector[idx++];// ArrayIndexOutOfBoundsException
-                        scoring += another * val;
-                    }
-                } else {
-                    float cosine = scoring * scoring / length / probs.get(++offset);
-                    int tgtVecId = (int) val - 1;
-                    if (!(this == rec.source && srcVecId == tgtVecId)) {
-                        rec.add(srcVecId, tgtVecId, cosine);
-                    }
-                    idx = 0;
-                    scoring = 0;
-                }
+        int offset = 0, end = probs.size(), len = vector.length;
+        for (int base = 0; base < end;) {
+            for (int pos = 0; pos < len;) {
+                offset = base + vector[pos];
+                scoring += vector[pos + 1] * probs.get(offset);
+                pos += 2;
             }
+            while (probs.get(offset) < 1) {
+                offset++;
+            }
+            int tgtVecId = (int) (probs.get(offset) - 1);
+            float tgtLength = probs.get(offset + 1);
+            float cosine = scoring * scoring / length / tgtLength;
+            base = offset + 2;
+            if (!(this == rec.source && srcVecId == tgtVecId)) {
+                rec.add(srcVecId, tgtVecId, cosine);
+            }
+            scoring = 0;
         }
     }
 
