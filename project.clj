@@ -1,4 +1,4 @@
-(defproject com.guokr/simbase "0.0.1"
+(defproject com.guokr/simbase "0.1.0"
 
     :description "A clojure document similarity server"
     :url "https://github.com/guokr/simbase/"
@@ -29,6 +29,8 @@
     :target-path "target/"
     :javac-options ["-target" "1.6" "-source" "1.6" "-Xlint:-options"]
     :jvm-opts ["-Xmx1g"]
+
+    :uberjar-name "simbase-standalone.jar"
 
     :aot [simbase]
     :main simbase.main)
