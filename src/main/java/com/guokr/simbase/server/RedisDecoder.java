@@ -7,11 +7,45 @@ import com.guokr.simbase.errors.ProtocolException;
 
 public class RedisDecoder {
 
-    public enum State {
+    public static enum State {
         READ_BEGIN, READ_NARGS, READ_ARGUMENT, READ_NBYTES, READ_STRING, READ_END
     }
 
-    private State            state = State.READ_BEGIN;
+    public static class ParserState {
+
+        public int                nargs;
+        public int                nbytes;
+        public ByteBuffer         buffer;
+        public RedisDecoder.State state;
+
+        public ParserState() {
+            reset();
+        }
+
+        public void reset() {
+            nargs = 0;
+            nbytes = 0;
+            state = RedisDecoder.State.READ_BEGIN;
+            ByteBuffer temp = buffer;
+            buffer = ByteBuffer.allocateDirect(1024 * 256);
+
+            if (temp != null) {
+                int limit = temp.limit();
+                while (temp.position() < limit) {
+                    buffer.put(temp.get());
+                }
+            }
+        }
+
+        public void attach(ByteBuffer incoming) {
+            int limit = incoming.limit();
+            while (incoming.position() < limit) {
+                buffer.put(incoming.get());
+            }
+            buffer.flip();
+        }
+
+    }
 
     RedisRequests            requests;
 
@@ -21,14 +55,15 @@ public class RedisDecoder {
         this.lineReader = new LineReader();
     }
 
-    public RedisRequests decode(ByteBuffer buffer) throws ProtocolException {
+    public boolean decode(RedisRequests requests, ParserState parserState) throws ProtocolException {
         byte discr;
-        int nargs = 0, nbytes = 0;
-        requests = new RedisRequests();
+        int nargs = parserState.nargs, nbytes = parserState.nbytes;
+        State state = parserState.state;
+        ByteBuffer buffer = parserState.buffer;
         while (buffer.hasRemaining()) {
             switch (state) {
             case READ_END:
-                return requests;
+                return true;
             case READ_BEGIN:
                 discr = lineReader.readByte(buffer);
                 if (discr == SimUtils.STAR) {
@@ -79,11 +114,10 @@ public class RedisDecoder {
         if (state == State.READ_ARGUMENT) {
             state = State.READ_END;
         }
-        return state == State.READ_END ? requests : null;
+        return state == State.READ_END;
     }
 
     public void reset() {
-        state = State.READ_BEGIN;
         lineReader.reset();
     }
 

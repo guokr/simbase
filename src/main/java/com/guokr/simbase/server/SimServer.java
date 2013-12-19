@@ -15,14 +15,17 @@ import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import com.guokr.simbase.SimUtils;
 import com.guokr.simbase.SimContext;
+import com.guokr.simbase.SimUtils;
 import com.guokr.simbase.errors.ProtocolException;
+import com.guokr.simbase.server.RedisDecoder.ParserState;
 
 public class SimServer implements Runnable {
 
@@ -36,16 +39,20 @@ public class SimServer implements Runnable {
     private Thread                                    serverThread;
 
     private final ConcurrentLinkedQueue<SelectionKey> pending     = new ConcurrentLinkedQueue<SelectionKey>();
+
     // shared, single thread
     private final ByteBuffer                          buffer      = ByteBuffer.allocateDirect(1024 * 64);
+    private final Map<SelectionKey, ParserState>      states      = new HashMap<SelectionKey, ParserState>();
+    private final Map<SelectionKey, RedisRequests>    requests    = new HashMap<SelectionKey, RedisRequests>();
 
     public SimServer(String ip, int port, IHandler handler) throws IOException {
         this.handler = handler;
         this.selector = Selector.open();
         this.serverChannel = ServerSocketChannel.open();
-        serverChannel.configureBlocking(false);
-        serverChannel.socket().bind(new InetSocketAddress(ip, port));
-        serverChannel.register(selector, OP_ACCEPT);
+
+        this.serverChannel.configureBlocking(false);
+        this.serverChannel.socket().bind(new InetSocketAddress(ip, port));
+        this.serverChannel.register(selector, OP_ACCEPT);
     }
 
     public SimServer(SimContext ctx, IHandler handler) throws IOException {
@@ -89,16 +96,17 @@ public class SimServer implements Runnable {
             do {
                 AsyncChannel channel = atta.channel;
                 SimUtils.printTrace("getting requests");
-                RedisRequests requests = atta.decoder.decode(buffer);
-                SimUtils.printTrace("getting requests done");
-                if (requests != null) {
-                    channel.reset(requests);
-                    requests.channel = channel;
-                    requests.remoteAddr = (InetSocketAddress) ch.socket().getRemoteSocketAddress();
-                    handler.handle(requests, new RespCallback(key, this));
+                RedisRequests request = requests.get(key);
+                ParserState state = states.get(key);
+                if (atta.decoder.decode(request, state)) {
+                    SimUtils.printTrace("getting requests done");
+                    channel.reset(request);
+                    request.channel = channel;
+                    request.remoteAddr = (InetSocketAddress) ch.socket().getRemoteSocketAddress();
+                    handler.handle(request, new RespCallback(key, this));
                     atta.decoder.reset();
-                } else {
-                    SimUtils.printTrace("requests null");
+                    state.reset();
+                    request.reset();
                 }
             } while (buffer.hasRemaining()); // consume all
         } catch (ProtocolException e) {
@@ -121,6 +129,20 @@ public class SimServer implements Runnable {
                 final ServerAtta atta = (ServerAtta) key.attachment();
                 if (atta instanceof RedisAtta) {
                     SimUtils.printTrace("reading:" + read);
+
+                    RedisRequests request = requests.get(key);
+                    if (request == null) {
+                        request = new RedisRequests();
+                        requests.put(key, request);
+                    }
+
+                    ParserState state = states.get(key);
+                    if (state == null) {
+                        state = new ParserState();
+                        states.put(key, state);
+                    }
+                    state.attach(buffer);
+
                     decodeRedis((RedisAtta) atta, key, ch);
                 }
             }

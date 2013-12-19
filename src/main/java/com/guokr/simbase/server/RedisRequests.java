@@ -32,4 +32,8 @@ public class RedisRequests implements Iterable<SimRequest> {
         return list.iterator();
     }
 
+    public void reset() {
+        list.clear();
+    }
+
 }
