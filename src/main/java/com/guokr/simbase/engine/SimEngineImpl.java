@@ -90,8 +90,12 @@ public class SimEngineImpl implements SimEngine {
     private Map<String, SimBasis>        bases      = new HashMap<String, SimBasis>();
     private Map<String, ExecutorService> dataExecs  = new HashMap<String, ExecutorService>();
 
+    private final Map<String, Integer>   counters   = new HashMap<String, Integer>();
+    private final int                    bycount;
+
     public SimEngineImpl(SimContext simContext) {
         this.context = simContext;
+        this.bycount = simContext.getInt("bycount");
         this.loadData();
         this.startCron();
     }
@@ -381,6 +385,15 @@ public class SimEngineImpl implements SimEngine {
             @Override
             public void invoke() {
                 bases.get(bkey).vadd(vkey, vecid, vector);
+
+                if (!counters.containsKey(vkey)) {
+                    counters.put(vkey, 0);
+                }
+                int counter = (counters.get(vkey) + 1) % bycount;
+                counters.put(vkey, counter);
+                if(counter == 0) {
+                    logger.info(String.format("adding dense vectors by count of %d", bycount));
+                }
             }
         });
 
@@ -454,6 +467,15 @@ public class SimEngineImpl implements SimEngine {
             @Override
             public void invoke() {
                 bases.get(bkey).iadd(vkey, vecid, pairs);
+
+                if (!counters.containsKey(vkey)) {
+                    counters.put(vkey, 0);
+                }
+                int counter = (counters.get(vkey) + 1) % bycount;
+                counters.put(vkey, counter);
+                if(counter == 0) {
+                    logger.info(String.format("adding sparse vectors by count of %d", bycount));
+                }
             }
         });
 
