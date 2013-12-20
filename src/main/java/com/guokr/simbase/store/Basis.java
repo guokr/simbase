@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.guokr.simbase.errors.SimEngineException;
 import com.guokr.simbase.events.BasisListener;
 
 public class Basis {
@@ -24,13 +25,19 @@ public class Basis {
     }
 
     public Basis(String[] comps) {
-        this.base = comps.clone();
-        this.schema = new ArrayList<String>(Arrays.asList(comps));
-        this.compIndex = new HashMap<String, Integer>();
+        List<String> schema = new ArrayList<String>(Arrays.asList(comps));
+        Map<String, Integer> compIndex = new HashMap<String, Integer>();
         int index = 0;
-        for (String comp : this.schema) {
-            this.compIndex.put(comp, index++);
+        for (String comp : schema) {
+            if (compIndex.containsKey(comp)) {
+                throw new SimEngineException(String.format("Dupicate base schema '%s'", comp));
+            } else {
+                compIndex.put(comp, index++);
+            }
         }
+        this.base = comps.clone();
+        this.schema = schema;
+        this.compIndex = compIndex;
         this.listeners = new ArrayList<BasisListener>();
     }
 

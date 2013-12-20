@@ -71,11 +71,10 @@ public class SparseVectorSet implements VectorSet {
         int end = probs.size();
         for (int offset = 0; offset < end;) {
             float pos = probs.get(offset);
-            float val = probs.get(offset + 1);
-            if (pos < 0) {
-                resultList.add(-(int) val - 1);
+            if (pos < -1) {
+                resultList.add(-(int) pos - 1);
             }
-            pos += 2;
+            offset += 2;
         }
         return resultList.toArray();
     }

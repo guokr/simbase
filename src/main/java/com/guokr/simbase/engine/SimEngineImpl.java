@@ -18,7 +18,9 @@ import org.slf4j.LoggerFactory;
 import com.guokr.simbase.SimCallback;
 import com.guokr.simbase.SimContext;
 import com.guokr.simbase.SimEngine;
+import com.guokr.simbase.errors.SimEngineException;
 import com.guokr.simbase.errors.SimErrors;
+import com.guokr.simbase.errors.SimException;
 import com.guokr.simbase.events.BasisListener;
 import com.guokr.simbase.events.RecommendationListener;
 import com.guokr.simbase.events.VectorSetListener;
@@ -67,10 +69,10 @@ public class SimEngineImpl implements SimEngine {
         public void run() {
             try {
                 invoke();
-            } catch (Throwable ex) {
-                int code = SimErrors.lookup(scope, ex);
-                logger.error(SimErrors.info(code), ex);
-                callback.error(SimErrors.descr(code));
+            } catch (SimException ex) {
+                String errMsg = ex.getMessage();
+                logger.error(errMsg, ex);
+                callback.error(errMsg);
             } finally {
                 callback.response();
             }
@@ -100,27 +102,58 @@ public class SimEngineImpl implements SimEngine {
         this.startCron();
     }
 
-    private void validateKeyFormat(String key) throws IllegalArgumentException {
+    private void validateKeyFormat(String key) throws SimEngineException {
         if (key.indexOf('_') > -1) {
-            throw new IllegalArgumentException("Invalid key format:" + key);
+            throw new SimEngineException(String.format("Invalid key format '%s'", key));
         }
     }
 
-    private void validateExistence(String toCheck) throws IllegalArgumentException {
+    private void validateExistence(String toCheck) throws SimEngineException {
         if (!basisOf.containsKey(toCheck)) {
-            throw new IllegalArgumentException("Data entry[" + toCheck + "] should exist on server before this operation!");
+            throw new SimEngineException(String.format("Unknown data entry '%s'", toCheck));
         }
     }
 
-    private void validateNotExistence(String toCheck) throws IllegalArgumentException {
+    private void validateNotExistence(String toCheck) throws SimEngineException {
         if (basisOf.containsKey(toCheck)) {
-            throw new IllegalArgumentException("Data entry[" + toCheck + "] should not exist on server before this operation!");
+            throw new SimEngineException(String.format("Data entry '%s' already exists", toCheck));
         }
     }
 
-    private void validateKind(String op, String toCheck, Kind kindShouldBe) throws IllegalArgumentException {
+    private void validateKind(String op, String toCheck, Kind kindShouldBe) throws SimEngineException {
         if (!kindOf.containsKey(toCheck) || !kindShouldBe.equals(kindOf.get(toCheck))) {
-            throw new IllegalArgumentException("Invalid operation[" + op + "] on kind[" + kindShouldBe + "] with:" + toCheck);
+            throw new SimEngineException(String.format("Operation '%s' against a non-%s type '%s'", op, kindShouldBe,
+                    toCheck));
+        }
+    }
+
+    private void validateId(int toCheck) throws SimEngineException {
+        if (toCheck < 1) {
+            throw new SimEngineException(String.format("Inviad id '%d', should be positive integer", toCheck));
+        }
+    }
+
+    private void validateProbs(float[] toCheck) throws SimEngineException {
+        for (float prob : toCheck) {
+            if (prob < 0 || prob > 1) {
+                throw new SimEngineException(String.format("Invaid prob '%s', should be between 0 and 1", prob));
+            }
+        }
+    }
+
+    private void validatePairs(int maxIndex, int[] toCheck) throws SimEngineException {
+        int len = toCheck.length;
+        if (len % 2 != 0) {
+            throw new SimEngineException("Sparse vector should be paired");
+        }
+        for (int offset = 0; offset < len; offset += 2) {
+            if (toCheck[offset] < 0 || toCheck[offset] > maxIndex) {
+                throw new SimEngineException(String.format("Sparse matrix index '%d' out of bound", toCheck[offset]));
+            }
+            if (toCheck[offset + 1] < 0) {
+                throw new SimEngineException(String.format("Sparse matrix value '%d' should be non-negative",
+                        toCheck[offset + 1]));
+            }
         }
     }
 
@@ -302,10 +335,10 @@ public class SimEngineImpl implements SimEngine {
 
     @Override
     public void bget(final SimCallback callback, final String bkey) {
+        validateKind("bget", bkey, Kind.BASIS);
         dataExecs.get(bkey).execute(new SafeRunner("bget", callback) {
             @Override
             public void invoke() {
-                validateKind("bget", bkey, Kind.BASIS);
                 callback.stringList(bases.get(bkey).bget());
             }
         });
@@ -380,6 +413,8 @@ public class SimEngineImpl implements SimEngine {
     @Override
     public void vadd(final SimCallback callback, final String vkey, final int vecid, final float[] vector) {
         validateKind("vadd", vkey, Kind.VECTORS);
+        validateId(vecid);
+        validateProbs(vector);
         final String bkey = basisOf.get(vkey);
         dataExecs.get(bkey).execute(new AsyncSafeRunner("vget") {
             @Override
@@ -391,7 +426,7 @@ public class SimEngineImpl implements SimEngine {
                 }
                 int counter = (counters.get(vkey) + 1) % bycount;
                 counters.put(vkey, counter);
-                if(counter == 0) {
+                if (counter == 0) {
                     logger.info(String.format("adding dense vectors by count of %d", bycount));
                 }
             }
@@ -404,6 +439,8 @@ public class SimEngineImpl implements SimEngine {
     @Override
     public void vset(final SimCallback callback, final String vkey, final int vecid, final float[] vector) {
         validateKind("vset", vkey, Kind.VECTORS);
+        validateId(vecid);
+        validateProbs(vector);
         final String bkey = basisOf.get(vkey);
         dataExecs.get(bkey).execute(new SafeRunner("vset", callback) {
             @Override
@@ -418,7 +455,9 @@ public class SimEngineImpl implements SimEngine {
 
     @Override
     public void vacc(final SimCallback callback, final String vkey, final int vecid, final float[] vector) {
-        this.validateKind("vacc", vkey, Kind.VECTORS);
+        validateKind("vacc", vkey, Kind.VECTORS);
+        validateId(vecid);
+        validateProbs(vector);
         final String bkey = basisOf.get(vkey);
         dataExecs.get(bkey).execute(new AsyncSafeRunner("vacc") {
             @Override
@@ -462,7 +501,10 @@ public class SimEngineImpl implements SimEngine {
     @Override
     public void iadd(SimCallback callback, final String vkey, final int vecid, final int[] pairs) {
         validateKind("iadd", vkey, Kind.VECTORS);
+        validateId(vecid);
         final String bkey = basisOf.get(vkey);
+        int maxIndex = bases.get(bkey).bget().length;
+        validatePairs(maxIndex, pairs);
         dataExecs.get(bkey).execute(new AsyncSafeRunner("iadd") {
             @Override
             public void invoke() {
@@ -473,7 +515,7 @@ public class SimEngineImpl implements SimEngine {
                 }
                 int counter = (counters.get(vkey) + 1) % bycount;
                 counters.put(vkey, counter);
-                if(counter == 0) {
+                if (counter == 0) {
                     logger.info(String.format("adding sparse vectors by count of %d", bycount));
                 }
             }
@@ -486,7 +528,10 @@ public class SimEngineImpl implements SimEngine {
     @Override
     public void iset(final SimCallback callback, final String vkey, final int vecid, final int[] pairs) {
         validateKind("iset", vkey, Kind.VECTORS);
+        validateId(vecid);
         final String bkey = basisOf.get(vkey);
+        int maxIndex = bases.get(bkey).bget().length;
+        validatePairs(maxIndex, pairs);
         dataExecs.get(bkey).execute(new AsyncSafeRunner("iset") {
             @Override
             public void invoke() {
@@ -501,7 +546,10 @@ public class SimEngineImpl implements SimEngine {
     @Override
     public void iacc(final SimCallback callback, final String vkey, final int vecid, final int[] pairs) {
         this.validateKind("iacc", vkey, Kind.VECTORS);
+        validateId(vecid);
         final String bkey = basisOf.get(vkey);
+        int maxIndex = bases.get(bkey).bget().length;
+        validatePairs(maxIndex, pairs);
         dataExecs.get(bkey).execute(new AsyncSafeRunner("iacc") {
             @Override
             public void invoke() {

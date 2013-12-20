@@ -52,7 +52,7 @@ public class SimBasis implements KryoSerializable {
         } else if (type.equals("sparseVectorSet")) {
             this.vectorSets.put(vkey, new SparseVectorSet(this.base, accumuFactor, sparseFactor));
         } else {
-            throw new IllegalArgumentException("wrong type of vector set in config!");
+            throw new IllegalArgumentException("Wrong type of vector set in config!");
         }
     }
 

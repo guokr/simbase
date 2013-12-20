@@ -15,8 +15,4 @@ public class SimContextException extends SimException {
     public SimContextException(String msg, Throwable t) {
         super(msg, t);
     }
-
-    public SimContextException(String msg, Throwable t, String... context) {
-        super(msg, t, context);
-    }
 }

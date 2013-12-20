@@ -112,11 +112,18 @@ public class Recommendation implements VectorSetListener {
     }
 
     public String[] get(int vecid) {
-        return this.sorters.get(vecid).pickle();
+        if (this.sorters.containsKey(vecid)) {
+            return this.sorters.get(vecid).pickle();
+        } else
+            return new String[0];
+
     }
 
     public int[] rec(int vecid) {
-        return this.sorters.get(vecid).vecids();
+        if (this.sorters.containsKey(vecid)) {
+            return this.sorters.get(vecid).vecids();
+        } else
+            return new int[0];
     }
 
     public void addListener(RecommendationListener listener) {

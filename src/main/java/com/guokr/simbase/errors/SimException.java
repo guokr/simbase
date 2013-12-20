@@ -19,17 +19,4 @@ public class SimException extends RuntimeException {
     public SimException(String msg, Throwable t) {
         super(msg, t);
     }
-
-    public SimException(String msg, Throwable t, String... pairs) {
-        super(msg, t);
-        context = new HashMap<String, String>();
-        int length = pairs.length;
-        if (length % 2 != 0) {
-            throw new IllegalArgumentException("Exception context should be paired");
-        }
-        for (int i = 0; i < length;) {
-            context.put(pairs[i], pairs[i + 1]);
-            i += 2;
-        }
-    }
 }

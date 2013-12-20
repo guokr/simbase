@@ -15,8 +15,4 @@ public class SimEngineException extends SimException {
     public SimEngineException(String msg, Throwable t) {
         super(msg, t);
     }
-
-    public SimEngineException(String msg, Throwable t, String... context) {
-        super(msg, t, context);
-    }
 }

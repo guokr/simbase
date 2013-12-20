@@ -100,7 +100,11 @@ public class ServerHandler implements IHandler {
                                 break;
                             }
                         } catch (Exception e) {
-                            callback.error(e.getMessage());
+                            if (e instanceof IndexOutOfBoundsException) {
+                                callback.error(String.format("Invalid arguments for command '%s'", request.name()));
+                            } else {
+                                callback.error(e.getMessage());
+                            }
                             callback.response();
                         }
                     }

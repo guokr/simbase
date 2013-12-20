@@ -70,7 +70,7 @@ public class LineReader {
                 String msg = String.format("Invalid character in the section for size: '%c'", next);
                 throw new IllegalStateException(msg);
             }
-            next = buffer.get(index++);
+            next = buffer.get(++index);
         }
 
         if (mark.empty()) {

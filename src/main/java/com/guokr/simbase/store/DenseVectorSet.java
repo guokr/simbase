@@ -43,8 +43,9 @@ public class DenseVectorSet implements VectorSet {
         int end = probs.size();
         for (int offset = 0; offset < end; offset++) {
             float val = probs.get(offset);
-            if (val > 0) {
+            if (val > 1) {
                 resultList.add((int) val - 1);
+                offset++;
             }
         }
         return resultList.toArray();
@@ -83,8 +84,9 @@ public class DenseVectorSet implements VectorSet {
 
     @Override
     public float[] get(int vecid) {
-        float[] result = new float[this.base.size()];
+        float[] result;
         if (indexer.containsKey(vecid)) {
+            result = new float[this.base.size()];
             float ftmp = 0;
             int cursor = 0;
             int start = indexer.get(vecid);
@@ -95,6 +97,8 @@ public class DenseVectorSet implements VectorSet {
                 }
                 cursor++;
             }
+        } else {
+            result = new float[0];
         }
         return result;
     }
