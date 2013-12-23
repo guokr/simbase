@@ -1,146 +1,48 @@
 package com.guokr.simbase.server;
 
 import java.nio.ByteBuffer;
-import java.util.Stack;
+import java.util.Arrays;
 
 import com.guokr.simbase.SimUtils;
+import com.guokr.simbase.errors.LineTooLargeException;
 
 public class LineReader {
+    // 1k buffer, increase as necessary;
+    byte[]            lineBuffer    = new byte[1024];
+    int               lineBufferIdx = 0;
+    private final int maxLine       = 64 * 1024;
 
-    int            index = 0;
-    Stack<Integer> mark  = new Stack<Integer>();
-
-    public LineReader() {
-    }
-
-    public void reset() {
-        index = 0;
-        mark.clear();
-    }
-
-    public void begin() {
-        mark.push(index);
-    }
-
-    public void commit() {
-        mark.pop();
-    }
-
-    public void rollback() {
-        index = mark.pop();
-    }
-
-    public int trySame(byte[] checked, ByteBuffer buffer, int index) {
-        int sameCount = 0, len = checked.length;
-        while (sameCount < len && buffer.get(index + sameCount) == checked[sameCount]) {
-            sameCount++;
-        }
-        return sameCount;
-    }
-
-    public byte readByte(ByteBuffer buffer) {
-        byte result = buffer.get(index);
-        index++;
-        if (mark.empty()) {
-            buffer.position(index);
-        }
-        return result;
-    }
-
-    public byte tryByte(ByteBuffer buffer) {
-        index++;
-        return buffer.get(index);
-    }
-
-    public int readSizeBy(ByteBuffer buffer, byte[] delims) {
-        int number = 0;
-        int next = buffer.get(index), len = delims.length;
-        while (true) {
-            if (next == -1) {
-                throw new IllegalStateException("Unexpected end");
-            } else if (trySame(delims, buffer, index) == len) {
-                index = index + len;
-                break;
-            }
-
-            int digit = next - SimUtils.ZERO;
-            if (digit >= 0 && digit < 10) {
-                number = number * 10 + digit;
+    public String readLine(ByteBuffer buffer) throws LineTooLargeException {
+        byte b;
+        boolean more = true;
+        while (buffer.hasRemaining() && more) {
+            b = buffer.get();
+            if (b == SimUtils.CR) {
+                if (buffer.hasRemaining() && buffer.get() == SimUtils.LF) {
+                    more = false;
+                }
+            } else if (b == SimUtils.LF) {
+                more = false;
             } else {
-                String msg = String.format("Invalid character in the section for size: '%c'", next);
-                throw new IllegalStateException(msg);
+                if (lineBufferIdx == maxLine - 2) {
+                    throw new LineTooLargeException("exceed max line " + maxLine);
+                }
+                if (lineBufferIdx == lineBuffer.length) {
+                    lineBuffer = Arrays.copyOf(lineBuffer, lineBuffer.length * 2);
+                }
+                lineBuffer[lineBufferIdx] = b;
+                ++lineBufferIdx;
             }
-            next = buffer.get(++index);
         }
-
-        if (mark.empty()) {
-            buffer.position(index);
+        String line = null;
+        if (!more) {
+            line = new String(lineBuffer, 0, lineBufferIdx);
+            lineBufferIdx = 0;
         }
-
-        return number;
+        return line;
     }
 
-    public int readIntegerBy(ByteBuffer buffer, byte[] delims) {
-        int sign = 1, len = delims.length, next = buffer.get(index);
-        int number = 0;
-
-        if (next == '-') {
-            next = buffer.get(index++);
-            sign = -1;
-        }
-
-        while (true) {
-            if (next == -1) {
-                throw new IllegalStateException("Unexpected end");
-            } else if (trySame(delims, buffer, index) == len) {
-                index = index + len;
-                number = number * sign;
-                break;
-            }
-
-            int digit = next - SimUtils.ZERO;
-            if (digit >= 0 && digit < 10) {
-                number = number * 10 + digit;
-            } else {
-                String msg = String.format("Invalid character in the section for size: '%c'", next);
-                throw new IllegalStateException(msg);
-            }
-            next = buffer.get(index++);
-        }
-
-        if (mark.empty()) {
-            buffer.position(index);
-        }
-
-        return number;
+    public final void reset() {
+        this.lineBufferIdx = 0;
     }
-
-    public float readFloatBy(ByteBuffer buffer, byte[] delims) {
-        return 0;
-    }
-
-    public String readStringBy(ByteBuffer buffer, byte[] delims, int nbytes) {
-        int len = delims.length;
-        String result = null;
-        byte[] bytes = null;
-        if (nbytes > 0) {
-            bytes = new byte[nbytes];
-            buffer.get(bytes);
-            result = new String(bytes, SimUtils.UTF_8);
-            index = index + nbytes;
-            buffer.position(index);
-        }
-
-        if (trySame(delims, buffer, index) == len) {
-            index = index + len;
-            buffer.position(index);
-        } else {
-            result = null;
-            String msg = String.format("Invalid character at: %d", index);
-            throw new IllegalStateException(msg);
-        }
-
-        return result;
-    }
-
 }
