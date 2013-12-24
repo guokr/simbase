@@ -39,8 +39,16 @@ This graph shows
 * recommend article by article (recommend from article to article)
 * recommend article by user profile (recommend from user profile to article)
 
-How to start
--------------
+How to build and start
+-----------------------
+
+To build the project, you need install leiningen first, and then
+
+  > cd SIMBASE_HOME
+  
+  > lein uberjar
+
+After the uberjar is created, you can start the system
 
   > cd SIMBASE_HOME
   
