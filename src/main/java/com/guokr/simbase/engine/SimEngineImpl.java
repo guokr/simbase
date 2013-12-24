@@ -447,10 +447,10 @@ public class SimEngineImpl implements SimEngine {
                 if (!counters.containsKey(vkey)) {
                     counters.put(vkey, 0);
                 }
-                int counter = (counters.get(vkey) + 1) % bycount;
+                int counter = counters.get(vkey) + 1;
                 counters.put(vkey, counter);
-                if (counter == 0) {
-                    logger.info(String.format("adding dense vectors by count of %d", bycount));
+                if (counter % bycount == 0) {
+                    logger.info(String.format("adding dense vectors %d to %s", counter, vkey));
                 }
             }
         });
@@ -469,6 +469,15 @@ public class SimEngineImpl implements SimEngine {
             @Override
             public void invoke() {
                 bases.get(bkey).vset(vkey, vecid, vector);
+
+                if (!counters.containsKey(vkey)) {
+                    counters.put(vkey, 0);
+                }
+                int counter = counters.get(vkey) + 1;
+                counters.put(vkey, counter);
+                if (counter % bycount == 0) {
+                    logger.info(String.format("setting dense vectors %d to %s", counter, vkey));
+                }
             }
         });
 
@@ -536,10 +545,10 @@ public class SimEngineImpl implements SimEngine {
                 if (!counters.containsKey(vkey)) {
                     counters.put(vkey, 0);
                 }
-                int counter = (counters.get(vkey) + 1) % bycount;
+                int counter = counters.get(vkey) + 1;
                 counters.put(vkey, counter);
-                if (counter == 0) {
-                    logger.info(String.format("adding sparse vectors by count of %d, %d", bycount, counter));
+                if (counter % bycount == 0) {
+                    logger.info(String.format("adding sparse vectors %d to %s", counter, vkey));
                 }
             }
         });
@@ -559,6 +568,15 @@ public class SimEngineImpl implements SimEngine {
             @Override
             public void invoke() {
                 bases.get(bkey).iset(vkey, vecid, pairs);
+
+                if (!counters.containsKey(vkey)) {
+                    counters.put(vkey, 0);
+                }
+                int counter = counters.get(vkey) + 1;
+                counters.put(vkey, counter);
+                if (counter % bycount == 0) {
+                    logger.info(String.format("setting sparse vectors %d to %s", counter, vkey));
+                }
             }
         });
 

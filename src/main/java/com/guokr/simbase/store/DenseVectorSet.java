@@ -48,7 +48,8 @@ public class DenseVectorSet implements VectorSet {
                 offset++;
             }
         }
-        return resultList.toArray();
+        int[] result = new int[resultList.size()];
+        return resultList.toArray(result);
     }
 
     @Override

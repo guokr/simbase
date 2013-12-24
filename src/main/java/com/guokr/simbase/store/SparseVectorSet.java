@@ -67,7 +67,7 @@ public class SparseVectorSet implements VectorSet {
 
     @Override
     public int[] ids() {
-        TIntList resultList = new TIntArrayList();
+        TIntArrayList resultList = new TIntArrayList();
         int end = probs.size();
         for (int offset = 0; offset < end;) {
             float pos = probs.get(offset);
@@ -76,7 +76,8 @@ public class SparseVectorSet implements VectorSet {
             }
             offset += 2;
         }
-        return resultList.toArray();
+        int[] result = new int[resultList.size()];
+        return resultList.toArray(result);
     }
 
     @Override
@@ -126,7 +127,7 @@ public class SparseVectorSet implements VectorSet {
 
     @Override
     public int[] _get(int vecid) {
-        TIntArrayList resultList = new TIntArrayList();
+        TIntArrayList resultList = new TIntArrayList(base.size());
         if (indexer.containsKey(vecid)) {
             int cursor = indexer.get(vecid);
             while (true) {
@@ -140,8 +141,7 @@ public class SparseVectorSet implements VectorSet {
             }
         }
         int[] result = new int[resultList.size()];
-        resultList.toArray(result);
-        return result;
+        return resultList.toArray(result);
     }
 
     @Override
