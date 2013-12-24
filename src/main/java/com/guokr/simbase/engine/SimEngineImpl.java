@@ -9,8 +9,13 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.RejectedExecutionHandler;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -79,21 +84,41 @@ public class SimEngineImpl implements SimEngine {
         }
     }
 
-    private SimContext                   context;
+    public class ServerThreadFactory implements ThreadFactory {
 
-    private SimCounter                   counter;
+        @Override
+        public Thread newThread(Runnable r) {
+            return new Thread(r);
+        }
 
-    private Map<String, Kind>            kindOf     = new HashMap<String, Kind>();
-    private Map<String, String>          basisOf    = new HashMap<String, String>();
-    private Map<String, List<String>>    vectorsOf  = new HashMap<String, List<String>>();
-    private Map<String, Set<String>>     rtargetsOf = new HashMap<String, Set<String>>();
-    private ExecutorService              mngmExec   = Executors.newSingleThreadExecutor();
+    }
 
-    private Map<String, SimBasis>        bases      = new HashMap<String, SimBasis>();
-    private Map<String, ExecutorService> dataExecs  = new HashMap<String, ExecutorService>();
+    public class RejectedHandler implements RejectedExecutionHandler {
 
-    private final Map<String, Integer>   counters   = new HashMap<String, Integer>();
-    private final int                    bycount;
+        @Override
+        public void rejectedExecution(Runnable r, ThreadPoolExecutor executor) {
+            logger.error("server reject request");
+        }
+
+    }
+
+    private SimContext                         context;
+
+    private SimCounter                         counter;
+
+    private final ExecutorService              mngmExec    = Executors.newSingleThreadExecutor();
+    private final Map<String, Kind>            kindOf      = new HashMap<String, Kind>();
+    private final Map<String, String>          basisOf     = new HashMap<String, String>();
+    private final Map<String, List<String>>    vectorsOf   = new HashMap<String, List<String>>();
+    private final Map<String, Set<String>>     rtargetsOf  = new HashMap<String, Set<String>>();
+    private final Map<String, SimBasis>        bases       = new HashMap<String, SimBasis>();
+
+    private final Map<String, ExecutorService> writerExecs = new HashMap<String, ExecutorService>();
+    private final ThreadPoolExecutor           readerPool  = new ThreadPoolExecutor(53, 83, 37, TimeUnit.SECONDS, new ArrayBlockingQueue<Runnable>(100),
+                                                                   new ServerThreadFactory(), new RejectedHandler());
+
+    private final Map<String, Integer>         counters    = new HashMap<String, Integer>();
+    private final int                          bycount;
 
     public SimEngineImpl(SimContext simContext) {
         this.context = simContext;
@@ -122,8 +147,7 @@ public class SimEngineImpl implements SimEngine {
 
     private void validateKind(String op, String toCheck, Kind kindShouldBe) throws SimEngineException {
         if (!kindOf.containsKey(toCheck) || !kindShouldBe.equals(kindOf.get(toCheck))) {
-            throw new SimEngineException(String.format("Operation '%s' against a non-%s type '%s'", op, kindShouldBe,
-                    toCheck));
+            throw new SimEngineException(String.format("Operation '%s' against a non-%s type '%s'", op, kindShouldBe, toCheck));
         }
     }
 
@@ -151,8 +175,7 @@ public class SimEngineImpl implements SimEngine {
                 throw new SimEngineException(String.format("Sparse matrix index '%d' out of bound", toCheck[offset]));
             }
             if (toCheck[offset + 1] < 0) {
-                throw new SimEngineException(String.format("Sparse matrix value '%d' should be non-negative",
-                        toCheck[offset + 1]));
+                throw new SimEngineException(String.format("Sparse matrix value '%d' should be non-negative", toCheck[offset + 1]));
             }
         }
     }
@@ -230,7 +253,7 @@ public class SimEngineImpl implements SimEngine {
 
     @Override
     public void save(final SimCallback callback, final String bkey) {
-        dataExecs.get(bkey).execute(new SafeRunner("save", callback) {
+        writerExecs.get(bkey).execute(new SafeRunner("save", callback) {
             @Override
             public void invoke() {
                 // TODO
@@ -242,7 +265,7 @@ public class SimEngineImpl implements SimEngine {
 
     @Override
     public void xincr(final SimCallback callback, final String vkey, final String key) {
-        dataExecs.get(basisOf.get(vkey)).execute(new SafeRunner("xincr", callback) {
+        writerExecs.get(basisOf.get(vkey)).execute(new SafeRunner("xincr", callback) {
             @Override
             public void invoke() {
                 validateKind("xincr", vkey, Kind.VECTORS);
@@ -253,7 +276,7 @@ public class SimEngineImpl implements SimEngine {
 
     @Override
     public void xget(final SimCallback callback, final String vkey, final String key) {
-        dataExecs.get(basisOf.get(vkey)).execute(new SafeRunner("xget", callback) {
+        writerExecs.get(basisOf.get(vkey)).execute(new SafeRunner("xget", callback) {
             @Override
             public void invoke() {
                 validateKind("xget", vkey, Kind.VECTORS);
@@ -264,7 +287,7 @@ public class SimEngineImpl implements SimEngine {
 
     @Override
     public void xlookup(final SimCallback callback, final String vkey, final int vecid) {
-        dataExecs.get(basisOf.get(vkey)).execute(new SafeRunner("xlookup", callback) {
+        writerExecs.get(basisOf.get(vkey)).execute(new SafeRunner("xlookup", callback) {
             @Override
             public void invoke() {
                 validateKind("xlookup", vkey, Kind.VECTORS);
@@ -276,7 +299,7 @@ public class SimEngineImpl implements SimEngine {
     @Override
     public void del(final SimCallback callback, final String key) {
         validateExistence(key);
-        dataExecs.get(basisOf.get(key)).execute(new AsyncSafeRunner("del") {
+        writerExecs.get(basisOf.get(key)).execute(new AsyncSafeRunner("del") {
             @Override
             public void invoke() {
                 if (bases.containsKey(key)) {
@@ -314,7 +337,7 @@ public class SimEngineImpl implements SimEngine {
                 bases.put(bkey, new SimBasis(context.getSub("basis", bkey), basis));
                 basisOf.put(bkey, bkey);
                 kindOf.put(bkey, Kind.BASIS);
-                dataExecs.put(bkey, Executors.newSingleThreadExecutor());
+                writerExecs.put(bkey, Executors.newSingleThreadExecutor());
                 callback.ok();
             }
         });
@@ -322,7 +345,7 @@ public class SimEngineImpl implements SimEngine {
 
     @Override
     public void brev(final SimCallback callback, final String bkey, final String[] base) {
-        dataExecs.get(bkey).execute(new SafeRunner("brev", callback) {
+        writerExecs.get(bkey).execute(new SafeRunner("brev", callback) {
             @Override
             public void invoke() {
                 validateKind("brev", bkey, Kind.BASIS);
@@ -336,7 +359,7 @@ public class SimEngineImpl implements SimEngine {
     @Override
     public void bget(final SimCallback callback, final String bkey) {
         validateKind("bget", bkey, Kind.BASIS);
-        dataExecs.get(bkey).execute(new SafeRunner("bget", callback) {
+        readerPool.submit(new SafeRunner("bget", callback) {
             @Override
             public void invoke() {
                 callback.stringList(bases.get(bkey).bget());
@@ -388,7 +411,7 @@ public class SimEngineImpl implements SimEngine {
     public void vids(final SimCallback callback, final String vkey) {
         validateKind("vget", vkey, Kind.VECTORS);
         final String bkey = basisOf.get(vkey);
-        dataExecs.get(bkey).execute(new SafeRunner("vids", callback) {
+        readerPool.submit(new SafeRunner("vids", callback) {
             @Override
             public void invoke() {
                 callback.integerList(bases.get(bkey).vids(vkey));
@@ -402,7 +425,7 @@ public class SimEngineImpl implements SimEngine {
     public void vget(final SimCallback callback, final String vkey, final int vecid) {
         validateKind("vget", vkey, Kind.VECTORS);
         final String bkey = basisOf.get(vkey);
-        dataExecs.get(bkey).execute(new SafeRunner("vget", callback) {
+        readerPool.submit(new SafeRunner("vget", callback) {
             @Override
             public void invoke() {
                 callback.floatList(bases.get(bkey).vget(vkey, vecid));
@@ -416,7 +439,7 @@ public class SimEngineImpl implements SimEngine {
         validateId(vecid);
         validateProbs(vector);
         final String bkey = basisOf.get(vkey);
-        dataExecs.get(bkey).execute(new AsyncSafeRunner("vget") {
+        writerExecs.get(bkey).execute(new AsyncSafeRunner("vget") {
             @Override
             public void invoke() {
                 bases.get(bkey).vadd(vkey, vecid, vector);
@@ -442,7 +465,7 @@ public class SimEngineImpl implements SimEngine {
         validateId(vecid);
         validateProbs(vector);
         final String bkey = basisOf.get(vkey);
-        dataExecs.get(bkey).execute(new SafeRunner("vset", callback) {
+        writerExecs.get(bkey).execute(new SafeRunner("vset", callback) {
             @Override
             public void invoke() {
                 bases.get(bkey).vset(vkey, vecid, vector);
@@ -459,7 +482,7 @@ public class SimEngineImpl implements SimEngine {
         validateId(vecid);
         validateProbs(vector);
         final String bkey = basisOf.get(vkey);
-        dataExecs.get(bkey).execute(new AsyncSafeRunner("vacc") {
+        writerExecs.get(bkey).execute(new AsyncSafeRunner("vacc") {
             @Override
             public void invoke() {
                 bases.get(bkey).vacc(vkey, vecid, vector);
@@ -474,7 +497,7 @@ public class SimEngineImpl implements SimEngine {
     public void vrem(final SimCallback callback, final String vkey, final int vecid) {
         this.validateKind("vrem", vkey, Kind.VECTORS);
         final String bkey = basisOf.get(vkey);
-        dataExecs.get(bkey).execute(new AsyncSafeRunner("vrem") {
+        writerExecs.get(bkey).execute(new AsyncSafeRunner("vrem") {
             @Override
             public void invoke() {
                 bases.get(bkey).vrem(vkey, vecid);
@@ -490,7 +513,7 @@ public class SimEngineImpl implements SimEngine {
     public void iget(final SimCallback callback, final String vkey, final int vecid) {
         validateExistence(vkey);
         final String bkey = basisOf.get(vkey);
-        dataExecs.get(bkey).execute(new SafeRunner("iget", callback) {
+        readerPool.submit(new SafeRunner("iget", callback) {
             @Override
             public void invoke() {
                 callback.integerList(bases.get(bkey).iget(vkey, vecid));
@@ -505,7 +528,7 @@ public class SimEngineImpl implements SimEngine {
         final String bkey = basisOf.get(vkey);
         int maxIndex = bases.get(bkey).bget().length;
         validatePairs(maxIndex, pairs);
-        dataExecs.get(bkey).execute(new AsyncSafeRunner("iadd") {
+        writerExecs.get(bkey).execute(new AsyncSafeRunner("iadd") {
             @Override
             public void invoke() {
                 bases.get(bkey).iadd(vkey, vecid, pairs);
@@ -516,7 +539,7 @@ public class SimEngineImpl implements SimEngine {
                 int counter = (counters.get(vkey) + 1) % bycount;
                 counters.put(vkey, counter);
                 if (counter == 0) {
-                    logger.info(String.format("adding sparse vectors by count of %d", bycount));
+                    logger.info(String.format("adding sparse vectors by count of %d, %d", bycount, counter));
                 }
             }
         });
@@ -532,7 +555,7 @@ public class SimEngineImpl implements SimEngine {
         final String bkey = basisOf.get(vkey);
         int maxIndex = bases.get(bkey).bget().length;
         validatePairs(maxIndex, pairs);
-        dataExecs.get(bkey).execute(new AsyncSafeRunner("iset") {
+        writerExecs.get(bkey).execute(new AsyncSafeRunner("iset") {
             @Override
             public void invoke() {
                 bases.get(bkey).iset(vkey, vecid, pairs);
@@ -550,7 +573,7 @@ public class SimEngineImpl implements SimEngine {
         final String bkey = basisOf.get(vkey);
         int maxIndex = bases.get(bkey).bget().length;
         validatePairs(maxIndex, pairs);
-        dataExecs.get(bkey).execute(new AsyncSafeRunner("iacc") {
+        writerExecs.get(bkey).execute(new AsyncSafeRunner("iacc") {
             @Override
             public void invoke() {
                 bases.get(bkey).iacc(vkey, vecid, pairs);
@@ -607,7 +630,7 @@ public class SimEngineImpl implements SimEngine {
         String rkey = rkey(vkeyTarget, vkeySource);
         validateExistence(rkey);
         final String bkey = basisOf.get(vkeySource);
-        dataExecs.get(bkey).execute(new SafeRunner("rget", callback) {
+        readerPool.submit(new SafeRunner("rget", callback) {
             @Override
             public void invoke() {
                 callback.stringList(bases.get(bkey).rget(vkeySource, vecid, vkeyTarget));
@@ -622,7 +645,7 @@ public class SimEngineImpl implements SimEngine {
         String rkey = rkey(vkeyTarget, vkeySource);
         validateExistence(rkey);
         final String bkey = basisOf.get(vkeySource);
-        dataExecs.get(bkey).execute(new SafeRunner("rrec", callback) {
+        readerPool.submit(new SafeRunner("rrec", callback) {
             @Override
             public void invoke() {
                 callback.integerList(bases.get(bkey).rrec(vkeySource, vecid, vkeyTarget));
@@ -632,7 +655,7 @@ public class SimEngineImpl implements SimEngine {
 
     @Override
     public void listen(final String bkey, final BasisListener listener) {
-        dataExecs.get(bkey).execute(new Runnable() {
+        writerExecs.get(bkey).execute(new Runnable() {
             @Override
             public void run() {
                 bases.get(bkey).addListener(listener);
@@ -643,7 +666,7 @@ public class SimEngineImpl implements SimEngine {
     @Override
     public void listen(final String vkey, final VectorSetListener listener) {
         final String bkey = basisOf.get(vkey);
-        dataExecs.get(bkey).execute(new Runnable() {
+        writerExecs.get(bkey).execute(new Runnable() {
             @Override
             public void run() {
                 bases.get(bkey).addListener(vkey, listener);
@@ -654,7 +677,7 @@ public class SimEngineImpl implements SimEngine {
     @Override
     public void listen(final String srcVkey, final String tgtVkey, final RecommendationListener listener) {
         final String bkey = basisOf.get(srcVkey);
-        dataExecs.get(bkey).execute(new Runnable() {
+        writerExecs.get(bkey).execute(new Runnable() {
             @Override
             public void run() {
                 bases.get(bkey).addListener(srcVkey, tgtVkey, listener);
