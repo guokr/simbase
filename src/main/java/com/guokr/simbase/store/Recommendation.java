@@ -68,16 +68,13 @@ public class Recommendation implements VectorSetListener {
     private void processChangedEvt(VectorSet evtSrc, int vecid, int[] inputed) {
         if (evtSrc == this.source) {
             target.rescore(vecid, length(inputed), inputed, this);
-        }
-        if (evtSrc == this.target) {
+        } else if (evtSrc == this.target) {
             int tgtVecId = vecid;
             TIntObjectIterator<Sorter> iter = sorters.iterator();
             while (iter.hasNext()) {
                 iter.advance();
                 int srcVecId = iter.key();
-                if (!(this.source == this.target && srcVecId == tgtVecId)) {
-                    add(srcVecId, tgtVecId, score(source._get(srcVecId), inputed));
-                }
+                add(srcVecId, tgtVecId, score(source._get(srcVecId), inputed));
             }
         }
     }
@@ -100,6 +97,9 @@ public class Recommendation implements VectorSetListener {
     }
 
     public void add(int srcVecId, int tgtVecId, float score) {
+        if (!sorters.containsKey(srcVecId)) {
+            create(srcVecId);
+        }
         this.sorters.get(srcVecId).add(tgtVecId, score);
         if (!this.reverseIndexer.containsKey(tgtVecId)) {
             this.reverseIndexer.put(tgtVecId, new TIntArrayList());

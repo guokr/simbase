@@ -224,6 +224,9 @@ public class DenseVectorSet implements VectorSet {
             base = offset + 2;
             if (!(this == rec.source && srcVecId == tgtVecId)) {
                 rec.add(srcVecId, tgtVecId, cosine);
+                if (this == rec.target) {
+                    rec.add(tgtVecId, srcVecId, cosine);
+                }
             }
             scoring = 0;
         }
