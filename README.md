@@ -8,6 +8,13 @@ We adopt cosine similarity as our distance function
 * http://en.wikipedia.org/wiki/Cosine_similarity
 
 
+How to build
+-------------
+
+  > cd SIMBASE_HOME
+  
+  > lein uberjar
+
 How to start
 -------------
 
