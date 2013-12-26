@@ -3,7 +3,7 @@ Simbase: A vector similarity database
 
 Simbase is a redis-like vector similarity database. You can add, get, delete
 vectors to/from it, and then retrieve the most similar vectors within one vector
-set or among two vector set.
+set or between two vector sets.
 
 Concepts
 --------
@@ -147,10 +147,10 @@ and distribution under the terms of either license.
 Special thanks
 ---------------
 
-Special thanks for Feng Sheng, we borrow lots of code from his
+Special thanks for Feng Sheng, we borrowed lots of code from his
 great project http-kit ( https://github.com/http-kit/http-kit/ ).
 
-Also thanks for Kunwei Zhang from Tsinghua for his smart idea.  
+Also thanks for Kunwei Zhang from Tsinghua Univ. for his smart idea.  
 
 Contributers
 -------------
