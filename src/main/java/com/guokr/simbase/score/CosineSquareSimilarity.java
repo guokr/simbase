@@ -12,8 +12,8 @@ import com.guokr.simbase.SimScore;
 
 public class CosineSquareSimilarity implements SimScore {
 
-    private Map<String, TIntFloatMap> denseCaches  = new HashMap<String, TIntFloatMap>();
-    private Map<String, TIntIntMap>   sparseCaches = new HashMap<String, TIntIntMap>();
+    private static Map<String, TIntFloatMap> denseCaches  = new HashMap<String, TIntFloatMap>();
+    private static Map<String, TIntIntMap>   sparseCaches = new HashMap<String, TIntIntMap>();
 
     private String                    batchKey     = null;
     private int                       batchId      = -1;

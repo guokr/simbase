@@ -4,6 +4,8 @@ import com.guokr.simbase.events.VectorSetListener;
 
 public interface VectorSet {
 
+    public String key();
+
     public int[] ids();
 
     public void remove(int vecid);
@@ -26,6 +28,8 @@ public interface VectorSet {
 
     public void addListener(VectorSetListener listener);
 
-    public void rescore(int srcVecId, int length, int[] vector, Recommendation rec);
+    public void rescore(String key, int vecid, float[] vector, Recommendation rec);
+
+    public void rescore(String key, int vecid, int[] vector, Recommendation rec);
 
 }

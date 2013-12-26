@@ -14,6 +14,8 @@ import com.guokr.simbase.events.VectorSetListener;
 
 public class DenseVectorSet implements VectorSet {
 
+    private String                  key;
+
     private TFloatList              probs   = new TFloatArrayList();
     private TIntIntMap              indexer = new TIntIntHashMap();
 
@@ -25,16 +27,22 @@ public class DenseVectorSet implements VectorSet {
     private boolean                 listening;
     private List<VectorSetListener> listeners;
 
-    public DenseVectorSet(Basis base) {
-        this(base, 0.01f, 4096);
+    public DenseVectorSet(String key, Basis base) {
+        this(key, base, 0.01f, 4096);
     }
 
-    public DenseVectorSet(Basis base, float accumuFactor, int sparseFactor) {
+    public DenseVectorSet(String key, Basis base, float accumuFactor, int sparseFactor) {
+        this.key = key;
         this.base = base;
         this.accumuFactor = accumuFactor;
         this.sparseFactor = sparseFactor;
         this.listening = true;
         this.listeners = new ArrayList<VectorSetListener>();
+    }
+
+    @Override
+    public String key() {
+        return key;
     }
 
     @Override
@@ -107,20 +115,16 @@ public class DenseVectorSet implements VectorSet {
     @Override
     public void add(int vecid, float[] vector) {
         if (!indexer.containsKey(vecid)) {
-            float length = 0;
             int start = probs.size();
             indexer.put(vecid, start);
             for (float val : vector) {
                 probs.add(val);
-                length += val * val;
             }
             probs.add((float) (vecid + 1));
-            probs.add(length);
 
             if (listening) {
-                int[] sparse = base.sparsify(sparseFactor, vector);
                 for (VectorSetListener l : listeners) {
-                    l.onVectorAdded(this, vecid, sparse);
+                    l.onVectorAdded(this, vecid, vector);
                 }
             }
         }
@@ -129,7 +133,7 @@ public class DenseVectorSet implements VectorSet {
     @Override
     public void set(int vecid, float[] vector) {
         if (indexer.containsKey(vecid)) {
-            int[] old = base.sparsify(sparseFactor, get(vecid));
+            float[] old = get(vecid);
 
             float length = 0;
             int cursor = indexer.get(vecid);
@@ -142,9 +146,8 @@ public class DenseVectorSet implements VectorSet {
             probs.set(cursor, length);
 
             if (listening) {
-                int[] sparse = base.sparsify(sparseFactor, vector);
                 for (VectorSetListener l : listeners) {
-                    l.onVectorSetted(this, vecid, old, sparse);
+                    l.onVectorSetted(this, vecid, old, vector);
                 }
             }
         } else {
@@ -170,10 +173,9 @@ public class DenseVectorSet implements VectorSet {
             probs.set(cursor, length);
 
             if (listening) {
-                int[] accumulated = base.sparsify(sparseFactor, get(vecid));
-                int[] sparse = base.sparsify(sparseFactor, vector);
+                float[] accumulated = get(vecid);
                 for (VectorSetListener l : listeners) {
-                    l.onVectorAccumulated(this, vecid, sparse, accumulated);
+                    l.onVectorAccumulated(this, vecid, vector, accumulated);
                 }
             }
         }
@@ -205,30 +207,40 @@ public class DenseVectorSet implements VectorSet {
     }
 
     @Override
-    public void rescore(int srcVecId, int length, int[] vector, Recommendation rec) {
-        rec.create(srcVecId);
-        float scoring = 0;
-        int offset = 0, end = probs.size(), len = vector.length;
-        for (int base = 0; base < end;) {
-            for (int pos = 0; pos < len;) {
-                offset = base + vector[pos];
-                scoring += vector[pos + 1] * probs.get(offset);
-                pos += 2;
-            }
-            while (probs.get(offset) < 1) {
-                offset++;
-            }
-            int tgtVecId = (int) (probs.get(offset) - 1);
-            float tgtLength = probs.get(offset + 1);
-            float cosine = scoring * scoring / length / tgtLength;
-            base = offset + 2;
-            if (!(this == rec.source && srcVecId == tgtVecId)) {
-                rec.add(srcVecId, tgtVecId, cosine);
-                if (this == rec.target) {
-                    rec.add(tgtVecId, srcVecId, cosine);
+    public void rescore(String key, int vecid, float[] vector, Recommendation rec) {
+        rec.create(vecid);
+        int end = probs.size();
+        for (int offset = 0; offset < end; offset++) {
+            if (probs.get(offset) > 1) {
+                int tgtId = (int) (probs.get(offset) - 1);
+                float[] target = get(tgtId);
+                float cosinesq = rec.scoring.score(key, vecid, vector, this.key, tgtId, target);
+                if (!(this == rec.source && vecid == tgtId)) {
+                    rec.add(vecid, tgtId, cosinesq);
+                    if (this == rec.target) {
+                        rec.add(tgtId, vecid, cosinesq);
+                    }
                 }
             }
-            scoring = 0;
+        }
+    }
+
+    @Override
+    public void rescore(String key, int vecid, int[] vector, Recommendation rec) {
+        rec.create(vecid);
+        int end = probs.size();
+        for (int offset = 0; offset < end; offset++) {
+            if (probs.get(offset) > 1) {
+                int tgtId = (int) (probs.get(offset) - 1);
+                int[] target = _get(tgtId);
+                float cosinesq = rec.scoring.score(key, vecid, vector, this.key, tgtId, target);
+                if (!(this == rec.source && vecid == tgtId)) {
+                    rec.add(vecid, tgtId, cosinesq);
+                    if (this == rec.target) {
+                        rec.add(tgtId, vecid, cosinesq);
+                    }
+                }
+            }
         }
     }
 

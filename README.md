@@ -124,11 +124,12 @@ Recommendation related
     
     List all recommendation targets with the inputed vecset as source
 
-*   rmk vecsetname1 vecsetname2
+*   rmk vecsetname1 vecsetname2 funcscore
 
-    > rmk userprofile article
+    > rmk userprofile article cosinesq
     
-    Create a recommendation to article by userprofile
+    Create a recommendation to article by userprofile and it use cosinesq as score function.
+    Currently score functions you can choice are: 'cosinesq' and 'jensenshannon' 
 
 *   rrec vecsetname1 vecid vecsetname2
 

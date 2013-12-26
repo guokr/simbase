@@ -10,13 +10,16 @@ import gnu.trove.map.hash.TIntObjectHashMap;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.guokr.simbase.SimScore;
 import com.guokr.simbase.events.RecommendationListener;
 import com.guokr.simbase.events.VectorSetListener;
+import com.guokr.simbase.score.CosineSquareSimilarity;
 
 public class Recommendation implements VectorSetListener {
 
     public VectorSet                     source;
     public VectorSet                     target;
+    public SimScore                      scoring;
 
     private int                          limit;
 
@@ -25,57 +28,57 @@ public class Recommendation implements VectorSetListener {
     private List<RecommendationListener> listeners;
 
     public Recommendation(VectorSet source, VectorSet target) {
-        this(source, target, 20);
+        this(source, target, new CosineSquareSimilarity(), 20);
     }
 
-    public Recommendation(VectorSet source, VectorSet target, int limits) {
+    public Recommendation(VectorSet source, VectorSet target, SimScore scoring) {
+        this(source, target, scoring, 20);
+    }
+
+    public Recommendation(VectorSet source, VectorSet target, SimScore scoring, int limits) {
         this.source = source;
         this.target = target;
         this.limit = limits;
+        this.scoring = scoring;
         this.sorters = new TIntObjectHashMap<Sorter>();
         this.listeners = new ArrayList<RecommendationListener>();
     }
 
-    private int length(int[] pairs) {
-        int result = 0;
-        int len = pairs.length;
-        for (int i = 0; i < len;) {
-            result += pairs[i + 1] * pairs[i + 1];
-            i += 2;
-        }
-        return result;
-    }
-
-    private float score(int[] pairs1, int[] pairs2) {
-        float result = 0f;
-        int len1 = pairs1.length;
-        int len2 = pairs2.length;
-        int idx1 = 0, idx2 = 0;
-        while (idx1 < len1 && idx2 < len2) {
-            if (pairs1[idx1] == pairs2[idx2]) {
-                result += pairs1[idx1 + 1] * pairs2[idx2 + 1];
-                idx1 += 2;
-                idx2 += 2;
-            } else if (pairs1[idx1] < pairs2[idx2]) {
-                idx1 += 2;
-            } else {
-                idx2 += 2;
-            }
-        }
-        return result * result / length(pairs1) / length(pairs2);
-    }
-
-    private void processChangedEvt(VectorSet evtSrc, int vecid, int[] inputed) {
+    private void processDenseChangedEvt(VectorSet evtSrc, int vecid, float[] vector) {
         if (evtSrc == this.source) {
-            target.rescore(vecid, length(inputed), inputed, this);
+            scoring.beginBatch(source.key(), vecid);
+            target.rescore(source.key(), vecid, vector, this);
+            scoring.endBatch();
         } else if (evtSrc == this.target) {
             int tgtVecId = vecid;
             TIntObjectIterator<Sorter> iter = sorters.iterator();
+            scoring.beginBatch(target.key(), tgtVecId);
             while (iter.hasNext()) {
                 iter.advance();
                 int srcVecId = iter.key();
-                add(srcVecId, tgtVecId, score(source._get(srcVecId), inputed));
+                float score = scoring.score(source.key(), srcVecId, source.get(srcVecId), target.key(), tgtVecId, vector);
+                add(srcVecId, tgtVecId, score);
             }
+            scoring.endBatch();
+        }
+    }
+
+    private void processSparseChangedEvt(VectorSet evtSrc, int vecid, int[] vector) {
+        if (evtSrc == this.source) {
+            scoring.beginBatch(source.key(), vecid);
+            target.rescore(source.key(), vecid, vector, this);
+            scoring.endBatch();
+        } else if (evtSrc == this.target) {
+            int tgtVecId = vecid;
+            TIntObjectIterator<Sorter> iter = sorters.iterator();
+            scoring.beginBatch(target.key(), tgtVecId);
+            while (iter.hasNext()) {
+                iter.advance();
+                int srcVecId = iter.key();
+                float score = scoring.score(source.key(), srcVecId, source._get(srcVecId), target.key(), tgtVecId, vector);
+                add(srcVecId, tgtVecId, score);
+            }
+            scoring.endBatch();
         }
     }
 
@@ -131,18 +134,33 @@ public class Recommendation implements VectorSetListener {
     }
 
     @Override
-    public void onVectorAdded(VectorSet evtSrc, int vecid, int[] inputed) {
-        processChangedEvt(evtSrc, vecid, inputed);
+    public void onVectorAdded(VectorSet evtSrc, int vecid, float[] inputed) {
+        processDenseChangedEvt(evtSrc, vecid, inputed);
     }
 
     @Override
-    public void onVectorSetted(VectorSet evtSrc, int vecid, int[] old, int[] inputed) {
-        processChangedEvt(evtSrc, vecid, inputed);
+    public void onVectorAdded(VectorSet evtSrc, int vecid, int[] vector) {
+        processSparseChangedEvt(evtSrc, vecid, vector);
     }
 
     @Override
-    public void onVectorAccumulated(VectorSet evtSrc, int vecid, int[] inputed, int[] accumulated) {
-        processChangedEvt(evtSrc, vecid, inputed);
+    public void onVectorSetted(VectorSet evtSrc, int vecid, float[] old, float[] vector) {
+        processDenseChangedEvt(evtSrc, vecid, vector);
+    }
+
+    @Override
+    public void onVectorSetted(VectorSet evtSrc, int vecid, int[] old, int[] vector) {
+        processSparseChangedEvt(evtSrc, vecid, vector);
+    }
+
+    @Override
+    public void onVectorAccumulated(VectorSet evtSrc, int vecid, float[] vector, float[] accumulated) {
+        processDenseChangedEvt(evtSrc, vecid, vector);
+    }
+
+    @Override
+    public void onVectorAccumulated(VectorSet evtSrc, int vecid, int[] vector, int[] accumulated) {
+        processSparseChangedEvt(evtSrc, vecid, vector);
     }
 
     @Override

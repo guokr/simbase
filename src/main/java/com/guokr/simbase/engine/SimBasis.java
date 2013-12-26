@@ -8,9 +8,12 @@ import com.esotericsoftware.kryo.KryoSerializable;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
 import com.guokr.simbase.SimContext;
+import com.guokr.simbase.SimScore;
 import com.guokr.simbase.events.BasisListener;
 import com.guokr.simbase.events.RecommendationListener;
 import com.guokr.simbase.events.VectorSetListener;
+import com.guokr.simbase.score.CosineSquareSimilarity;
+import com.guokr.simbase.score.JensenShannonDivergence;
 import com.guokr.simbase.store.Basis;
 import com.guokr.simbase.store.DenseVectorSet;
 import com.guokr.simbase.store.Recommendation;
@@ -48,9 +51,9 @@ public class SimBasis implements KryoSerializable {
         int sparseFactor = subcontext.getInt("sparseFactor");
 
         if (type.equals("denseVectorSet")) {
-            this.vectorSets.put(vkey, new DenseVectorSet(this.base, accumuFactor, sparseFactor));
+            this.vectorSets.put(vkey, new DenseVectorSet(vkey, this.base, accumuFactor, sparseFactor));
         } else if (type.equals("sparseVectorSet")) {
-            this.vectorSets.put(vkey, new SparseVectorSet(this.base, accumuFactor, sparseFactor));
+            this.vectorSets.put(vkey, new SparseVectorSet(vkey, this.base, accumuFactor, sparseFactor));
         } else {
             throw new IllegalArgumentException("Wrong type of vector set in config!");
         }
@@ -96,10 +99,18 @@ public class SimBasis implements KryoSerializable {
         this.vectorSets.get(vkey)._accumulate(vecid, pairs);
     }
 
-    public void rmk(String vkeySource, String vkeyTarget) {
+    public void rmk(String vkeySource, String vkeyTarget, String funcscore) {
+        SimScore scoring = null;
+        if (funcscore.equals("cosinesq")) {
+            scoring = new CosineSquareSimilarity();
+        }
+        if (funcscore.equals("jensenshannon")) {
+            scoring = new JensenShannonDivergence();
+        }
+
         VectorSet source = vectorSets.get(vkeySource);
         VectorSet target = vectorSets.get(vkeyTarget);
-        Recommendation rec = new Recommendation(source, target, 20);
+        Recommendation rec = new Recommendation(source, target, scoring, 20);
 
         String rkey = rkey(vkeySource, vkeyTarget);
         this.recommendations.put(rkey, rec);

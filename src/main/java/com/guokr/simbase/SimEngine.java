@@ -56,7 +56,7 @@ public interface SimEngine {
 
     public void rlist(SimCallback callback, String vkey);
 
-    public void rmk(SimCallback callback, String vkeySource, String vkeyTarget);
+    public void rmk(SimCallback callback, String vkeySource, String vkeyTarget, String funcscore);
 
     public void rget(SimCallback callback, String vkeySource, int vecid, String vkeyTarget);
 

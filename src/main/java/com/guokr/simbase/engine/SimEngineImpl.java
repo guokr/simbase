@@ -620,7 +620,7 @@ public class SimEngineImpl implements SimEngine {
     }
 
     @Override
-    public void rmk(final SimCallback callback, final String vkeySource, final String vkeyTarget) {
+    public void rmk(final SimCallback callback, final String vkeySource, final String vkeyTarget, final String funcscore) {
         mngmExec.execute(new SafeRunner("rmk", callback) {
             @Override
             public void invoke() {
@@ -630,7 +630,7 @@ public class SimEngineImpl implements SimEngine {
                 String rkey = rkey(vkeyTarget, vkeySource);
                 validateNotExistence(rkey);
                 final String bkey = basisOf.get(vkeySource);
-                bases.get(bkey).rmk(vkeySource, vkeyTarget);
+                bases.get(bkey).rmk(vkeySource, vkeyTarget, funcscore);
                 basisOf.put(rkey, basisOf.get(vkeySource));
                 if (rtargetsOf.get(vkeySource) == null) {
                     rtargetsOf.put(vkeySource, new HashSet<String>());

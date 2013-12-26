@@ -8,12 +8,12 @@ public class RMk extends SimCommand {
 
     @Override
     public String signature() {
-        return "ss";
+        return "sss";
     }
 
     @Override
-    public void invoke(SimEngine engine, String vkeySource, String vkeyTarget, SimCallback callback) {
-        engine.rmk(callback, vkeySource, vkeyTarget);
+    public void invoke(SimEngine engine, String vkeySource, String vkeyTarget, String funcscore, SimCallback callback) {
+        engine.rmk(callback, vkeySource, vkeyTarget, funcscore);
     }
 
 }
