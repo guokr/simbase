@@ -136,7 +136,7 @@ public class Basis {
         int[] result = new int[size];
         for (int i = 0; i < size;) {
             result[i] = resultList.get(i);
-            result[i + 1] = (int) (((float) resultList.get(i + 1)) / sum * sparseFactor);
+            result[i + 1] = (int) Math.round(((float) resultList.get(i + 1)) / sum * sparseFactor);
             i += 2;
         }
 
