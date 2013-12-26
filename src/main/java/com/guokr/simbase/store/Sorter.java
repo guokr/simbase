@@ -25,6 +25,12 @@ public class Sorter {
             this.vecids[i] = -1;
             this.scores[i] = -1.0f;
         }
+        
+        if (order == SortOrder.Asc) {
+            waterline = Float.POSITIVE_INFINITY;
+        } else {
+            waterline = Float.NEGATIVE_INFINITY;
+        }
     }
 
     private int indexOf(int vecid) {
@@ -135,7 +141,8 @@ public class Sorter {
 
     public float get(int vecid) {
         float result = -1.0f;
-        for (int i = 0; i < this.size; i++) {
+        int len = this.size > this.limits ? this.limits : this.size; 
+        for (int i = 0; i < len; i++) {
             if (this.vecids[i] == vecid) {
                 result = this.scores[i];
                 break;
