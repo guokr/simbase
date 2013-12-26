@@ -1,16 +1,22 @@
 package com.guokr.simbase.store;
 
+import com.guokr.simbase.SimScore.SortOrder;
+
 public class Sorter {
 
-    private int     limits    = 20;
-    private int     size      = 0;
-    //private float   waterline = 0;
+    private SortOrder order;
+    private int       limits    = 20;
 
-    private int[]   vecids;
-    private float[] scores;
+    private int       size      = 0;
+    private float     waterline = 0f;
 
-    public Sorter(int limits) {
+    private int[]     vecids;
+    private float[]   scores;
+
+    public Sorter(SortOrder order, int limits) {
+        this.order = order;
         this.limits = limits;
+
         int maxlen = 1 + limits;
         this.vecids = new int[maxlen];
         this.scores = new float[maxlen];
@@ -32,7 +38,28 @@ public class Sorter {
         return pos;
     }
 
-    private int lookup(float score) {
+    private int asclookup(float score) {
+        int pos = -1;
+        if (this.size == 0) {
+            pos = 0;
+        } else if (this.size > 0 && score <= this.scores[0]) {
+            pos = 0;
+        } else if (this.size > 0 && this.size < this.limits && score > this.scores[this.size - 1]) {
+            pos = this.size;
+        } else if (this.size > 0 && score > this.scores[this.size - 1]) {
+            pos = this.size;
+        } else {
+            for (int cur = 0; cur < this.size - 1; cur++) {
+                if (score > this.scores[cur] && score <= this.scores[cur + 1]) {
+                    pos = cur + 1;
+                    break;
+                }
+            }
+        }
+        return pos;
+    }
+
+    private int desclookup(float score) {
         int pos = -1;
         if (this.size == 0) {
             pos = 0;
@@ -58,8 +85,15 @@ public class Sorter {
     }
 
     public void add(int vecid, float score) {
+        if (order == SortOrder.Asc && score > waterline) {
+            return;
+        }
+        if (order == SortOrder.Desc && score < waterline) {
+            return;
+        }
+
         remove(vecid);
-        int pos = lookup(score);
+        int pos = order == SortOrder.Asc ? asclookup(score) : desclookup(score);
         if (pos == 0 && this.size == 0) {
             this.vecids = new int[] { vecid };
             this.scores = new float[] { score };
@@ -79,6 +113,16 @@ public class Sorter {
 
                 this.vecids[pos] = vecid;
                 this.scores[pos] = score;
+            }
+        }
+
+        if (this.size() > this.limits) {
+            int count = this.size - this.limits - 1;
+            for (int i = count; i > 0; i--) {
+                float last = removeLast();
+                if (i == 1) {
+                    this.waterline = last;
+                }
             }
         }
     }

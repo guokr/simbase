@@ -94,7 +94,7 @@ public class Recommendation implements VectorSetListener {
     }
 
     public Sorter create(int srcVecId) {
-        Sorter sorter = new Sorter(this.limit);
+        Sorter sorter = new Sorter(scoring.order(), this.limit);
         this.sorters.put(srcVecId, sorter);
         return sorter;
     }
