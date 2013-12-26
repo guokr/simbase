@@ -92,9 +92,12 @@ public class Basis {
         float[] result = new float[size];
 
         int index = 0, cursor = 0;
+        float sum = 0f;
         while (cursor < size) {
             if (index < length && cursor == pairs[index]) {
-                result[cursor] = ((float) pairs[index + 1]) / sparseFactor;
+                float val = ((float) pairs[index + 1]) / sparseFactor;
+                result[cursor] = val;
+                sum = sum + val;
                 index = index + 2;
             } else {
                 result[cursor] = 0f;
@@ -102,22 +105,41 @@ public class Basis {
             cursor++;
         }
 
+        if (sum > 0f) {
+            for (int i = 0; i < size; i++) {
+                result[i] = result[i] / sum;
+            }
+        } else {
+            for (int i = 0; i < size; i++) {
+                result[i] = 1.0f / size;
+            }
+        }
+
         return result;
     }
 
     int[] sparsify(int sparseFactor, float[] distr) {
         TIntArrayList resultList = new TIntArrayList();
-        int cursor = 0;
+
+        int cursor = 0, sum = 0;
         for (float ftmp : distr) {
             int itmp = Math.round(ftmp * sparseFactor);
             if (itmp > 0) {
                 resultList.add(cursor);
                 resultList.add(itmp);
+                sum += itmp;
             }
             cursor++;
         }
-        int[] result = new int[resultList.size()];
-        resultList.toArray(result);
+
+        int size = resultList.size();
+        int[] result = new int[size];
+        for (int i = 0; i < size;) {
+            result[i] = resultList.get(i);
+            result[i + 1] = (int) (((float) resultList.get(i + 1)) / sum * sparseFactor);
+            i += 2;
+        }
+
         return result;
     }
 
