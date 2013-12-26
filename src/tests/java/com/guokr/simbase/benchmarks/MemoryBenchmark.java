@@ -92,7 +92,7 @@ public class MemoryBenchmark {
         }
 
         start = new Date().getTime();
-        for (int i = 1; i <= 1024 * 1024; i++) {
+        for (int i = 1; i <= 10000; i++) {
 
             float total = 0;
             float[] distr = new float[512];
@@ -117,7 +117,7 @@ public class MemoryBenchmark {
         public void onVectorAdded(VectorSet evtSrc, int vecid, float[] vector) {
             if (counter % 1000 == 0) {
                 long duration = new Date().getTime() - start;
-                System.out.println("vecid:" + counter + "\tmemory:" + Runtime.getRuntime().totalMemory() + "\ttime:" + (duration / 1024));
+                System.out.println("vecid:" + counter + "\tmemory:" + Runtime.getRuntime().totalMemory() + "\ttime:" + (duration / 1000));
                 start = new Date().getTime();
             }
             counter++;
