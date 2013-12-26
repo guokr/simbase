@@ -43,7 +43,6 @@ Assumptions of current version
 -------------------------------
 
 Although Simbase is a vector data store, it dose not accept vectors without any constrain.
-
 In fact, Simbase only accept a vector which its components are all greater than zero and less than one.
 
 Especially, if you adopt "jensenshannon" as your score function, you should assure your vector is a
