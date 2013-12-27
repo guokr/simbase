@@ -201,7 +201,7 @@ public class SimEngineImpl implements SimEngine {
     }
 
     private void startCron() {
-        final int cronInterval = this.context.getInt("cronInterval");
+        final int cronInterval = this.context.getInt("saveinterval");
 
         Timer cron = new Timer();
 

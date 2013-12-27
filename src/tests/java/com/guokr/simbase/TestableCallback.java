@@ -6,6 +6,8 @@ import java.nio.ByteBuffer;
 
 public abstract class TestableCallback extends SimCallback {
 
+    public abstract void validator();
+
     public static TestableCallback noop() {
         return new TestableCallback() {
             @Override
@@ -13,8 +15,6 @@ public abstract class TestableCallback extends SimCallback {
             }
         };
     }
-
-    public abstract void validator();
 
     @Override
     public void response() {
@@ -83,7 +83,22 @@ public abstract class TestableCallback extends SimCallback {
             excepted.put(bytes);
             excepted.put(SimUtils.CRLF);
         }
-        assertEquals(buffer.compact().toString(), excepted.toString());
+
+        excepted.flip();
+        byte[] dstExp = new byte[excepted.limit()];
+        excepted.get(dstExp);
+        String a = new String(dstExp);
+        System.out.println(a);
+        excepted.flip();
+
+        buffer.flip();
+        byte[] dstBuf = new byte[buffer.limit()];
+        buffer.get(dstBuf);
+        String b = new String(dstBuf);
+        System.out.println(b);
+        buffer.flip();
+
+        assertEquals(a, b);
     }
 
     public void isFloatValue(float val) {
