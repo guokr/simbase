@@ -1,12 +1,15 @@
 package com.guokr.simbase;
 
+<<<<<<< HEAD
+import static org.junit.Assert.*;
+||||||| merged common ancestors
+=======
 import static org.junit.Assert.assertEquals;
 
+>>>>>>> 7b6d10216732364e32512a6c6e03ea378de9ff78
 import java.nio.ByteBuffer;
 
 public abstract class TestableCallback extends SimCallback {
-
-    public abstract void validator();
 
     public static TestableCallback noop() {
         return new TestableCallback() {
@@ -15,7 +18,24 @@ public abstract class TestableCallback extends SimCallback {
             }
         };
     }
+<<<<<<< HEAD
+ public static TestableCallback print(){
+        
+        return new TestableCallback(){
+            @Override
+            public void validator(){
+                byte[] dst = new byte[buffer.length];
+                buffer.get(dst);
+                System.out.println(dst);
+            }
+        };
+    }
+||||||| merged common ancestors
+=======
 
+    public abstract void validator();
+
+>>>>>>> 7b6d10216732364e32512a6c6e03ea378de9ff78
     @Override
     public void response() {
         validator();
@@ -83,24 +103,20 @@ public abstract class TestableCallback extends SimCallback {
             excepted.put(bytes);
             excepted.put(SimUtils.CRLF);
         }
-
-        excepted.flip();
-        byte[] dstExp = new byte[excepted.limit()];
-        excepted.get(dstExp);
-        String a = new String(dstExp);
-        System.out.println(a);
-        excepted.flip();
-
-        buffer.flip();
-        byte[] dstBuf = new byte[buffer.limit()];
-        buffer.get(dstBuf);
-        String b = new String(dstBuf);
-        System.out.println(b);
-        buffer.flip();
-
-        assertEquals(a, b);
+        assertEquals(buffer.compact().toString(), excepted.toString());
     }
 
+<<<<<<< HEAD
+    public void assertBytes(byte[] expect) {
+        byte[] dst = new byte[expect.length];
+        buffer.get(dst);
+        assertEquals(dst,expect);
+||||||| merged common ancestors
+    public void assertbytes(byte[] expect) {
+        byte[] dst = new byte[expect.length];
+        buffer.get(dst);
+        assertArrayEquals(dst,expect);
+=======
     public void isFloatValue(float val) {
         byte[] bytes = SimUtils.bytes(val);
         byte[] size = SimUtils.size(bytes);
@@ -111,8 +127,16 @@ public abstract class TestableCallback extends SimCallback {
         excepted.put(bytes);
         excepted.put(SimUtils.CRLF);
         assertEquals(buffer.compact().toString(), excepted.toString());
+>>>>>>> 7b6d10216732364e32512a6c6e03ea378de9ff78
     }
 
+<<<<<<< HEAD
+    public void assertByte(byte expect) {
+        assert (buffer.get() == expect);
+||||||| merged common ancestors
+    public void assertbytes(byte expect) {
+        assert (buffer.get() == expect);
+=======
     public void isFloatList(float[] list) {
         byte[] size = SimUtils.size(list.length);
         ByteBuffer excepted = ByteBuffer.allocate(1024 * list.length + 1024);
@@ -129,8 +153,24 @@ public abstract class TestableCallback extends SimCallback {
             excepted.put(SimUtils.CRLF);
         }
         assertEquals(buffer.compact().toString(), excepted.toString());
+>>>>>>> 7b6d10216732364e32512a6c6e03ea378de9ff78
     }
 
+<<<<<<< HEAD
+    public void isOk() {
+        ByteBuffer expect = ByteBuffer.allocate(5);
+        expect.put(SimUtils.PLUS);
+        expect.put(SimUtils.OK);
+        expect.put(SimUtils.CRLF);
+        assertBytes(expect.array());
+||||||| merged common ancestors
+    public void isOk() {
+        ByteBuffer expect = ByteBuffer.allocate(5);
+        expect.put(SimUtils.PLUS);
+        expect.put(SimUtils.OK);
+        expect.put(SimUtils.CRLF);
+        assertbytes(expect.array());
+=======
     public void isStringValue(String val) {
         byte[] bytes = SimUtils.bytes(val);
         byte[] size = SimUtils.size(bytes);
@@ -159,5 +199,7 @@ public abstract class TestableCallback extends SimCallback {
             excepted.put(SimUtils.CRLF);
         }
         assertEquals(buffer.compact().toString(), excepted.toString());
+>>>>>>> 7b6d10216732364e32512a6c6e03ea378de9ff78
     }
+    
 }

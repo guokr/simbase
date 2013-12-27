@@ -10,9 +10,9 @@ public interface SimEngine {
 
     public void cfg(SimCallback callback, String key, String val);
 
-    public void load(SimCallback callback, String bkey);
+    public void load(SimCallback callback);
 
-    public void save(SimCallback callback, String bkey);
+    public void save(SimCallback callback);
 
     public void xincr(SimCallback callback, String vkey, String key);
 
@@ -21,6 +21,10 @@ public interface SimEngine {
     public void xlookup(SimCallback callback, String vkey, int vecid);
 
     public void del(SimCallback callback, String key);
+
+    public void bload(SimCallback callback, String path);
+
+    public void bsave(SimCallback callback, String path);
 
     public void blist(SimCallback callback);
 
