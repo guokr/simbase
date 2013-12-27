@@ -28,7 +28,7 @@ public class JensenShannonDivergence implements SimScore {
                 info += p * (float) (Math.log(p) / ratio);
             }
         }
-        return -info;
+        return info;
     }
 
     private static int iinfo(int[] freq) {
@@ -40,7 +40,7 @@ public class JensenShannonDivergence implements SimScore {
                 info += p * (float) (Math.log(p) / ratio);
             }
         }
-        return -Math.round(info);
+        return Math.round(info);
     }
 
     @Override
@@ -99,10 +99,11 @@ public class JensenShannonDivergence implements SimScore {
             float p = source[i];
             float q = target[i];
             float m = (p + q) / 2;
-            if (p > 0f && q > 0f) {
-                scoring += (m * Math.log(m) / ratio + sourceCache.get(srcId) / 2f + targetCache.get(tgtId) / 2f);
+            if (m > 0f) {
+                scoring += (-m * Math.log(m) / ratio);
             }
         }
+        scoring += sourceCache.get(srcId) / 2f + targetCache.get(tgtId) / 2f;
 
         return scoring;
     }

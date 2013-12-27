@@ -52,8 +52,6 @@ public class Sorter {
             pos = 0;
         } else if (this.size > 0 && this.size < this.limits && score > this.scores[this.size - 1]) {
             pos = this.size;
-        } else if (this.size > 0 && score > this.scores[this.size - 1]) {
-            pos = this.size;
         } else {
             for (int cur = 0; cur < this.size - 1; cur++) {
                 if (score > this.scores[cur] && score <= this.scores[cur + 1]) {
@@ -72,8 +70,6 @@ public class Sorter {
         } else if (this.size > 0 && score >= this.scores[0]) {
             pos = 0;
         } else if (this.size > 0 && this.size < this.limits && score < this.scores[this.size - 1]) {
-            pos = this.size;
-        } else if (this.size > 0 && score < this.scores[this.size - 1]) {
             pos = this.size;
         } else {
             for (int cur = 0; cur < this.size - 1; cur++) {
