@@ -14,15 +14,17 @@ import com.guokr.simbase.events.VectorSetListener;
 
 public class DenseVectorSet implements VectorSet {
 
-    private String                  key;
+    public static final String      TYPE    = "dense";
 
-    private TFloatList              probs   = new TFloatArrayList();
-    private TIntIntMap              indexer = new TIntIntHashMap();
+    String                          key;
 
-    private float                   accumuFactor;
-    private int                     sparseFactor;
+    TFloatList                      probs   = new TFloatArrayList();
+    TIntIntMap                      indexer = new TIntIntHashMap();
 
-    private Basis                   base;
+    float                           accumuFactor;
+    int                             sparseFactor;
+
+    Basis                           base;
 
     private boolean                 listening;
     private List<VectorSetListener> listeners;
@@ -38,6 +40,11 @@ public class DenseVectorSet implements VectorSet {
         this.sparseFactor = sparseFactor;
         this.listening = true;
         this.listeners = new ArrayList<VectorSetListener>();
+    }
+
+    @Override
+    public String type() {
+        return TYPE;
     }
 
     @Override

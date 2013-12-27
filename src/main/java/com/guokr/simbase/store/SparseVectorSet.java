@@ -17,15 +17,17 @@ import com.guokr.simbase.events.VectorSetListener;
 
 public class SparseVectorSet implements VectorSet {
 
-    private String                  key;
+    public static final String TYPE = "sparse";
 
-    private TFloatList              probs   = new TFloatArrayList();
-    private TIntIntMap              indexer = new TIntIntHashMap();
+    String                          key;
 
-    private float                   accumuFactor;
-    private int                     sparseFactor;
+    TFloatList                      probs   = new TFloatArrayList();
+    TIntIntMap                      indexer = new TIntIntHashMap();
 
-    private Basis                   base;
+    float                           accumuFactor;
+    int                             sparseFactor;
+
+    Basis                           base;
 
     private boolean                 listening;
     private List<VectorSetListener> listeners;
@@ -56,6 +58,11 @@ public class SparseVectorSet implements VectorSet {
             }
         }
 
+    }
+
+    @Override
+    public String type() {
+        return TYPE;
     }
 
     @Override

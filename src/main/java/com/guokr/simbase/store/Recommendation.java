@@ -21,10 +21,11 @@ public class Recommendation implements VectorSetListener {
     public VectorSet                     target;
     public SimScore                      scoring;
 
-    private int                          limit;
+    int                                  limit;
 
-    private TIntObjectMap<Sorter>        sorters;
-    private TIntObjectHashMap<TIntList>  reverseIndexer = new TIntObjectHashMap<TIntList>();
+    TIntObjectMap<Sorter>                sorters;
+    TIntObjectHashMap<TIntList>          reverseIndexer = new TIntObjectHashMap<TIntList>();
+
     private List<RecommendationListener> listeners;
 
     public Recommendation(VectorSet source, VectorSet target) {

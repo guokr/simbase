@@ -1,119 +1,63 @@
 package com.guokr.simbase.engine;
 
-import static org.junit.Assert.assertEquals;
-
+import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.io.IOException;
-import java.util.HashMap;
 import java.util.Map;
 
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.yaml.snakeyaml.Yaml;
 
+import com.guokr.simbase.SimConfig;
+import com.guokr.simbase.TestableCallback;
 
 public class SimEngineTests {
+    public static SimEngineImpl engine;
 
-//    private int[] getDocids(String[] set) {
-//        int[] docids = new int[set.length / 2];
-//        int i = 0, j = 0;
-//        while (i < set.length) {
-//            docids[j++] = Integer.parseInt(set[i]);
-//            i = i + 2;
-//        }
-//        return docids;
-//    }
-//
-//    private void delay(int second) {
-//
-//        try {
-//            Thread.currentThread();
-//            Thread.sleep(second * 1000);
-//        } catch (InterruptedException e) {
-//        }
-//    }
-//
-//    private void printSimBase(SimMain simbase, String key) {
-//        int count = 0;
-//        while (count < 24) {
-//            int[] docids = getDocids(simbase.retrieve(key, count));
-//            if (docids.length != 0) {
-//                for (int docid : docids) {
-//                    System.out.print(docid + ",");
-//                }
-//                System.out.println();
-//            } else {
-//                System.out.println("empty");
-//            }
-//            count++;
-//        }
-//        System.out.println();
-//    }
-//
-//    private SimMain initSimBase(String key) {
-//        Map<String, Object> context = new HashMap<String, Object>();
-//        try {
-//            Yaml yaml = new Yaml();
-//            @SuppressWarnings("unchecked")
-//            Map<String, Object> config = (Map<String, Object>) yaml.load(new FileReader("config/server.yaml"));
-//            context = new HashMap<String, Object>(config);
-//        } catch (IOException e) {
-//        }
-//
-//        SimMain simbase = new SimMain(context);
-//        simbase.add(key, 0, new float[] { 0.18257418583505536f, 0.3651483716701107f, 0.5477225575051661f, 0.7302967433402214f });
-//        simbase.add(key, 1, new float[] { 0.18257418583505536f, 0.3651483716701107f, 0.7302967433402214f, 0.5477225575051661f });
-//        simbase.add(key, 2, new float[] { 0.18257418583505536f, 0.5477225575051661f, 0.3651483716701107f, 0.7302967433402214f });
-//        simbase.add(key, 3, new float[] { 0.18257418583505536f, 0.5477225575051661f, 0.7302967433402214f, 0.3651483716701107f });
-//        simbase.add(key, 4, new float[] { 0.18257418583505536f, 0.7302967433402214f, 0.3651483716701107f, 0.5477225575051661f });
-//        simbase.add(key, 5, new float[] { 0.18257418583505536f, 0.7302967433402214f, 0.5477225575051661f, 0.3651483716701107f });
-//        simbase.add(key, 6, new float[] { 0.3651483716701107f, 0.18257418583505536f, 0.5477225575051661f, 0.7302967433402214f });
-//        simbase.add(key, 7, new float[] { 0.3651483716701107f, 0.18257418583505536f, 0.7302967433402214f, 0.5477225575051661f });
-//        simbase.add(key, 8, new float[] { 0.3651483716701107f, 0.5477225575051661f, 0.18257418583505536f, 0.7302967433402214f });
-//        simbase.add(key, 9, new float[] { 0.3651483716701107f, 0.5477225575051661f, 0.7302967433402214f, 0.18257418583505536f });
-//        simbase.add(key, 10, new float[] { 0.3651483716701107f, 0.7302967433402214f, 0.18257418583505536f, 0.5477225575051661f });
-//        simbase.add(key, 11, new float[] { 0.3651483716701107f, 0.7302967433402214f, 0.5477225575051661f, 0.18257418583505536f });
-//        simbase.add(key, 12, new float[] { 0.5477225575051661f, 0.18257418583505536f, 0.3651483716701107f, 0.7302967433402214f });
-//        simbase.add(key, 13, new float[] { 0.5477225575051661f, 0.18257418583505536f, 0.7302967433402214f, 0.3651483716701107f });
-//        simbase.add(key, 14, new float[] { 0.5477225575051661f, 0.3651483716701107f, 0.18257418583505536f, 0.7302967433402214f });
-//        simbase.add(key, 15, new float[] { 0.5477225575051661f, 0.3651483716701107f, 0.7302967433402214f, 0.18257418583505536f });
-//        simbase.add(key, 16, new float[] { 0.5477225575051661f, 0.7302967433402214f, 0.18257418583505536f, 0.3651483716701107f });
-//        simbase.add(key, 17, new float[] { 0.5477225575051661f, 0.7302967433402214f, 0.3651483716701107f, 0.18257418583505536f });
-//        simbase.add(key, 18, new float[] { 0.7302967433402214f, 0.18257418583505536f, 0.3651483716701107f, 0.5477225575051661f });
-//        simbase.add(key, 19, new float[] { 0.7302967433402214f, 0.18257418583505536f, 0.5477225575051661f, 0.3651483716701107f });
-//        simbase.add(key, 20, new float[] { 0.7302967433402214f, 0.3651483716701107f, 0.18257418583505536f, 0.5477225575051661f });
-//        simbase.add(key, 21, new float[] { 0.7302967433402214f, 0.3651483716701107f, 0.5477225575051661f, 0.18257418583505536f });
-//        simbase.add(key, 22, new float[] { 0.7302967433402214f, 0.5477225575051661f, 0.18257418583505536f, 0.3651483716701107f });
-//        simbase.add(key, 23, new float[] { 0.7302967433402214f, 0.5477225575051661f, 0.3651483716701107f, 0.18257418583505536f });
-//        return simbase;
-//
-//    }
-//
-//    @Test
-//    public void test_del_clean() {
-//        String key = "test2";
-//        SimMain simbase = initSimBase("test2");
-//        delay(1);// 等待加载完毕
-//        printSimBase(simbase, key);
-//        simbase.delete(key, 1);
-//        // 删除之后，清除之前
-//        // simbase.add(key, 7,
-//        // new float[] { 0.3651483716701107f, 0.18257418583505536f,
-//        // 0.7302967433402214f, 0.5477225575051661f });
-//        delay(1);
-//        assertEquals(0, simbase.retrieve(key, 1).length);
-//        simbase.clear();
-//        delay(1);
-//        assertEquals(0, simbase.retrieve(key, 1).length);
-//        printSimBase(simbase, key);
-//        simbase.add(key, 7, new float[] { 0.3651483716701107f, 0.18257418583505536f, 0.7302967433402214f, 0.5477225575051661f });
-//        delay(1);
-//        assertEquals(0, simbase.retrieve(key, 1).length);
-//        printSimBase(simbase, key);
-//        simbase.add(key, 1, new float[] { 0.18257418583505536f, 0.3651483716701107f, 0.7302967433402214f, 0.5477225575051661f });
-//        delay(1);
-//        printSimBase(simbase, key);
-//        assertEquals(40, simbase.retrieve(key, 1).length);
-//
-//    }
+    @SuppressWarnings("unchecked")
+    @BeforeClass
+    public static void testSetup() {
+        SimConfig config = null;
+        try {
+            Yaml yaml = new Yaml();
+            config = new SimConfig((Map<String, Object>) yaml.load(new FileReader("config/simbase.yaml")));
+        } catch (FileNotFoundException e) {
+        }
+        engine = new SimEngineImpl(config.getSub("engine"));
+        String[] components = new String[3];
+        for (int i = 0; i < components.length; i++) {
+            components[i] = "B" + String.valueOf(i);
+        }
+        try {
+            engine.bmk(TestableCallback.noop(), "base", components);
+            Thread.sleep(100);
+            engine.vmk(TestableCallback.noop(), "base", "article");
+            Thread.sleep(100);
+            engine.rmk(TestableCallback.noop(), "article", "article", "cosinesq");
+            Thread.sleep(100);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
 
+    @Test
+    public void test3d() {
+        engine.bget(TestableCallback.noop(), "base");
+        engine.vadd(TestableCallback.noop(), "article", 2, new float[] { 0.9f, 0.1f, 0f });
+        engine.vadd(TestableCallback.noop(), "article", 3, new float[] { 0.9f, 0f, 0.1f });
+        engine.vadd(TestableCallback.noop(), "article", 5, new float[] { 0.1f, 0.9f, 0f });
+        engine.vadd(TestableCallback.noop(), "article", 7, new float[] { 0.1f, 0f, 0.9f });
+        engine.vadd(TestableCallback.noop(), "article", 11, new float[] { 0f, 0.9f, 0.1f });
+        engine.vadd(TestableCallback.noop(), "article", 13, new float[] { 0f, 0.1f, 0.9f });
+
+        TestableCallback test = new TestableCallback() {
+            @Override
+            public void excepted() {
+                isIntegerList(new int[] { 2, 3, 4, 7, 11 });
+            }
+        };
+        engine.rrec(test, "article", 13, "article");
+        test.waitForFinish();
+        test.validate();
+    }
 }

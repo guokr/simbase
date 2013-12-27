@@ -4,6 +4,8 @@ import com.guokr.simbase.events.VectorSetListener;
 
 public interface VectorSet {
 
+    public String type();
+
     public String key();
 
     public int[] ids();

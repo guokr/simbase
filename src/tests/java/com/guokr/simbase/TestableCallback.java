@@ -6,71 +6,68 @@ import java.nio.ByteBuffer;
 
 public abstract class TestableCallback extends SimCallback {
 
-    public abstract void validator();
+    protected ByteBuffer excepted;
+
+    public abstract void excepted();
 
     public static TestableCallback noop() {
         return new TestableCallback() {
             @Override
-            public void validator() {
+            public void excepted() {
             }
         };
     }
 
     @Override
     public void response() {
-        validator();
+        excepted();
     }
 
     public void isOk() {
-        ByteBuffer excepted = ByteBuffer.allocate(5);
+        excepted = ByteBuffer.allocate(5);
         excepted.put(SimUtils.PLUS);
         excepted.put(SimUtils.OK);
         excepted.put(SimUtils.CRLF);
-        assertEquals(buffer.compact().toString(), excepted.toString());
     }
 
     public void isOk(String msg) {
         byte[] bytes = SimUtils.bytes(msg);
-        ByteBuffer excepted = ByteBuffer.allocate(bytes.length + 3);
+        excepted = ByteBuffer.allocate(bytes.length + 3);
         excepted.put(SimUtils.PLUS);
         excepted.put(bytes);
         excepted.put(SimUtils.CRLF);
-        assertEquals(buffer.compact().toString(), excepted.toString());
     }
 
     public void isError(String msg) {
         byte[] bytes = SimUtils.bytes(msg);
-        ByteBuffer excepted = ByteBuffer.allocate(bytes.length + 3);
+        excepted = ByteBuffer.allocate(bytes.length + 3);
         excepted.put(SimUtils.MINUS);
         excepted.put(bytes);
         excepted.put(SimUtils.CRLF);
-        assertEquals(buffer.compact().toString(), excepted.toString());
     }
 
     public void isStatus(int code) {
         byte[] bytes = SimUtils.bytes(code);
-        ByteBuffer excepted = ByteBuffer.allocate(bytes.length + 3);
+        excepted = ByteBuffer.allocate(bytes.length + 3);
         excepted.put(SimUtils.COLON);
         excepted.put(bytes);
         excepted.put(SimUtils.CRLF);
-        assertEquals(buffer.compact().toString(), excepted.toString());
     }
 
     public void isIntegerValue(int val) {
         byte[] bytes = SimUtils.bytes(val);
         byte[] size = SimUtils.size(bytes);
-        ByteBuffer excepted = ByteBuffer.allocate(bytes.length + size.length + 5);
+        excepted = ByteBuffer.allocate(bytes.length + size.length + 5);
         excepted.put(SimUtils.DOLLAR);
         excepted.put(size);
         excepted.put(SimUtils.CRLF);
         excepted.put(bytes);
         excepted.put(SimUtils.CRLF);
-        assertEquals(buffer.compact().toString(), excepted.toString());
     }
 
     public void isIntegerList(int[] list) {
         byte[] size = SimUtils.size(list.length);
-        ByteBuffer excepted = ByteBuffer.allocate(1024 * list.length + 1024);
+        excepted = ByteBuffer.allocate(1024 * list.length + 1024);
         excepted.put(SimUtils.STAR);
         excepted.put(size);
         excepted.put(SimUtils.CRLF);
@@ -83,39 +80,22 @@ public abstract class TestableCallback extends SimCallback {
             excepted.put(bytes);
             excepted.put(SimUtils.CRLF);
         }
-
-        excepted.flip();
-        byte[] dstExp = new byte[excepted.limit()];
-        excepted.get(dstExp);
-        String a = new String(dstExp);
-        System.out.println(a);
-        excepted.flip();
-
-        buffer.flip();
-        byte[] dstBuf = new byte[buffer.limit()];
-        buffer.get(dstBuf);
-        String b = new String(dstBuf);
-        System.out.println(b);
-        buffer.flip();
-
-        assertEquals(a, b);
     }
 
     public void isFloatValue(float val) {
         byte[] bytes = SimUtils.bytes(val);
         byte[] size = SimUtils.size(bytes);
-        ByteBuffer excepted = ByteBuffer.allocate(bytes.length + size.length + 5);
+        excepted = ByteBuffer.allocate(bytes.length + size.length + 5);
         excepted.put(SimUtils.DOLLAR);
         excepted.put(size);
         excepted.put(SimUtils.CRLF);
         excepted.put(bytes);
         excepted.put(SimUtils.CRLF);
-        assertEquals(buffer.compact().toString(), excepted.toString());
     }
 
     public void isFloatList(float[] list) {
         byte[] size = SimUtils.size(list.length);
-        ByteBuffer excepted = ByteBuffer.allocate(1024 * list.length + 1024);
+        excepted = ByteBuffer.allocate(1024 * list.length + 1024);
         excepted.put(SimUtils.STAR);
         excepted.put(size);
         excepted.put(SimUtils.CRLF);
@@ -128,24 +108,22 @@ public abstract class TestableCallback extends SimCallback {
             excepted.put(bytes);
             excepted.put(SimUtils.CRLF);
         }
-        assertEquals(buffer.compact().toString(), excepted.toString());
     }
 
     public void isStringValue(String val) {
         byte[] bytes = SimUtils.bytes(val);
         byte[] size = SimUtils.size(bytes);
-        ByteBuffer excepted = ByteBuffer.allocate(bytes.length + size.length + 5);
+        excepted = ByteBuffer.allocate(bytes.length + size.length + 5);
         excepted.put(SimUtils.DOLLAR);
         excepted.put(size);
         excepted.put(SimUtils.CRLF);
         excepted.put(bytes);
         excepted.put(SimUtils.CRLF);
-        assertEquals(buffer.compact().toString(), excepted.toString());
     }
 
     public void isStringList(String[] list) {
         byte[] size = SimUtils.size(list.length);
-        ByteBuffer excepted = ByteBuffer.allocate(1024 * list.length + 1024);
+        excepted = ByteBuffer.allocate(1024 * list.length + 1024);
         excepted.put(SimUtils.STAR);
         excepted.put(size);
         excepted.put(SimUtils.CRLF);
@@ -158,6 +136,33 @@ public abstract class TestableCallback extends SimCallback {
             excepted.put(bytes);
             excepted.put(SimUtils.CRLF);
         }
-        assertEquals(buffer.compact().toString(), excepted.toString());
     }
+
+    public void waitForFinish() {
+        try {
+            Thread.sleep(100);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void validate() {
+        excepted.flip();
+        byte[] dstExp = new byte[excepted.limit()];
+        excepted.get(dstExp);
+        String exp = new String(dstExp);
+        System.out.println(exp);
+        excepted.flip();
+
+        buffer.flip();
+        byte[] dstBuf = new byte[buffer.limit()];
+        buffer.get(dstBuf);
+        String fact = new String(dstBuf);
+        System.out.println(fact);
+        buffer.flip();
+
+        assertEquals(exp, fact);
+    }
+
+    
 }

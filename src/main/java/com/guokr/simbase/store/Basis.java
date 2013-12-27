@@ -12,13 +12,13 @@ import com.guokr.simbase.errors.SimEngineException;
 import com.guokr.simbase.events.BasisListener;
 
 public class Basis {
-    private String[]             base;
-    private List<String>         schema;
+
+    List<String>                 schema;
+
     private Map<String, Integer> compIndex;
     private List<BasisListener>  listeners;
 
     public Basis() {
-        this.base = new String[0];
         this.schema = new ArrayList<String>();
         this.compIndex = new HashMap<String, Integer>();
         this.listeners = new ArrayList<BasisListener>();
@@ -35,7 +35,6 @@ public class Basis {
                 compIndex.put(comp, index++);
             }
         }
-        this.base = comps.clone();
         this.schema = schema;
         this.compIndex = compIndex;
         this.listeners = new ArrayList<BasisListener>();
@@ -55,7 +54,7 @@ public class Basis {
     }
 
     public String[] get() {
-        return this.base;
+        return this.schema.toArray(new String[this.schema.size()]);
     }
 
     public int pos(String comp) {
@@ -63,23 +62,18 @@ public class Basis {
     }
 
     public int size() {
-        return this.base.length;
+        return this.schema.size();
     }
 
     public void revise(String[] base) {
+        String[] old = get();
+
         for (String dim : base) {
             if (!this.compIndex.containsKey(dim)) {
                 this.schema.add(dim);
                 this.compIndex.put(dim, this.schema.size());
             }
         }
-        String[] old = this.base;
-        String[] newbase = new String[this.schema.size()];
-        int pos = 0;
-        for (String dim : this.schema) {
-            newbase[pos++] = dim;
-        }
-        this.base = newbase;
 
         for (BasisListener l : listeners) {
             l.onBasisRevised(this, old, base);

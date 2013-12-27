@@ -33,7 +33,9 @@ public class JensenShannonDivergence implements SimScore {
 
     private static int iinfo(int[] freq) {
         float info = 0f;
-        for (float p : freq) {
+        int len = freq.length;
+        for (int i = 0; i < len; i += 2) {
+            int p = freq[i + 1];
             if (p > 0f) {
                 info += p * (float) (Math.log(p) / ratio);
             }

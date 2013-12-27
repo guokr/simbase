@@ -3,8 +3,6 @@ package com.guokr.simbase.engine;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.esotericsoftware.kryo.Kryo;
-import com.esotericsoftware.kryo.KryoSerializable;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
 import com.guokr.simbase.SimContext;
@@ -17,6 +15,7 @@ import com.guokr.simbase.score.JensenShannonDivergence;
 import com.guokr.simbase.store.Basis;
 import com.guokr.simbase.store.DenseVectorSet;
 import com.guokr.simbase.store.Recommendation;
+import com.guokr.simbase.store.SerializerHelper;
 import com.guokr.simbase.store.SparseVectorSet;
 import com.guokr.simbase.store.VectorSet;
 
@@ -24,8 +23,10 @@ public class SimBasis {
 
     private SimContext                  context;
     private Basis                       base;
-    private Map<String, VectorSet>      vectorSets      = new HashMap<String, VectorSet>();
-    private Map<String, Recommendation> recommendations = new HashMap<String, Recommendation>();
+    private Map<String, VectorSet>      vectorSets       = new HashMap<String, VectorSet>();
+    private Map<String, Recommendation> recommendations  = new HashMap<String, Recommendation>();
+
+    private SerializerHelper            serializerHelper = new SerializerHelper();
 
     public SimBasis(SimContext context, Basis base) {
         this.context = context;
@@ -34,6 +35,23 @@ public class SimBasis {
 
     private String rkey(String vkeySource, String vkeyTarget) {
         return new StringBuilder().append(vkeySource).append("_").append(vkeyTarget).toString();
+    }
+
+    public void bsave(String path) {
+        Output output = new Output();
+        serializerHelper.writeB(output, this.base);
+        serializerHelper.writeVectorSets(output, this.vectorSets);
+        serializerHelper.writeRecommendations(output, this.recommendations);
+    }
+
+    public void bload(String path) {
+        Input input = new Input();
+        Basis tmpBase = serializerHelper.readB(input);
+        Map<String, VectorSet> tmpVecSets = serializerHelper.readVectorSets(tmpBase);
+        Map<String, Recommendation> tmpRecomnd = serializerHelper.readRecommendations(tmpVecSets);
+        this.base = tmpBase;
+        this.vectorSets = tmpVecSets;
+        this.recommendations = tmpRecomnd;
     }
 
     public String[] bget() {
@@ -50,9 +68,9 @@ public class SimBasis {
         float accumuFactor = subcontext.getFloat("accumuFactor");
         int sparseFactor = subcontext.getInt("sparseFactor");
 
-        if (type.equals("denseVectorSet")) {
+        if (type.equals(DenseVectorSet.TYPE)) {
             this.vectorSets.put(vkey, new DenseVectorSet(vkey, this.base, accumuFactor, sparseFactor));
-        } else if (type.equals("sparseVectorSet")) {
+        } else if (type.equals(SparseVectorSet.TYPE)) {
             this.vectorSets.put(vkey, new SparseVectorSet(vkey, this.base, accumuFactor, sparseFactor));
         } else {
             throw new IllegalArgumentException("Wrong type of vector set in config!");
