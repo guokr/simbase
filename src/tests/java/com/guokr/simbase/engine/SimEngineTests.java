@@ -43,17 +43,27 @@ public class SimEngineTests {
     @Test
     public void test3d() {
         engine.bget(TestableCallback.noop(), "base");
-        engine.vadd(TestableCallback.noop(), "article", 2, new float[] { 0.9f, 0.1f, 0f });
-        engine.vadd(TestableCallback.noop(), "article", 3, new float[] { 0.9f, 0f, 0.1f });
-        engine.vadd(TestableCallback.noop(), "article", 5, new float[] { 0.1f, 0.9f, 0f });
-        engine.vadd(TestableCallback.noop(), "article", 7, new float[] { 0.1f, 0f, 0.9f });
-        engine.vadd(TestableCallback.noop(), "article", 11, new float[] { 0f, 0.9f, 0.1f });
-        engine.vadd(TestableCallback.noop(), "article", 13, new float[] { 0f, 0.1f, 0.9f });
+        try {
+            engine.vadd(TestableCallback.noop(), "article", 2, new float[] { 0.9f, 0.1f, 0f });
+            Thread.sleep(100);
+            engine.vadd(TestableCallback.noop(), "article", 3, new float[] { 0.9f, 0f, 0.1f });
+            Thread.sleep(100);
+            engine.vadd(TestableCallback.noop(), "article", 5, new float[] { 0.1f, 0.9f, 0f });
+            Thread.sleep(100);
+            engine.vadd(TestableCallback.noop(), "article", 7, new float[] { 0.1f, 0f, 0.9f });
+            Thread.sleep(100);
+            engine.vadd(TestableCallback.noop(), "article", 11, new float[] { 0f, 0.9f, 0.1f });
+            Thread.sleep(100);
+            engine.vadd(TestableCallback.noop(), "article", 13, new float[] { 0f, 0.1f, 0.9f });
+            Thread.sleep(100);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
 
         TestableCallback test = new TestableCallback() {
             @Override
             public void excepted() {
-                isIntegerList(new int[] { 2, 3, 4, 7, 11 });
+                isIntegerList(new int[] { 7, 11, 5, 3, 2 });
             }
         };
         engine.rrec(test, "article", 13, "article");
