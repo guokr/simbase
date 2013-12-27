@@ -1,5 +1,6 @@
 package com.guokr.simbase;
 
+import static org.junit.Assert.*;
 import java.nio.ByteBuffer;
 
 public abstract class TestableCallback extends SimCallback {
@@ -15,6 +16,17 @@ public abstract class TestableCallback extends SimCallback {
             }
         };
     }
+ public static TestableCallback print(){
+        
+        return new TestableCallback(){
+            @Override
+            public void validator(){
+                byte[] dst = new byte[buffer.length];
+                buffer.get(dst);
+                System.out.println(dst);
+            }
+        };
+    }
     @Override
     public void response() {
         validator();
@@ -27,13 +39,13 @@ public abstract class TestableCallback extends SimCallback {
         }
     }
 
-    public void assertbytes(byte[] expect) {
+    public void assertBytes(byte[] expect) {
         byte[] dst = new byte[expect.length];
         buffer.get(dst);
-        assertArrayEquals(dst,expect);
+        assertEquals(dst,expect);
     }
 
-    public void assertbytes(byte expect) {
+    public void assertByte(byte expect) {
         assert (buffer.get() == expect);
     }
 
@@ -42,6 +54,7 @@ public abstract class TestableCallback extends SimCallback {
         expect.put(SimUtils.PLUS);
         expect.put(SimUtils.OK);
         expect.put(SimUtils.CRLF);
-        assertbytes(expect.array());
+        assertBytes(expect.array());
     }
+    
 }
