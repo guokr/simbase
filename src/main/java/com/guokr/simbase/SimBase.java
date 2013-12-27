@@ -9,17 +9,21 @@ import org.yaml.snakeyaml.Yaml;
 
 import com.guokr.simbase.command.BGet;
 import com.guokr.simbase.command.BList;
+import com.guokr.simbase.command.BLoad;
 import com.guokr.simbase.command.BMk;
 import com.guokr.simbase.command.BRev;
+import com.guokr.simbase.command.BSave;
 import com.guokr.simbase.command.IAcc;
 import com.guokr.simbase.command.IAdd;
 import com.guokr.simbase.command.IGet;
 import com.guokr.simbase.command.ISet;
+import com.guokr.simbase.command.Load;
 import com.guokr.simbase.command.Ping;
 import com.guokr.simbase.command.RGet;
 import com.guokr.simbase.command.RList;
 import com.guokr.simbase.command.RMk;
 import com.guokr.simbase.command.RRec;
+import com.guokr.simbase.command.Save;
 import com.guokr.simbase.command.VAcc;
 import com.guokr.simbase.command.VAdd;
 import com.guokr.simbase.command.VGet;
@@ -41,7 +45,11 @@ public class SimBase {
         SimRegistry registry = new SimRegistry();
 
         registry.add("ping", new Ping());
+        registry.add("save", new Save());
+        registry.add("load", new Load());
 
+        registry.add("bsave", new BSave());
+        registry.add("bload", new BLoad());
         registry.add("blist", new BList());
         registry.add("bmk", new BMk());
         registry.add("bget", new BGet());

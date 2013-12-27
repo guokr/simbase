@@ -114,7 +114,8 @@ public class SimEngineImpl implements SimEngine {
     private final Map<String, SimBasis>        bases       = new HashMap<String, SimBasis>();
 
     private final Map<String, ExecutorService> writerExecs = new HashMap<String, ExecutorService>();
-    private final ThreadPoolExecutor           readerPool  = new ThreadPoolExecutor(53, 83, 37, TimeUnit.SECONDS, new ArrayBlockingQueue<Runnable>(100),
+    private final ThreadPoolExecutor           readerPool  = new ThreadPoolExecutor(53, 83, 37, TimeUnit.SECONDS,
+                                                                   new ArrayBlockingQueue<Runnable>(100),
                                                                    new ServerThreadFactory(), new RejectedHandler());
 
     private final Map<String, Integer>         counters    = new HashMap<String, Integer>();
@@ -147,7 +148,8 @@ public class SimEngineImpl implements SimEngine {
 
     private void validateKind(String op, String toCheck, Kind kindShouldBe) throws SimEngineException {
         if (!kindOf.containsKey(toCheck) || !kindShouldBe.equals(kindOf.get(toCheck))) {
-            throw new SimEngineException(String.format("Operation '%s' against a non-%s type '%s'", op, kindShouldBe, toCheck));
+            throw new SimEngineException(String.format("Operation '%s' against a non-%s type '%s'", op, kindShouldBe,
+                    toCheck));
         }
     }
 
@@ -175,7 +177,8 @@ public class SimEngineImpl implements SimEngine {
                 throw new SimEngineException(String.format("Sparse matrix index '%d' out of bound", toCheck[offset]));
             }
             if (toCheck[offset + 1] < 0) {
-                throw new SimEngineException(String.format("Sparse matrix value '%d' should be non-negative", toCheck[offset + 1]));
+                throw new SimEngineException(String.format("Sparse matrix value '%d' should be non-negative",
+                        toCheck[offset + 1]));
             }
         }
     }
@@ -239,28 +242,23 @@ public class SimEngineImpl implements SimEngine {
     }
 
     @Override
-    public void load(final SimCallback callback, final String bkey) {
-        mngmExec.execute(new SafeRunner("load", callback) {
-            @Override
-            public void invoke() {
-                // TODO
-                validateKeyFormat(bkey);
-                validateNotExistence(bkey);
-                callback.ok();
-            }
-        });
+    public void load(final SimCallback callback) {
+        for (String bkey : writerExecs.keySet()) {
+            bload(callback, bkey);
+        }
+
+        callback.ok();
+        callback.response();
     }
 
     @Override
-    public void save(final SimCallback callback, final String bkey) {
-        writerExecs.get(bkey).execute(new SafeRunner("save", callback) {
-            @Override
-            public void invoke() {
-                // TODO
-                validateKind("save", bkey, Kind.BASIS);
-                callback.ok();
-            }
-        });
+    public void save(final SimCallback callback) {
+        for (String bkey : writerExecs.keySet()) {
+            bsave(callback, bkey);
+        }
+
+        callback.ok();
+        callback.response();
     }
 
     @Override
@@ -313,6 +311,31 @@ public class SimEngineImpl implements SimEngine {
 
         callback.ok();
         callback.response();
+    }
+
+    @Override
+    public void bload(final SimCallback callback, final String bkey) {
+        mngmExec.execute(new SafeRunner("bload", callback) {
+            @Override
+            public void invoke() {
+                // TODO
+                validateKeyFormat(bkey);
+                validateNotExistence(bkey);
+                callback.ok();
+            }
+        });
+    }
+
+    @Override
+    public void bsave(final SimCallback callback, final String bkey) {
+        writerExecs.get(bkey).execute(new SafeRunner("bsave", callback) {
+            @Override
+            public void invoke() {
+                // TODO
+                validateKind("bsave", bkey, Kind.BASIS);
+                callback.ok();
+            }
+        });
     }
 
     @Override

@@ -20,7 +20,7 @@ import com.guokr.simbase.store.Recommendation;
 import com.guokr.simbase.store.SparseVectorSet;
 import com.guokr.simbase.store.VectorSet;
 
-public class SimBasis implements KryoSerializable {
+public class SimBasis {
 
     private SimContext                  context;
     private Basis                       base;
@@ -127,14 +127,6 @@ public class SimBasis implements KryoSerializable {
 
     public int[] rrec(String vkeySource, int vecid, String vkeyTarget) {
         return this.recommendations.get(rkey(vkeySource, vkeyTarget)).rec(vecid);
-    }
-
-    @Override
-    public void read(Kryo arg0, Input arg1) {
-    }
-
-    @Override
-    public void write(Kryo arg0, Output arg1) {
     }
 
     public void addListener(BasisListener listener) {

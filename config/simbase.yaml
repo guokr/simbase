@@ -7,8 +7,9 @@ defaults:
     ip: 0.0.0.0
     port: 7654
   engine:
-    cronInterval: 7200000
-    cloneThrottle: 1800000
+    savepath: data
+    saveinterval: 7200000
+    savethrottle: 1800000
     maxlimits: 20
     loadfactor: 0.75
     debug: true
