@@ -39,14 +39,28 @@ This graph shows
 * recommend article by article (recommend from article to article)
 * recommend article by user profile (recommend from user profile to article)
 
-Assumptions of current version
--------------------------------
+Limitations
+------------
 
-Although Simbase is a vector data store, it dose not accept vectors without any constrain.
+### Assumptions on vectors
+
+Although Simbase is a vector data store, it dose not accept vectors without any constrains.
 In fact, Simbase only accept a vector which its components are all greater than zero and less than one.
 
 Especially, if you adopt "jensenshannon" as your score function, you should assure your vector is a
-probability distribution, i.e. the sum of all components is one.  
+probability distribution, i.e. the sum of all components is one.
+
+### Performance consideration
+
+The write operation is handled in a single thread per basis, and comparison between any two vector is needed,
+so the write operation is scaled at O(n).
+
+We had a non-final performance test on a i7-cpu Macbook, it is easily to handle 150k 1k-dimensional vectors
+with write operations under 1 sec.
+
+Since the data are all in memory, the read operation is pretty fast.
+
+We still in the process to tune the performance.
 
 How to build and start
 -----------------------
