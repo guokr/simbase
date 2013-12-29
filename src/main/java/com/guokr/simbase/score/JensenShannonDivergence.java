@@ -12,11 +12,11 @@ import com.guokr.simbase.SimScore;
 
 public class JensenShannonDivergence implements SimScore {
 
-    private static TIntFloatMap              lbCaches     = new TIntFloatHashMap();
+    // private static TIntFloatMap lbCaches = new TIntFloatHashMap();
     private static Map<String, TIntFloatMap> denseCaches  = new HashMap<String, TIntFloatMap>();
     private static Map<String, TIntIntMap>   sparseCaches = new HashMap<String, TIntIntMap>();
 
-    private static final int                 scale        = 1024 * 8;
+    // private static final int scale = 1024 * 8;
     private static final float               ratio        = (float) Math.log(2);
 
     private String                           batchKey     = null;
@@ -25,14 +25,14 @@ public class JensenShannonDivergence implements SimScore {
 
     private static float lb(float val) {
         if (val > 0f) {
-            int scaledVal = Math.round(val * scale);
-            if (lbCaches.containsKey(scaledVal)) {
-                return lbCaches.get(scaledVal);
-            } else {
-                float result = ((float) Math.log(val)) / ratio;
-                lbCaches.put(scaledVal, result);
-                return result;
-            }
+            // int scaledVal = Math.round(val * scale);
+            // if (lbCaches.containsKey(scaledVal)) {
+            // return lbCaches.get(scaledVal);
+            // } else {
+            float result = ((float) Math.log(val)) / ratio;
+            // lbCaches.put(scaledVal, result);
+            return result;
+            // }
         } else {
             return 0f;
         }

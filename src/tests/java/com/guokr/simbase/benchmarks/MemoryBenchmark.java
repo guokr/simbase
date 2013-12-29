@@ -99,7 +99,7 @@ public class MemoryBenchmark {
             Thread.sleep(100);
             engine.vmk(TestableCallback.noop(), "base", "article");
             Thread.sleep(100);
-            engine.rmk(TestableCallback.noop(), "article", "article", "cosinesq");
+            engine.rmk(TestableCallback.noop(), "article", "article", "jensenshannon");
             Thread.sleep(100);
 
             VectorSetListener listener = new TestMemListener();
