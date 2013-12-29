@@ -12,156 +12,159 @@ import com.guokr.simbase.SimScore;
 
 public class JensenShannonDivergence implements SimScore {
 
-    private static Map<String, TIntFloatMap> denseCaches  = new HashMap<String, TIntFloatMap>();
-    private static Map<String, TIntIntMap>   sparseCaches = new HashMap<String, TIntIntMap>();
+	private static Map<String, TIntFloatMap> denseCaches = new HashMap<String, TIntFloatMap>();
+	private static Map<String, TIntIntMap> sparseCaches = new HashMap<String, TIntIntMap>();
 
-    private static final float               ratio        = (float) Math.log(2);
+	private static final float ratio = (float) Math.log(2);
 
-    private String                           batchKey     = null;
-    private int                              batchId      = -1;
-    private boolean                          consumed     = false;
+	private String batchKey = null;
+	private int batchId = -1;
+	private boolean consumed = false;
 
-    private static float finfo(float[] prob) {
-        float info = 0f;
-        for (float p : prob) {
-            if (p > 0f) {
-                info += p * (float) (Math.log(p) / ratio);
-            }
-        }
-        return info;
-    }
+	private static float lb(float val) {
+		if (val > 0f) {
+			return ((float) Math.log(val)) / ratio;
+		} else {
+			return 0f;
+		}
+	}
 
-    private static int iinfo(int[] freq) {
-        float info = 0f;
-        int len = freq.length;
-        for (int i = 0; i < len; i += 2) {
-            int p = freq[i + 1];
-            if (p > 0f) {
-                info += p * (float) (Math.log(p) / ratio);
-            }
-        }
-        return Math.round(info);
-    }
+	private static float finfo(float[] prob) {
+		float info = 0f;
+		for (float p : prob) {
+			info += p * lb(p);
+		}
+		return info;
+	}
 
-    @Override
-    public SortOrder order() {
-        return SortOrder.Asc;
-    }
+	private static int iinfo(int[] freq) {
+		float info = 0f;
+		int len = freq.length;
+		for (int i = 0; i < len; i += 2) {
+			int p = freq[i + 1];
+			info += p * lb(p);
+		}
+		return Math.round(info);
+	}
 
-    @Override
-    public void beginBatch(String vkey, int vecId) {
-        this.batchKey = vkey;
-        this.batchId = vecId;
-    }
+	@Override
+	public SortOrder order() {
+		return SortOrder.Asc;
+	}
 
-    @Override
-    public void endBatch() {
-        this.batchKey = null;
-        this.batchId = -1;
-        this.consumed = false;
-    }
+	@Override
+	public void beginBatch(String vkey, int vecId) {
+		this.batchKey = vkey;
+		this.batchId = vecId;
+	}
 
-    @Override
-    public float score(String srcVKey, int srcId, float[] source, String tgtVKey, int tgtId, float[] target) {
-        TIntFloatMap sourceCache = denseCaches.get(srcVKey);
-        if (sourceCache == null) {
-            sourceCache = new TIntFloatHashMap();
-            denseCaches.put(srcVKey, sourceCache);
-        }
+	@Override
+	public void endBatch() {
+		this.batchKey = null;
+		this.batchId = -1;
+		this.consumed = false;
+	}
 
-        TIntFloatMap targetCache = denseCaches.get(tgtVKey);
-        if (targetCache == null) {
-            targetCache = new TIntFloatHashMap();
-            denseCaches.put(tgtVKey, targetCache);
-        }
+	@Override
+	public float score(String srcVKey, int srcId, float[] source,
+			String tgtVKey, int tgtId, float[] target) {
+		TIntFloatMap sourceCache = denseCaches.get(srcVKey);
+		if (sourceCache == null) {
+			sourceCache = new TIntFloatHashMap();
+			denseCaches.put(srcVKey, sourceCache);
+		}
 
-        if (!consumed && batchKey.equals(srcVKey) && batchId == srcId) {
-            sourceCache.put(srcId, finfo(source));
-            consumed = true;
-        }
+		TIntFloatMap targetCache = denseCaches.get(tgtVKey);
+		if (targetCache == null) {
+			targetCache = new TIntFloatHashMap();
+			denseCaches.put(tgtVKey, targetCache);
+		}
 
-        if (!consumed && batchKey.equals(tgtVKey) && batchId == tgtId) {
-            targetCache.put(tgtId, finfo(target));
-            consumed = true;
-        }
+		if (!consumed && batchKey.equals(srcVKey) && batchId == srcId) {
+			sourceCache.put(srcId, finfo(source));
+			consumed = true;
+		}
 
-        if (!sourceCache.containsKey(srcId)) {
-            sourceCache.put(srcId, finfo(source));
-        }
+		if (!consumed && batchKey.equals(tgtVKey) && batchId == tgtId) {
+			targetCache.put(tgtId, finfo(target));
+			consumed = true;
+		}
 
-        if (!targetCache.containsKey(tgtId)) {
-            targetCache.put(tgtId, finfo(target));
-        }
+		if (!sourceCache.containsKey(srcId)) {
+			sourceCache.put(srcId, finfo(source));
+		}
 
-        float scoring = 0f;
-        int len = source.length;
-        for (int i = 0; i < len; i++) {
-            float p = source[i];
-            float q = target[i];
-            float m = (p + q) / 2;
-            if (m > 0f) {
-                scoring += (-m * Math.log(m) / ratio);
-            }
-        }
-        scoring += sourceCache.get(srcId) / 2f + targetCache.get(tgtId) / 2f;
+		if (!targetCache.containsKey(tgtId)) {
+			targetCache.put(tgtId, finfo(target));
+		}
 
-        return scoring;
-    }
+		float scoring = 0f;
+		int len = source.length;
+		for (int i = 0; i < len; i++) {
+			float p = source[i];
+			float q = target[i];
+			float m = (p + q) / 2;
+			scoring += (-m * lb(m));
+		}
+		scoring += sourceCache.get(srcId) / 2f + targetCache.get(tgtId) / 2f;
 
-    @Override
-    public float score(String srcVKey, int srcId, int[] source, String tgtVKey, int tgtId, int[] target) {
-        TIntIntMap sourceCache = sparseCaches.get(srcVKey);
-        if (sourceCache == null) {
-            sourceCache = new TIntIntHashMap();
-            sparseCaches.put(srcVKey, sourceCache);
-        }
+		return scoring;
+	}
 
-        TIntIntMap targetCache = sparseCaches.get(tgtVKey);
-        if (targetCache == null) {
-            targetCache = new TIntIntHashMap();
-            sparseCaches.put(tgtVKey, targetCache);
-        }
+	@Override
+	public float score(String srcVKey, int srcId, int[] source, String tgtVKey,
+			int tgtId, int[] target) {
+		TIntIntMap sourceCache = sparseCaches.get(srcVKey);
+		if (sourceCache == null) {
+			sourceCache = new TIntIntHashMap();
+			sparseCaches.put(srcVKey, sourceCache);
+		}
 
-        if (!consumed && batchKey.equals(srcVKey) && batchId == srcId) {
-            sourceCache.put(srcId, iinfo(source));
-            consumed = true;
-        }
+		TIntIntMap targetCache = sparseCaches.get(tgtVKey);
+		if (targetCache == null) {
+			targetCache = new TIntIntHashMap();
+			sparseCaches.put(tgtVKey, targetCache);
+		}
 
-        if (!consumed && batchKey.equals(tgtVKey) && batchId == tgtId) {
-            targetCache.put(tgtId, iinfo(target));
-            consumed = true;
-        }
+		if (!consumed && batchKey.equals(srcVKey) && batchId == srcId) {
+			sourceCache.put(srcId, iinfo(source));
+			consumed = true;
+		}
 
-        if (!sourceCache.containsKey(srcId)) {
-            sourceCache.put(srcId, iinfo(source));
-        }
+		if (!consumed && batchKey.equals(tgtVKey) && batchId == tgtId) {
+			targetCache.put(tgtId, iinfo(target));
+			consumed = true;
+		}
 
-        if (!targetCache.containsKey(tgtId)) {
-            targetCache.put(tgtId, iinfo(target));
-        }
+		if (!sourceCache.containsKey(srcId)) {
+			sourceCache.put(srcId, iinfo(source));
+		}
 
-        float scoring = 0f;
-        int len1 = source.length;
-        int len2 = target.length;
-        int idx1 = 0, idx2 = 0;
-        while (idx1 < len1 && idx2 < len2) {
-            if (source[idx1] == target[idx2]) {
-                float p = source[idx1 + 1];
-                float q = target[idx2 + 1];
-                float m = (p + q) / 2;
-                if (p > 0f && q > 0f) {
-                    scoring += (m * Math.log(m) / ratio + sourceCache.get(srcId) / 2f + targetCache.get(tgtId) / 2f);
-                }
-                idx1 += 2;
-                idx2 += 2;
-            } else if (source[idx1] < target[idx2]) {
-                idx1 += 2;
-            } else {
-                idx2 += 2;
-            }
-        }
+		if (!targetCache.containsKey(tgtId)) {
+			targetCache.put(tgtId, iinfo(target));
+		}
 
-        return scoring;
-    }
+		float scoring = 0f;
+		int len1 = source.length;
+		int len2 = target.length;
+		int idx1 = 0, idx2 = 0;
+		while (idx1 < len1 && idx2 < len2) {
+			if (source[idx1] == target[idx2]) {
+				float p = source[idx1 + 1];
+				float q = target[idx2 + 1];
+				float m = (p + q) / 2;
+				scoring += (-m * lb(m));
+				idx1 += 2;
+				idx2 += 2;
+			} else if (source[idx1] < target[idx2]) {
+				idx1 += 2;
+			} else {
+				idx2 += 2;
+			}
+		}
+		scoring += sourceCache.get(srcId) / 2f + targetCache.get(tgtId) / 2f;
+
+		return scoring;
+	}
 
 }
