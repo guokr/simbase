@@ -15,9 +15,9 @@ public class CosineSquareSimilarity implements SimScore {
     private static Map<String, TIntFloatMap> denseCaches  = new HashMap<String, TIntFloatMap>();
     private static Map<String, TIntIntMap>   sparseCaches = new HashMap<String, TIntIntMap>();
 
-    private String                    batchKey     = null;
-    private int                       batchId      = -1;
-    private boolean                   consumed     = false;
+    private String                           batchKey     = null;
+    private int                              batchId      = -1;
+    private boolean                          consumed     = false;
 
     private float flengthsq(float[] vector) {
         float result = 0f;

@@ -162,5 +162,4 @@ public abstract class TestableCallback extends SimCallback {
         assertEquals("assertEquals", exp, fact);
     }
 
-    
 }

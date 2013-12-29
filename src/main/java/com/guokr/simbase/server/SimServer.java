@@ -53,7 +53,7 @@ public class SimServer implements Runnable {
     }
 
     void accept(SelectionKey key) {
-        //SimUtils.printTrace("accept incoming request");
+        // SimUtils.printTrace("accept incoming request");
         ServerSocketChannel ch = (ServerSocketChannel) key.channel();
         SocketChannel s;
         try {
@@ -70,7 +70,7 @@ public class SimServer implements Runnable {
     }
 
     private void closeKey(final SelectionKey key, int status) {
-        //SimUtils.printTrace("close key");
+        // SimUtils.printTrace("close key");
         try {
             key.channel().close();
         } catch (Exception ignore) {
@@ -88,9 +88,9 @@ public class SimServer implements Runnable {
         try {
             do {
                 AsyncChannel channel = atta.channel;
-                //SimUtils.printTrace("getting requests");
+                // SimUtils.printTrace("getting requests");
                 RedisRequests requests = atta.decoder.decode(buffer, atta.requests);
-                //SimUtils.printTrace("getting requests done");
+                // SimUtils.printTrace("getting requests done");
                 if (requests.isFinished) {
                     channel.reset(requests);
                     requests.channel = channel;
@@ -99,7 +99,7 @@ public class SimServer implements Runnable {
                     atta.decoder.reset();
                     atta.requests = null;
                 } else {
-                    //SimUtils.printTrace("requests null");
+                    // SimUtils.printTrace("requests null");
                     atta.requests = requests;
                 }
             } while (buffer.hasRemaining()); // consume all
@@ -117,12 +117,12 @@ public class SimServer implements Runnable {
             int read = ch.read(buffer);
             if (read == -1) {
                 // remote entity shut the socket down cleanly.
-                //SimUtils.printTrace("remote shut down");
+                // SimUtils.printTrace("remote shut down");
                 closeKey(key, CLOSE_AWAY);
             } else if (read > 0) {
                 buffer.flip(); // flip for read
                 if (atta instanceof RedisAtta) {
-                    //SimUtils.printTrace("reading:" + read);
+                    // SimUtils.printTrace("reading:" + read);
                     decodeRedis((RedisAtta) atta, key, ch);
                 }
             }
@@ -132,7 +132,7 @@ public class SimServer implements Runnable {
     }
 
     private void doWrite(SelectionKey key) {
-        //SimUtils.printTrace("writing");
+        // SimUtils.printTrace("writing");
         ServerAtta atta = (ServerAtta) key.attachment();
         SocketChannel ch = (SocketChannel) key.channel();
         try {

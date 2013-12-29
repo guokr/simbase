@@ -4,7 +4,7 @@ public class RedisAtta extends ServerAtta {
 
     public final RedisDecoder decoder;
 
-    public RedisRequests requests;
+    public RedisRequests      requests;
 
     public RedisAtta() {
         decoder = new RedisDecoder();

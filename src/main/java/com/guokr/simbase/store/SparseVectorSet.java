@@ -17,7 +17,7 @@ import com.guokr.simbase.events.VectorSetListener;
 
 public class SparseVectorSet implements VectorSet {
 
-    public static final String TYPE = "sparse";
+    public static final String      TYPE    = "sparse";
 
     String                          key;
 

@@ -57,7 +57,8 @@ public class Recommendation implements VectorSetListener {
             while (iter.hasNext()) {
                 iter.advance();
                 int srcVecId = iter.key();
-                float score = scoring.score(source.key(), srcVecId, source.get(srcVecId), target.key(), tgtVecId, vector);
+                float score = scoring.score(source.key(), srcVecId, source.get(srcVecId), target.key(), tgtVecId,
+                        vector);
                 add(srcVecId, tgtVecId, score);
             }
             scoring.endBatch();
@@ -76,7 +77,8 @@ public class Recommendation implements VectorSetListener {
             while (iter.hasNext()) {
                 iter.advance();
                 int srcVecId = iter.key();
-                float score = scoring.score(source.key(), srcVecId, source._get(srcVecId), target.key(), tgtVecId, vector);
+                float score = scoring.score(source.key(), srcVecId, source._get(srcVecId), target.key(), tgtVecId,
+                        vector);
                 add(srcVecId, tgtVecId, score);
             }
             scoring.endBatch();
