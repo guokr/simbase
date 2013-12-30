@@ -1,5 +1,6 @@
 package com.guokr.simbase.store;
 
+import gnu.trove.iterator.TIntIntIterator;
 import gnu.trove.list.TFloatList;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TFloatArrayList;
@@ -216,17 +217,16 @@ public class DenseVectorSet implements VectorSet {
     @Override
     public void rescore(String key, int vecid, float[] vector, Recommendation rec) {
         rec.create(vecid);
-        int end = probs.size();
-        for (int offset = 0; offset < end; offset++) {
-            if (probs.get(offset) > 1) {
-                int tgtId = (int) (probs.get(offset) - 1);
-                float[] target = get(tgtId);
-                float score = rec.scoring.score(key, vecid, vector, this.key, tgtId, target);
-                if (!(this == rec.source && vecid == tgtId)) {
-                    rec.add(vecid, tgtId, score);
-                    if (this == rec.target) {
-                        rec.add(tgtId, vecid, score);
-                    }
+        TIntIntIterator iter = indexer.iterator();
+        while (iter.hasNext()) {
+            iter.advance();
+            int tgtId = iter.key();
+            float[] target = get(tgtId);
+            float score = rec.scoring.score(key, vecid, vector, this.key, tgtId, target);
+            if (!(this == rec.source && vecid == tgtId)) {
+                rec.add(vecid, tgtId, score);
+                if (this == rec.target) {
+                    rec.add(tgtId, vecid, score);
                 }
             }
         }
@@ -235,17 +235,16 @@ public class DenseVectorSet implements VectorSet {
     @Override
     public void rescore(String key, int vecid, int[] vector, Recommendation rec) {
         rec.create(vecid);
-        int end = probs.size();
-        for (int offset = 0; offset < end; offset++) {
-            if (probs.get(offset) > 1) {
-                int tgtId = (int) (probs.get(offset) - 1);
-                int[] target = _get(tgtId);
-                float score = rec.scoring.score(key, vecid, vector, this.key, tgtId, target);
-                if (!(this == rec.source && vecid == tgtId)) {
-                    rec.add(vecid, tgtId, score);
-                    if (this == rec.target) {
-                        rec.add(tgtId, vecid, score);
-                    }
+        TIntIntIterator iter = indexer.iterator();
+        while (iter.hasNext()) {
+            iter.advance();
+            int tgtId = iter.key();
+            int[] target = _get(tgtId);
+            float score = rec.scoring.score(key, vecid, vector, this.key, tgtId, target);
+            if (!(this == rec.source && vecid == tgtId)) {
+                rec.add(vecid, tgtId, score);
+                if (this == rec.target) {
+                    rec.add(tgtId, vecid, score);
                 }
             }
         }
