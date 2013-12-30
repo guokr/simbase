@@ -55,7 +55,7 @@ probability distribution, i.e. the sum of all components is one.
 The write operation is handled in a single thread per basis, and comparison between any two vector is needed,
 so the write operation is scaled at O(n).
 
-We had a non-final performance test on an i7-cpu Macbook, it is easily to handle 150k 1k-dimensional vectors
+We had a non-final performance test on an i7-cpu Macbook, it is easily to handle 100k 1k-dimensional vectors
 with write operations under 1 sec.
 
 Since the data are all in memory, the read operation is pretty fast.
