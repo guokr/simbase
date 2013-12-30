@@ -54,8 +54,7 @@ public class SimContext extends HashMap<String, Object> {
         } else if (defaults != null) {
             return defaults.getSub(type, type).getInt(keys);
         } else {
-            throw new SimContextException("no default int value found for keys" + Arrays.asList(keys) + " in type["
-                    + type + "]");
+            throw new SimContextException("no default int value found for keys" + Arrays.asList(keys) + " in type[" + type + "]");
         }
     }
 
@@ -84,8 +83,7 @@ public class SimContext extends HashMap<String, Object> {
             result = defaults.getSub(type, type).getIntArray(keys);
         }
         if (result == null) {
-            throw new SimContextException("no default int array found for keys" + Arrays.asList(keys) + " in type["
-                    + type + "]");
+            throw new SimContextException("no default int array found for keys" + Arrays.asList(keys) + " in type[" + type + "]");
         }
         return result;
     }
@@ -116,8 +114,7 @@ public class SimContext extends HashMap<String, Object> {
         } else if (defaults != null) {
             return defaults.getSub(type, type).getFloat(keys);
         } else {
-            throw new SimContextException("no default float value found for keys" + Arrays.asList(keys) + " in type["
-                    + type + "]");
+            throw new SimContextException("no default float value found for keys" + Arrays.asList(keys) + " in type[" + type + "]");
         }
     }
 
@@ -146,8 +143,7 @@ public class SimContext extends HashMap<String, Object> {
             result = defaults.getSub(type, type).getFloatArray(keys);
         }
         if (result == null) {
-            throw new SimContextException("no default float value found for keys" + Arrays.asList(keys) + " in type["
-                    + type + "]");
+            throw new SimContextException("no default float value found for keys" + Arrays.asList(keys) + " in type[" + type + "]");
         }
         return result;
     }
@@ -182,8 +178,7 @@ public class SimContext extends HashMap<String, Object> {
         } else if (defaults != null) {
             return defaults.getSub(type, type).getString(keys);
         } else {
-            throw new SimContextException("no default string value found for keys" + Arrays.asList(keys) + " in type["
-                    + type + "]");
+            throw new SimContextException("no default string value found for keys" + Arrays.asList(keys) + " in type[" + type + "]");
         }
     }
 
@@ -212,8 +207,7 @@ public class SimContext extends HashMap<String, Object> {
             result = defaults.getSub(type, type).getStringArray(keys);
         }
         if (result == null) {
-            throw new SimContextException("no default string value found for keys" + Arrays.asList(keys) + " in type["
-                    + type + "]");
+            throw new SimContextException("no default string value found for keys" + Arrays.asList(keys) + " in type[" + type + "]");
         }
         return result;
     }
