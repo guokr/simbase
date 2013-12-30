@@ -221,11 +221,11 @@ public class DenseVectorSet implements VectorSet {
             if (probs.get(offset) > 1) {
                 int tgtId = (int) (probs.get(offset) - 1);
                 float[] target = get(tgtId);
-                float cosinesq = rec.scoring.score(key, vecid, vector, this.key, tgtId, target);
+                float score = rec.scoring.score(key, vecid, vector, this.key, tgtId, target);
                 if (!(this == rec.source && vecid == tgtId)) {
-                    rec.add(vecid, tgtId, cosinesq);
+                    rec.add(vecid, tgtId, score);
                     if (this == rec.target) {
-                        rec.add(tgtId, vecid, cosinesq);
+                        rec.add(tgtId, vecid, score);
                     }
                 }
             }
@@ -240,11 +240,11 @@ public class DenseVectorSet implements VectorSet {
             if (probs.get(offset) > 1) {
                 int tgtId = (int) (probs.get(offset) - 1);
                 int[] target = _get(tgtId);
-                float cosinesq = rec.scoring.score(key, vecid, vector, this.key, tgtId, target);
+                float score = rec.scoring.score(key, vecid, vector, this.key, tgtId, target);
                 if (!(this == rec.source && vecid == tgtId)) {
-                    rec.add(vecid, tgtId, cosinesq);
+                    rec.add(vecid, tgtId, score);
                     if (this == rec.target) {
-                        rec.add(tgtId, vecid, cosinesq);
+                        rec.add(tgtId, vecid, score);
                     }
                 }
             }
