@@ -6,6 +6,8 @@ public interface SimScore {
         Asc, Desc
     }
 
+    public String name();
+
     public SortOrder order();
 
     public void beginBatch(String vkey, int vecId);

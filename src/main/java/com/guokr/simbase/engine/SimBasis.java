@@ -1,5 +1,7 @@
 package com.guokr.simbase.engine;
 
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -7,6 +9,7 @@ import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
 import com.guokr.simbase.SimContext;
 import com.guokr.simbase.SimScore;
+import com.guokr.simbase.errors.SimException;
 import com.guokr.simbase.events.BasisListener;
 import com.guokr.simbase.events.RecommendationListener;
 import com.guokr.simbase.events.VectorSetListener;
@@ -37,21 +40,40 @@ public class SimBasis {
         return new StringBuilder().append(vkeySource).append("_").append(vkeyTarget).toString();
     }
 
-    public void bsave(String path) {
-        Output output = new Output();
-        serializerHelper.writeB(output, this.base);
-        serializerHelper.writeVectorSets(output, this.vectorSets);
-        serializerHelper.writeRecommendations(output, this.recommendations);
+    public void bsave(String filepath) {
+        Output output = null;
+        try {
+            output = new Output(new FileOutputStream(filepath));
+            serializerHelper.writeB(output, this.base);
+            serializerHelper.writeVectorSets(output, this.vectorSets);
+            serializerHelper.writeRecommendations(output, this.recommendations);
+        } catch (Throwable e) {
+            throw new SimException(e);
+        } finally {
+            if (output != null) {
+                output.close();
+            }
+        }
     }
 
-    public void bload(String path) {
-        Input input = new Input();
-        Basis tmpBase = serializerHelper.readB(input);
-        Map<String, VectorSet> tmpVecSets = serializerHelper.readVectorSets(tmpBase);
-        Map<String, Recommendation> tmpRecomnd = serializerHelper.readRecommendations(tmpVecSets);
-        this.base = tmpBase;
-        this.vectorSets = tmpVecSets;
-        this.recommendations = tmpRecomnd;
+    public void bload(String filepath) {
+        Input input = null;
+        try {
+            input = new Input(new FileInputStream(filepath));
+            Basis base = serializerHelper.readB(input);
+            Map<String, VectorSet> vecSets = serializerHelper.readVectorSets(input, base);
+            Map<String, Recommendation> recs = serializerHelper.readRecommendations(input, vecSets);
+
+            this.base = base;
+            this.vectorSets = vecSets;
+            this.recommendations = recs;
+        } catch (Throwable e) {
+            throw new SimException(e);
+        } finally {
+            if (input != null) {
+                input.close();
+            }
+        }
     }
 
     public String[] bget() {

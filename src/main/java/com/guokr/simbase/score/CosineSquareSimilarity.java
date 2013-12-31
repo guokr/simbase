@@ -12,6 +12,7 @@ import com.guokr.simbase.SimScore;
 
 public class CosineSquareSimilarity implements SimScore {
 
+    private static String                    name         = "cosinesq";
     private static Map<String, TIntFloatMap> denseCaches  = new HashMap<String, TIntFloatMap>();
     private static Map<String, TIntIntMap>   sparseCaches = new HashMap<String, TIntIntMap>();
 
@@ -36,6 +37,11 @@ public class CosineSquareSimilarity implements SimScore {
             i += 2;
         }
         return result;
+    }
+
+    @Override
+    public String name() {
+        return name;
     }
 
     @Override

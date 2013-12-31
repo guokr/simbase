@@ -45,7 +45,7 @@ public class DenseVectorSet implements VectorSet {
 
     @Override
     public String type() {
-        return TYPE;
+        return "" + TYPE;
     }
 
     @Override

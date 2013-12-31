@@ -13,6 +13,7 @@ import com.guokr.simbase.SimScore;
 public class JensenShannonDivergence implements SimScore {
 
     // private static TIntFloatMap lbCaches = new TIntFloatHashMap();
+    private static final String              name         = "jensenshannon";
     private static Map<String, TIntFloatMap> denseCaches  = new HashMap<String, TIntFloatMap>();
     private static Map<String, TIntIntMap>   sparseCaches = new HashMap<String, TIntIntMap>();
 
@@ -54,6 +55,11 @@ public class JensenShannonDivergence implements SimScore {
             info += p * lb(p);
         }
         return Math.round(info);
+    }
+
+    @Override
+    public String name() {
+        return name;
     }
 
     @Override

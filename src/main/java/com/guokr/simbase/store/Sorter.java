@@ -4,14 +4,14 @@ import com.guokr.simbase.SimScore.SortOrder;
 
 public class Sorter {
 
-    private SortOrder order;
-    private int       limits    = 20;
+    SortOrder order;
+    int       limits    = 20;
 
-    private int       size      = 0;
-    private float     waterline = 0f;
+    int       size      = 0;
+    float     waterline = 0f;
 
-    private int[]     vecids;
-    private float[]   scores;
+    int[]     vecids;
+    float[]   scores;
 
     public Sorter(SortOrder order, int limits) {
         this.order = order;
