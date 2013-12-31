@@ -462,7 +462,7 @@ public class SimEngineImpl implements SimEngine {
         validateId(vecid);
         validateProbs(vector);
         final String bkey = basisOf.get(vkey);
-        writerExecs.get(bkey).execute(new AsyncSafeRunner("vget") {
+        writerExecs.get(bkey).execute(new AsyncSafeRunner("vadd") {
             @Override
             public void invoke() {
                 bases.get(bkey).vadd(vkey, vecid, vector);
