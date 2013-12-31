@@ -4,14 +4,14 @@ import com.guokr.simbase.SimScore.SortOrder;
 
 public class Sorter {
 
-    private SortOrder order;
-    private int       limits    = 20;
+    SortOrder order;
+    int       limits    = 20;
 
-    private int       size      = 0;
-    private float     waterline = 0f;
+    int       size      = 0;
+    float     waterline = 0f;
 
-    private int[]     vecids;
-    private float[]   scores;
+    int[]     vecids;
+    float[]   scores;
 
     public Sorter(SortOrder order, int limits) {
         this.order = order;
@@ -52,8 +52,6 @@ public class Sorter {
             pos = 0;
         } else if (this.size > 0 && this.size < this.limits && score > this.scores[this.size - 1]) {
             pos = this.size;
-        } else if (this.size > 0 && score > this.scores[this.size - 1]) {
-            pos = this.size;
         } else {
             for (int cur = 0; cur < this.size - 1; cur++) {
                 if (score > this.scores[cur] && score <= this.scores[cur + 1]) {
@@ -72,8 +70,6 @@ public class Sorter {
         } else if (this.size > 0 && score >= this.scores[0]) {
             pos = 0;
         } else if (this.size > 0 && this.size < this.limits && score < this.scores[this.size - 1]) {
-            pos = this.size;
-        } else if (this.size > 0 && score < this.scores[this.size - 1]) {
             pos = this.size;
         } else {
             for (int cur = 0; cur < this.size - 1; cur++) {

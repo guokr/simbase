@@ -8,7 +8,7 @@ public class Save extends SimCommand {
 
     @Override
     public String signature() {
-        return "s";
+        return "";
     }
 
     @Override

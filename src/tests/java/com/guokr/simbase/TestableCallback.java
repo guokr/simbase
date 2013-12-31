@@ -151,18 +151,15 @@ public abstract class TestableCallback extends SimCallback {
         byte[] dstExp = new byte[excepted.limit()];
         excepted.get(dstExp);
         String exp = new String(dstExp);
-        System.out.println(exp);
         excepted.flip();
 
         buffer.flip();
         byte[] dstBuf = new byte[buffer.limit()];
         buffer.get(dstBuf);
         String fact = new String(dstBuf);
-        System.out.println(fact);
         buffer.flip();
 
-        assertEquals(exp, fact);
+        assertEquals("assertEquals", exp, fact);
     }
 
-    
 }

@@ -74,6 +74,7 @@ public class SimBase {
         registry.add("rrec", new RRec());
 
         server = new SimServer(conf.getSub("server", "server"), new ServerHandler(32, "", 100, registry, engine));
+
     }
 
     public void run() throws IOException {

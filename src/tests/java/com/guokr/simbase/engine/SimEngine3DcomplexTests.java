@@ -33,7 +33,7 @@ public class SimEngine3DcomplexTests {
             Thread.sleep(100);
             engine.vmk(TestableCallback.noop(), "base", "article");
             Thread.sleep(100);
-            engine.rmk(TestableCallback.noop(), "article", "article", "cosinesq");
+            engine.rmk(TestableCallback.noop(), "article", "article", "jensenshannon");
             Thread.sleep(100);
         } catch (InterruptedException e) {
             e.printStackTrace();

@@ -122,7 +122,8 @@ public class RedisDecoder {
                 }
                 break;
             }
-            //System.out.println("current - state:" + state + ", nargs:" + nargs);
+            // System.out.println("current - state:" + state + ", nargs:" +
+            // nargs);
         }
 
         if (state == State.READ_ARGUMENT && nargs == 0) {
@@ -136,7 +137,8 @@ public class RedisDecoder {
             requests.nbytes = 0;
             requests.line = null;
             requests.lineReader = null;
-            //System.out.println("final - state:" + state + ", nargs:" + nargs);
+            // System.out.println("final - state:" + state + ", nargs:" +
+            // nargs);
         } else {
             requests.isFinished = false;
             requests.state = state;
@@ -144,7 +146,7 @@ public class RedisDecoder {
             requests.nbytes = nbytes;
             requests.line = line;
             requests.lineReader = lineReader;
-            //System.out.println("last - state:" + state + ", nargs:" + nargs);
+            // System.out.println("last - state:" + state + ", nargs:" + nargs);
         }
 
         return requests;

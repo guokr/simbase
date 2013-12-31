@@ -15,7 +15,7 @@
                    [org.slf4j/slf4j-api "1.7.5"]
                    [org.slf4j/slf4j-log4j12 "1.7.5"]
                    [log4j/log4j "1.2.17"]
-                   [com.esotericsoftware.kryo/kryo "2.21"]
+                   [com.esotericsoftware.kryo/kryo "2.22"]
                    [junit "4.0" :scope "test"]]
     :source-paths ["src/main/clojure"]
     :java-source-paths ["src/main/java"]

@@ -13,18 +13,21 @@ import com.guokr.simbase.events.BasisListener;
 
 public class Basis {
 
+    String                       key;
+
     List<String>                 schema;
 
     private Map<String, Integer> compIndex;
     private List<BasisListener>  listeners;
 
-    public Basis() {
+    public Basis(String key) {
+        this.key = key;
         this.schema = new ArrayList<String>();
         this.compIndex = new HashMap<String, Integer>();
         this.listeners = new ArrayList<BasisListener>();
     }
 
-    public Basis(String[] comps) {
+    public Basis(String key, String[] comps) {
         List<String> schema = new ArrayList<String>(Arrays.asList(comps));
         Map<String, Integer> compIndex = new HashMap<String, Integer>();
         int index = 0;
@@ -35,9 +38,14 @@ public class Basis {
                 compIndex.put(comp, index++);
             }
         }
+        this.key = key;
         this.schema = schema;
         this.compIndex = compIndex;
         this.listeners = new ArrayList<BasisListener>();
+    }
+
+    public String key() {
+        return key;
     }
 
     public String[] all() {

@@ -12,12 +12,13 @@ import com.guokr.simbase.SimScore;
 
 public class CosineSquareSimilarity implements SimScore {
 
+    private static String                    name         = "cosinesq";
     private static Map<String, TIntFloatMap> denseCaches  = new HashMap<String, TIntFloatMap>();
     private static Map<String, TIntIntMap>   sparseCaches = new HashMap<String, TIntIntMap>();
 
-    private String                    batchKey     = null;
-    private int                       batchId      = -1;
-    private boolean                   consumed     = false;
+    private String                           batchKey     = null;
+    private int                              batchId      = -1;
+    private boolean                          consumed     = false;
 
     private float flengthsq(float[] vector) {
         float result = 0f;
@@ -36,6 +37,11 @@ public class CosineSquareSimilarity implements SimScore {
             i += 2;
         }
         return result;
+    }
+
+    @Override
+    public String name() {
+        return name;
     }
 
     @Override

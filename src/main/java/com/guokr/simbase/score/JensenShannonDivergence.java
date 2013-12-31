@@ -12,23 +12,39 @@ import com.guokr.simbase.SimScore;
 
 public class JensenShannonDivergence implements SimScore {
 
+    // private static TIntFloatMap lbCaches = new TIntFloatHashMap();
+    private static final String              name         = "jensenshannon";
     private static Map<String, TIntFloatMap> denseCaches  = new HashMap<String, TIntFloatMap>();
     private static Map<String, TIntIntMap>   sparseCaches = new HashMap<String, TIntIntMap>();
 
+    // private static final int scale = 1024 * 8;
     private static final float               ratio        = (float) Math.log(2);
 
     private String                           batchKey     = null;
     private int                              batchId      = -1;
     private boolean                          consumed     = false;
 
+    private static float lb(float val) {
+        if (val > 0f) {
+            // int scaledVal = Math.round(val * scale);
+            // if (lbCaches.containsKey(scaledVal)) {
+            // return lbCaches.get(scaledVal);
+            // } else {
+            float result = ((float) Math.log(val)) / ratio;
+            // lbCaches.put(scaledVal, result);
+            return result;
+            // }
+        } else {
+            return 0f;
+        }
+    }
+
     private static float finfo(float[] prob) {
         float info = 0f;
         for (float p : prob) {
-            if (p > 0f) {
-                info += p * (float) (Math.log(p) / ratio);
-            }
+            info += p * lb(p);
         }
-        return -info;
+        return info;
     }
 
     private static int iinfo(int[] freq) {
@@ -36,11 +52,14 @@ public class JensenShannonDivergence implements SimScore {
         int len = freq.length;
         for (int i = 0; i < len; i += 2) {
             int p = freq[i + 1];
-            if (p > 0f) {
-                info += p * (float) (Math.log(p) / ratio);
-            }
+            info += p * lb(p);
         }
-        return -Math.round(info);
+        return Math.round(info);
+    }
+
+    @Override
+    public String name() {
+        return name;
     }
 
     @Override
@@ -99,10 +118,9 @@ public class JensenShannonDivergence implements SimScore {
             float p = source[i];
             float q = target[i];
             float m = (p + q) / 2;
-            if (p > 0f && q > 0f) {
-                scoring += (m * Math.log(m) / ratio + sourceCache.get(srcId) / 2f + targetCache.get(tgtId) / 2f);
-            }
+            scoring += (-m * lb(m));
         }
+        scoring += sourceCache.get(srcId) / 2f + targetCache.get(tgtId) / 2f;
 
         return scoring;
     }
@@ -148,9 +166,7 @@ public class JensenShannonDivergence implements SimScore {
                 float p = source[idx1 + 1];
                 float q = target[idx2 + 1];
                 float m = (p + q) / 2;
-                if (p > 0f && q > 0f) {
-                    scoring += (m * Math.log(m) / ratio + sourceCache.get(srcId) / 2f + targetCache.get(tgtId) / 2f);
-                }
+                scoring += (-m * lb(m));
                 idx1 += 2;
                 idx2 += 2;
             } else if (source[idx1] < target[idx2]) {
@@ -159,6 +175,7 @@ public class JensenShannonDivergence implements SimScore {
                 idx2 += 2;
             }
         }
+        scoring += sourceCache.get(srcId) / 2f + targetCache.get(tgtId) / 2f;
 
         return scoring;
     }

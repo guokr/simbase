@@ -156,7 +156,7 @@ public class SimContext extends HashMap<String, Object> {
         for (String key : keys) {
             if (idx > 1) {
                 try {
-                    //System.out.println(intermedia);
+                    // System.out.println(intermedia);
                     intermedia = (Map<String, Object>) intermedia.get(key);
                 } catch (ClassCastException e) {
                     intermedia = null;

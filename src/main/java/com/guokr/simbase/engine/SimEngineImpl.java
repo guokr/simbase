@@ -1,5 +1,6 @@
 package com.guokr.simbase.engine;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -25,7 +26,6 @@ import com.guokr.simbase.SimContext;
 import com.guokr.simbase.SimEngine;
 import com.guokr.simbase.errors.SimEngineException;
 import com.guokr.simbase.errors.SimErrors;
-import com.guokr.simbase.errors.SimException;
 import com.guokr.simbase.events.BasisListener;
 import com.guokr.simbase.events.RecommendationListener;
 import com.guokr.simbase.events.VectorSetListener;
@@ -74,7 +74,7 @@ public class SimEngineImpl implements SimEngine {
         public void run() {
             try {
                 invoke();
-            } catch (SimException ex) {
+            } catch (Throwable ex) {
                 String errMsg = ex.getMessage();
                 logger.error(errMsg, ex);
                 callback.error(errMsg);
@@ -120,12 +120,22 @@ public class SimEngineImpl implements SimEngine {
 
     private final Map<String, Integer>         counters    = new HashMap<String, Integer>();
     private final int                          bycount;
+    private final String                       savePath;
 
     public SimEngineImpl(SimContext simContext) {
+        String separator = System.getProperty("file.separator");
         this.context = simContext;
         this.bycount = simContext.getInt("bycount");
-        this.loadData();
+        this.savePath = new StringBuilder(System.getProperty("user.dir")).append(separator)
+                .append(context.getString("savepath")).append(separator).toString();
+        this.load(null);
         this.startCron();
+    }
+
+    private void validatePath(String filePath) throws SimEngineException {
+        if (!new File(filePath).exists()) {
+            throw new SimEngineException(String.format("Dmp file '%s' not exists", filePath));
+        }
     }
 
     private void validateKeyFormat(String key) throws SimEngineException {
@@ -191,33 +201,17 @@ public class SimEngineImpl implements SimEngine {
         return new StringBuilder().append(vkeySource).append("_").append(vkeyTarget).toString();
     }
 
-    private void clearData() {
-    }
-
-    private void loadData() {
-    }
-
-    private void saveData() {
-    }
-
-    private void startCron() {
-        final int cronInterval = this.context.getInt("saveinterval");
+    public void startCron() {
+        final int saveInterval = this.context.getInt("saveinterval");
 
         Timer cron = new Timer();
 
-        TimerTask cleartask = new TimerTask() {
-            public void run() {
-                clearData();
-            }
-        };
-        cron.schedule(cleartask, cronInterval / 2, cronInterval);
-
         TimerTask savetask = new TimerTask() {
             public void run() {
-                saveData();
+                save(null);
             }
         };
-        cron.schedule(savetask, cronInterval, cronInterval);
+        cron.schedule(savetask, saveInterval, saveInterval);
     }
 
     @Override
@@ -243,22 +237,31 @@ public class SimEngineImpl implements SimEngine {
 
     @Override
     public void load(final SimCallback callback) {
-        for (String bkey : writerExecs.keySet()) {
-            bload(callback, bkey);
+
+        File[] files = new File(savePath).listFiles();
+        for (File file : files) {
+            String filename = file.getName();
+            if (file.isFile() && filename.endsWith("dmp")) {
+                bload(null, filename.replaceFirst("[.][^.]+$", ""));
+            }
         }
 
-        callback.ok();
-        callback.response();
+        if (callback != null) {
+            callback.ok();
+            callback.response();
+        }
     }
 
     @Override
     public void save(final SimCallback callback) {
-        for (String bkey : writerExecs.keySet()) {
-            bsave(callback, bkey);
+        for (String bkey : bases.keySet()) {
+            bsave(null, bkey);
         }
 
-        callback.ok();
-        callback.response();
+        if (callback != null) {
+            callback.ok();
+            callback.response();
+        }
     }
 
     @Override
@@ -309,33 +312,54 @@ public class SimEngineImpl implements SimEngine {
             }
         });
 
-        callback.ok();
-        callback.response();
+        if (callback != null) {
+            callback.ok();
+            callback.response();
+        }
     }
 
     @Override
     public void bload(final SimCallback callback, final String bkey) {
-        mngmExec.execute(new SafeRunner("bload", callback) {
+        mngmExec.execute(new AsyncSafeRunner("bload") {
             @Override
             public void invoke() {
                 // TODO
                 validateKeyFormat(bkey);
-                validateNotExistence(bkey);
-                callback.ok();
+                String filePath = new StringBuilder(savePath).append(bkey).append(".dmp").toString();
+                validatePath(filePath);
+                if (basisOf.containsKey(bkey)) {
+                    del(null, bkey);
+                }
+                Basis basis = new Basis(bkey);
+                SimBasis simBasis = new SimBasis(context.getSub("basis", bkey), basis);
+                simBasis.bload(filePath);
+                bases.put(bkey, simBasis);
+                basisOf.put(bkey, bkey);
+                kindOf.put(bkey, Kind.BASIS);
+                writerExecs.put(bkey, Executors.newSingleThreadExecutor());
             }
         });
+
+        if (callback != null) {
+            callback.ok();
+            callback.response();
+        }
     }
 
     @Override
     public void bsave(final SimCallback callback, final String bkey) {
-        writerExecs.get(bkey).execute(new SafeRunner("bsave", callback) {
+        writerExecs.get(bkey).execute(new AsyncSafeRunner("bsave") {
             @Override
             public void invoke() {
-                // TODO
                 validateKind("bsave", bkey, Kind.BASIS);
-                callback.ok();
+                bases.get(bkey).bsave(new StringBuilder(savePath).append(bkey).append(".dmp").toString());
             }
         });
+
+        if (callback != null) {
+            callback.ok();
+            callback.response();
+        }
     }
 
     @Override
@@ -356,7 +380,8 @@ public class SimEngineImpl implements SimEngine {
             @Override
             public void invoke() {
                 validateKeyFormat(bkey);
-                Basis basis = new Basis(base);
+                validateNotExistence(bkey);
+                Basis basis = new Basis(bkey, base);
                 bases.put(bkey, new SimBasis(context.getSub("basis", bkey), basis));
                 basisOf.put(bkey, bkey);
                 kindOf.put(bkey, Kind.BASIS);
@@ -488,7 +513,7 @@ public class SimEngineImpl implements SimEngine {
         validateId(vecid);
         validateProbs(vector);
         final String bkey = basisOf.get(vkey);
-        writerExecs.get(bkey).execute(new SafeRunner("vset", callback) {
+        writerExecs.get(bkey).execute(new AsyncSafeRunner("vset") {
             @Override
             public void invoke() {
                 bases.get(bkey).vset(vkey, vecid, vector);

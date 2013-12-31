@@ -8,7 +8,7 @@ public class Load extends SimCommand {
 
     @Override
     public String signature() {
-        return "s";
+        return "";
     }
 
     @Override
