@@ -13,6 +13,7 @@ import com.guokr.simbase.command.BLoad;
 import com.guokr.simbase.command.BMk;
 import com.guokr.simbase.command.BRev;
 import com.guokr.simbase.command.BSave;
+import com.guokr.simbase.command.Del;
 import com.guokr.simbase.command.IAcc;
 import com.guokr.simbase.command.IAdd;
 import com.guokr.simbase.command.IGet;
@@ -47,6 +48,7 @@ public class SimBase {
         registry.add("ping", new Ping());
         registry.add("save", new Save());
         registry.add("load", new Load());
+        registry.add("del", new Del());
 
         registry.add("bsave", new BSave());
         registry.add("bload", new BLoad());

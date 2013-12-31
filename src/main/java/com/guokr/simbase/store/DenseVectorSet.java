@@ -143,15 +143,12 @@ public class DenseVectorSet implements VectorSet {
         if (indexer.containsKey(vecid)) {
             float[] old = get(vecid);
 
-            float length = 0;
             int cursor = indexer.get(vecid);
             for (float val : vector) {
                 probs.set(cursor, val);
-                length += val * val;
                 cursor++;
             }
             probs.set(cursor++, (float) (vecid + 1));
-            probs.set(cursor, length);
 
             if (listening) {
                 for (VectorSetListener l : listeners) {
@@ -168,17 +165,14 @@ public class DenseVectorSet implements VectorSet {
         if (!indexer.containsKey(vecid)) {
             add(vecid, vector);
         } else {
-            float length = 0;
             int cursor = indexer.get(vecid);
             for (float newval : vector) {
                 float oldval = probs.get(cursor);
                 float val = (1f - accumuFactor) * oldval + accumuFactor * newval;
                 probs.set(cursor, val);
-                length += val * val;
                 cursor++;
             }
             probs.set(cursor++, (float) (vecid + 1));
-            probs.set(cursor, length);
 
             if (listening) {
                 float[] accumulated = get(vecid);

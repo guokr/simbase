@@ -303,11 +303,26 @@ public class SimEngineImpl implements SimEngine {
         writerExecs.get(basisOf.get(key)).execute(new AsyncSafeRunner("del") {
             @Override
             public void invoke() {
-                if (bases.containsKey(key)) {
-                    // TODO
-                    // should to be empty before deletion
-                } else {
-                    // TODO
+                Kind kind = kindOf.get(key);
+                switch (kind) {
+                case BASIS:
+                    for (String vkey : vectorsOf.get(key)) {
+                        del(null, vkey);
+                    }
+                    writerExecs.remove(key);
+                    kindOf.remove(key);
+                    basisOf.remove(key);
+                    bases.remove(key);
+                    break;
+                case VECTORS:
+                    String bkey = basisOf.get(key);
+                    vectorsOf.get(bkey).remove(key);
+                    basisOf.remove(key);
+                    kindOf.remove(key);
+                    bases.get(bkey).vdel(key);
+                    break;
+                case RECOMM:
+                    break;
                 }
             }
         });
@@ -323,7 +338,6 @@ public class SimEngineImpl implements SimEngine {
         mngmExec.execute(new AsyncSafeRunner("bload") {
             @Override
             public void invoke() {
-                // TODO
                 validateKeyFormat(bkey);
                 String filePath = new StringBuilder(savePath).append(bkey).append(".dmp").toString();
                 validatePath(filePath);
@@ -487,7 +501,7 @@ public class SimEngineImpl implements SimEngine {
         validateId(vecid);
         validateProbs(vector);
         final String bkey = basisOf.get(vkey);
-        writerExecs.get(bkey).execute(new AsyncSafeRunner("vget") {
+        writerExecs.get(bkey).execute(new AsyncSafeRunner("vadd") {
             @Override
             public void invoke() {
                 bases.get(bkey).vadd(vkey, vecid, vector);
