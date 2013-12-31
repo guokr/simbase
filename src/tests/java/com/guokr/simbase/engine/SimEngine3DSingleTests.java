@@ -4,7 +4,6 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.util.Map;
 
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.yaml.snakeyaml.Yaml;
@@ -17,7 +16,7 @@ public class SimEngine3DSingleTests {
 
     @SuppressWarnings("unchecked")
     @BeforeClass
-    public static void testSetup() {
+    public static void setup() {
         SimConfig config = null;
         try {
             Yaml yaml = new Yaml();

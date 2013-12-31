@@ -11,7 +11,7 @@ import org.yaml.snakeyaml.Yaml;
 import com.guokr.simbase.SimConfig;
 import com.guokr.simbase.TestableCallback;
 
-public class SimEngine3DcomplexTests {
+public class SimEngine3DComplexTests {
     public static SimEngineImpl engine;
 
     @SuppressWarnings("unchecked")

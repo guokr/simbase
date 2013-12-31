@@ -15,7 +15,7 @@ defaults:
     debug: true
     bycount: 100
   basis:
-    vectorSetType: sparse
+    vectorSetType: dense
   dense:
     accumuFactor: 0.01
     sparseFactor: 4096
