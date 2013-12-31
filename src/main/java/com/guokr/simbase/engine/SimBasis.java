@@ -24,12 +24,17 @@ import com.guokr.simbase.store.VectorSet;
 
 public class SimBasis {
 
-    private SimContext                  context;
-    private Basis                       base;
-    private Map<String, VectorSet>      vectorSets       = new HashMap<String, VectorSet>();
-    private Map<String, Recommendation> recommendations  = new HashMap<String, Recommendation>();
+    private SimContext                    context;
+    private Basis                         base;
+    private Map<String, VectorSet>        vectorSets      = new HashMap<String, VectorSet>();
+    private Map<String, Recommendation>   recommendations = new HashMap<String, Recommendation>();
 
-    private SerializerHelper            serializerHelper = new SerializerHelper();
+    private ThreadLocal<SerializerHelper> helper          = new ThreadLocal<SerializerHelper>() {
+                                                              @Override
+                                                              protected SerializerHelper initialValue() {
+                                                                  return new SerializerHelper();
+                                                              }
+                                                          };
 
     public SimBasis(SimContext context, Basis base) {
         this.context = context;
@@ -44,6 +49,7 @@ public class SimBasis {
         Output output = null;
         try {
             output = new Output(new FileOutputStream(filepath));
+            SerializerHelper serializerHelper = helper.get();
             serializerHelper.writeB(output, this.base);
             serializerHelper.writeVectorSets(output, this.vectorSets);
             serializerHelper.writeRecommendations(output, this.recommendations);
@@ -60,6 +66,7 @@ public class SimBasis {
         Input input = null;
         try {
             input = new Input(new FileInputStream(filepath));
+            SerializerHelper serializerHelper = helper.get();
             Basis base = serializerHelper.readB(input);
             Map<String, VectorSet> vecSets = serializerHelper.readVectorSets(input, base);
             Map<String, Recommendation> recs = serializerHelper.readRecommendations(input, vecSets);
