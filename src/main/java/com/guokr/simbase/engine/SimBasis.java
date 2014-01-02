@@ -2,7 +2,9 @@ package com.guokr.simbase.engine;
 
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.esotericsoftware.kryo.io.Input;
@@ -12,6 +14,7 @@ import com.guokr.simbase.SimScore;
 import com.guokr.simbase.errors.SimException;
 import com.guokr.simbase.events.BasisListener;
 import com.guokr.simbase.events.RecommendationListener;
+import com.guokr.simbase.events.SimBasisListener;
 import com.guokr.simbase.events.VectorSetListener;
 import com.guokr.simbase.score.CosineSquareSimilarity;
 import com.guokr.simbase.score.JensenShannonDivergence;
@@ -28,6 +31,7 @@ public class SimBasis {
     private Basis                         base;
     private Map<String, VectorSet>        vectorSets      = new HashMap<String, VectorSet>();
     private Map<String, Recommendation>   recommendations = new HashMap<String, Recommendation>();
+    private List<SimBasisListener>        listeners       = new ArrayList<SimBasisListener>();
 
     private ThreadLocal<SerializerHelper> helper          = new ThreadLocal<SerializerHelper>() {
                                                               @Override
@@ -43,6 +47,10 @@ public class SimBasis {
 
     private String rkey(String vkeySource, String vkeyTarget) {
         return new StringBuilder().append(vkeySource).append("_").append(vkeyTarget).toString();
+    }
+
+    public String key() {
+        return this.base.key();
     }
 
     public void bsave(String filepath) {
@@ -74,6 +82,20 @@ public class SimBasis {
             this.base = base;
             this.vectorSets = vecSets;
             this.recommendations = recs;
+
+            for (String vkey : vecSets.keySet()) {
+                for (SimBasisListener listener : listeners) {
+                    listener.onVecSetAdded(key(), vkey);
+                }
+            }
+            for (String vkeySrc : recs.keySet()) {
+                Recommendation rec = recs.get(vkeySrc);
+                String vkeyTgt = rec.target.key();
+                for (SimBasisListener listener : listeners) {
+                    listener.onRecAdded(key(), vkeySrc, vkeyTgt);
+                }
+            }
+
         } catch (Throwable e) {
             throw new SimException(e);
         } finally {
@@ -178,6 +200,10 @@ public class SimBasis {
 
     public int[] rrec(String vkeySource, int vecid, String vkeyTarget) {
         return this.recommendations.get(rkey(vkeySource, vkeyTarget)).rec(vecid);
+    }
+
+    public void addListener(SimBasisListener listener) {
+        listeners.add(listener);
     }
 
     public void addListener(BasisListener listener) {

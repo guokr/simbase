@@ -49,11 +49,15 @@ public class SerializerHelper {
         @Override
         public DenseVectorSet read(Kryo kryo, Input input, Class<DenseVectorSet> type) {
             String key = input.readString();
+            System.out.println("vsets key:" + key);
+
             float accumuFactor = input.readFloat();
             int sparseFactor = input.readInt();
             DenseVectorSet vectorSet = new DenseVectorSet(key, basis, accumuFactor, sparseFactor);
             int sizeVector = input.readInt();
             int sizeBase = basis.size();
+            System.out.println("vsets size:" + sizeVector);
+            System.out.println("vsets dim:" + sizeBase);
             for (int offset = 0; offset < sizeVector; offset++) {
                 for (int index = 0; index < sizeBase; index++) {
                     float prob = input.readFloat();
@@ -151,6 +155,8 @@ public class SerializerHelper {
         @Override
         public Recommendation read(Kryo kryo, Input input, Class<Recommendation> type) {
             int limits = input.readInt();
+            int sortersSize = input.readInt();
+
             String scoringName = input.readString();
             SimScore scoring;
             if (scoringName.equals("cosinesq")) {
@@ -162,7 +168,6 @@ public class SerializerHelper {
             }
             Recommendation rec = new Recommendation(source, target, scoring, limits);
 
-            int sortersSize = input.readInt();
             while (sortersSize > 0) {
                 int size = input.readInt();
                 int srcId = input.readInt();
@@ -182,9 +187,9 @@ public class SerializerHelper {
         @Override
         public void write(Kryo kryo, Output output, Recommendation recommend) {
             output.writeInt(recommend.limit);
+            output.writeInt(recommend.sorters.size());
             output.writeString(recommend.scoring.name());
 
-            output.writeInt(recommend.sorters.size());
             TIntObjectIterator<Sorter> iter = recommend.sorters.iterator();
             while (iter.hasNext()) {
                 iter.advance();
@@ -262,6 +267,7 @@ public class SerializerHelper {
         System.out.println("vsets size:" + size);
         while (size > 0) {
             String type = input.readString();
+            System.out.println("vsets type:" + type);
             VectorSet vectorSet;
             if (type.equals("dense")) {
                 vectorSet = readDVS(base, input);

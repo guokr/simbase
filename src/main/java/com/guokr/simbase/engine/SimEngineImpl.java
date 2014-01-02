@@ -28,10 +28,11 @@ import com.guokr.simbase.errors.SimEngineException;
 import com.guokr.simbase.errors.SimErrors;
 import com.guokr.simbase.events.BasisListener;
 import com.guokr.simbase.events.RecommendationListener;
+import com.guokr.simbase.events.SimBasisListener;
 import com.guokr.simbase.events.VectorSetListener;
 import com.guokr.simbase.store.Basis;
 
-public class SimEngineImpl implements SimEngine {
+public class SimEngineImpl implements SimEngine, SimBasisListener {
 
     enum Kind {
         BASIS, VECTORS, RECOMM
@@ -104,8 +105,6 @@ public class SimEngineImpl implements SimEngine {
 
     private SimContext                         context;
 
-    private SimCounter                         counter;
-
     private final ExecutorService              mngmExec    = Executors.newSingleThreadExecutor();
     private final Map<String, Kind>            kindOf      = new HashMap<String, Kind>();
     private final Map<String, String>          basisOf     = new HashMap<String, String>();
@@ -114,8 +113,7 @@ public class SimEngineImpl implements SimEngine {
     private final Map<String, SimBasis>        bases       = new HashMap<String, SimBasis>();
 
     private final Map<String, ExecutorService> writerExecs = new HashMap<String, ExecutorService>();
-    private final ThreadPoolExecutor           readerPool  = new ThreadPoolExecutor(53, 83, 37, TimeUnit.SECONDS,
-                                                                   new ArrayBlockingQueue<Runnable>(100),
+    private final ThreadPoolExecutor           readerPool  = new ThreadPoolExecutor(53, 83, 37, TimeUnit.SECONDS, new ArrayBlockingQueue<Runnable>(100),
                                                                    new ServerThreadFactory(), new RejectedHandler());
 
     private final Map<String, Integer>         counters    = new HashMap<String, Integer>();
@@ -126,8 +124,7 @@ public class SimEngineImpl implements SimEngine {
         String separator = System.getProperty("file.separator");
         this.context = simContext;
         this.bycount = simContext.getInt("bycount");
-        this.savePath = new StringBuilder(System.getProperty("user.dir")).append(separator)
-                .append(context.getString("savepath")).append(separator).toString();
+        this.savePath = new StringBuilder(System.getProperty("user.dir")).append(separator).append(context.getString("savepath")).append(separator).toString();
         this.load(null);
         this.startCron();
     }
@@ -158,8 +155,7 @@ public class SimEngineImpl implements SimEngine {
 
     private void validateKind(String op, String toCheck, Kind kindShouldBe) throws SimEngineException {
         if (!kindOf.containsKey(toCheck) || !kindShouldBe.equals(kindOf.get(toCheck))) {
-            throw new SimEngineException(String.format("Operation '%s' against a non-%s type '%s'", op, kindShouldBe,
-                    toCheck));
+            throw new SimEngineException(String.format("Operation '%s' against a non-%s type '%s'", op, kindShouldBe, toCheck));
         }
     }
 
@@ -187,8 +183,7 @@ public class SimEngineImpl implements SimEngine {
                 throw new SimEngineException(String.format("Sparse matrix index '%d' out of bound", toCheck[offset]));
             }
             if (toCheck[offset + 1] < 0) {
-                throw new SimEngineException(String.format("Sparse matrix value '%d' should be non-negative",
-                        toCheck[offset + 1]));
+                throw new SimEngineException(String.format("Sparse matrix value '%d' should be non-negative", toCheck[offset + 1]));
             }
         }
     }
@@ -265,39 +260,6 @@ public class SimEngineImpl implements SimEngine {
     }
 
     @Override
-    public void xincr(final SimCallback callback, final String vkey, final String key) {
-        writerExecs.get(basisOf.get(vkey)).execute(new SafeRunner("xincr", callback) {
-            @Override
-            public void invoke() {
-                validateKind("xincr", vkey, Kind.VECTORS);
-                callback.integerValue(counter.incr(vkey, key));
-            }
-        });
-    }
-
-    @Override
-    public void xget(final SimCallback callback, final String vkey, final String key) {
-        writerExecs.get(basisOf.get(vkey)).execute(new SafeRunner("xget", callback) {
-            @Override
-            public void invoke() {
-                validateKind("xget", vkey, Kind.VECTORS);
-                callback.integerValue(counter.get(vkey, key));
-            }
-        });
-    }
-
-    @Override
-    public void xlookup(final SimCallback callback, final String vkey, final int vecid) {
-        writerExecs.get(basisOf.get(vkey)).execute(new SafeRunner("xlookup", callback) {
-            @Override
-            public void invoke() {
-                validateKind("xlookup", vkey, Kind.VECTORS);
-                callback.stringValue(counter.lookup(vkey, vecid));
-            }
-        });
-    }
-
-    @Override
     public void del(final SimCallback callback, final String key) {
         validateExistence(key);
         writerExecs.get(basisOf.get(key)).execute(new AsyncSafeRunner("del") {
@@ -346,10 +308,13 @@ public class SimEngineImpl implements SimEngine {
                 }
                 Basis basis = new Basis(bkey);
                 SimBasis simBasis = new SimBasis(context.getSub("basis", bkey), basis);
-                simBasis.bload(filePath);
                 bases.put(bkey, simBasis);
                 basisOf.put(bkey, bkey);
                 kindOf.put(bkey, Kind.BASIS);
+                simBasis.addListener(SimEngineImpl.this);
+
+                simBasis.bload(filePath);
+
                 writerExecs.put(bkey, Executors.newSingleThreadExecutor());
             }
         });
@@ -396,10 +361,13 @@ public class SimEngineImpl implements SimEngine {
                 validateKeyFormat(bkey);
                 validateNotExistence(bkey);
                 Basis basis = new Basis(bkey, base);
-                bases.put(bkey, new SimBasis(context.getSub("basis", bkey), basis));
+                SimBasis simbasis = new SimBasis(context.getSub("basis", bkey), basis);
+                bases.put(bkey, simbasis);
                 basisOf.put(bkey, bkey);
                 kindOf.put(bkey, Kind.BASIS);
+                simbasis.addListener(SimEngineImpl.this);
                 writerExecs.put(bkey, Executors.newSingleThreadExecutor());
+
                 callback.ok();
             }
         });
@@ -763,6 +731,33 @@ public class SimEngineImpl implements SimEngine {
                 bases.get(bkey).addListener(srcVkey, tgtVkey, listener);
             }
         });
+    }
+
+    @Override
+    public void onVecSetAdded(String bkeySrc, String vkey) {
+        basisOf.put(vkey, bkeySrc);
+        List<String> vecs = vectorsOf.get(bkeySrc);
+        if (vecs == null) {
+            vecs = new ArrayList<String>();
+            vectorsOf.put(bkeySrc, vecs);
+        }
+        vecs.add(vkey);
+        kindOf.put(vkey, Kind.VECTORS);
+    }
+
+    @Override
+    public void onVecSetDeleted(String bkeySrc, String vkey) {
+        basisOf.remove(vkey);
+        vectorsOf.get(bkeySrc).remove(vkey);
+        kindOf.remove(vkey);
+    }
+
+    @Override
+    public void onRecAdded(String bkeySrc, String vkeyFrom, String vkeyTo) {
+    }
+
+    @Override
+    public void onRecDeleted(String bkeySrc, String vkeyFrom, String vkeyTo) {
     }
 
 }

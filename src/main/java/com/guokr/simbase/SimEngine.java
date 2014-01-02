@@ -14,12 +14,6 @@ public interface SimEngine {
 
     public void save(SimCallback callback);
 
-    public void xincr(SimCallback callback, String vkey, String key);
-
-    public void xget(SimCallback callback, String vkey, String key);
-
-    public void xlookup(SimCallback callback, String vkey, int vecid);
-
     public void del(SimCallback callback, String key);
 
     public void bload(SimCallback callback, String path);
