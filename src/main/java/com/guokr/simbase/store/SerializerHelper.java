@@ -55,7 +55,7 @@ public class SerializerHelper {
                 }
                 float vecid = kryo.readObject(input, float.class);
                 vectorSet.probs.add(vecid);
-                vectorSet.indexer.put(offset * (sizeBase + 1), (int) vecid - 1);
+                vectorSet.indexer.put((int)vecid - 1, offset * (sizeBase + 1));
             }
             return vectorSet;
         }
@@ -101,7 +101,7 @@ public class SerializerHelper {
                     offset++;
                 }
                 vectorSet.probs.add(value);
-                vectorSet.indexer.put(offset, -(int) value - 1);
+                vectorSet.indexer.put(-(int) value - 1, offset);
                 sizeVector--;
             }
             return vectorSet;
