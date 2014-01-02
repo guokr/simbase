@@ -113,22 +113,22 @@ public class SparseVectorSet implements VectorSet {
 
     @Override
     public float[] get(int vecid) {
-        return base.densify(sparseFactor, _get(vecid));
+        return Basis.densify(base.size(), sparseFactor, _get(vecid));
     }
 
     @Override
     public void add(int vecid, float[] vector) {
-        _add(vecid, base.sparsify(sparseFactor, vector));
+        _add(vecid, Basis.sparsify(sparseFactor, vector));
     }
 
     @Override
     public void set(int vecid, float[] vector) {
-        _set(vecid, base.sparsify(sparseFactor, vector));
+        _set(vecid, Basis.sparsify(sparseFactor, vector));
     }
 
     @Override
     public void accumulate(int vecid, float[] vector) {
-        _accumulate(vecid, base.sparsify(sparseFactor, vector));
+        _accumulate(vecid, Basis.sparsify(sparseFactor, vector));
     }
 
     @Override
@@ -224,7 +224,7 @@ public class SparseVectorSet implements VectorSet {
                 }
             }
             indexes.sort();
- 
+
             int start = probs.size();
             indexer.put(vecid, start);
             TIntIterator iter = indexes.iterator();

@@ -15,12 +15,12 @@ import com.guokr.simbase.events.VectorSetListener;
 
 public class DenseVectorSet implements VectorSet {
 
-    public static final String      TYPE    = "dense";
+    public static final String      TYPE      = "dense";
 
     String                          key;
 
-    TFloatList                      probs   = new TFloatArrayList();
-    TIntIntMap                      indexer = new TIntIntHashMap();
+    TFloatList                      probs     = new TFloatArrayList();
+    TIntIntMap                      indexer   = new TIntIntHashMap();
 
     float                           accumuFactor;
     int                             sparseFactor;
@@ -183,22 +183,22 @@ public class DenseVectorSet implements VectorSet {
 
     @Override
     public int[] _get(int vecid) {
-        return base.sparsify(sparseFactor, get(vecid));
+        return Basis.sparsify(sparseFactor, get(vecid));
     }
 
     @Override
     public void _add(int vecid, int[] pairs) {
-        this.add(vecid, base.densify(sparseFactor, pairs));
+        this.add(vecid, Basis.densify(base.size(), sparseFactor, pairs));
     }
 
     @Override
     public void _set(int vecid, int[] pairs) {
-        this.set(vecid, base.densify(sparseFactor, pairs));
+        this.set(vecid, Basis.densify(base.size(), sparseFactor, pairs));
     }
 
     @Override
     public void _accumulate(int vecid, int[] pairs) {
-        this.accumulate(vecid, base.densify(sparseFactor, pairs));
+        this.accumulate(vecid, Basis.densify(base.size(), sparseFactor, pairs));
     }
 
     @Override

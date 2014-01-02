@@ -88,8 +88,7 @@ public class Basis {
         }
     }
 
-    float[] densify(int sparseFactor, int[] pairs) {
-        int size = size();
+    public static float[] densify(int size, int sparseFactor, int[] pairs) {
         int length = pairs.length;
         float[] result = new float[size];
 
@@ -120,7 +119,7 @@ public class Basis {
         return result;
     }
 
-    int[] sparsify(int sparseFactor, float[] distr) {
+    public static int[] sparsify(int sparseFactor, float[] distr) {
         TIntArrayList resultList = new TIntArrayList();
 
         int cursor = 0, sum = 0;
