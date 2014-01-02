@@ -138,9 +138,6 @@ public class SerializerHelper {
 
         @Override
         public Recommendation read(Kryo kryo, Input input, Class<Recommendation> type) {
-            int limits = kryo.readObject(input, int.class);
-            int sortersSize = kryo.readObject(input, int.class);
-
             String scoringName = kryo.readObject(input, String.class);
             SimScore scoring;
             if (scoringName.equals("cosinesq")) {
@@ -150,6 +147,10 @@ public class SerializerHelper {
             } else {
                 scoring = new CosineSquareSimilarity();
             }
+
+            int limits = kryo.readObject(input, int.class);
+            int sortersSize = kryo.readObject(input, int.class);
+
             Recommendation rec = new Recommendation(source, target, scoring, limits);
 
             while (sortersSize > 0) {
@@ -170,9 +171,10 @@ public class SerializerHelper {
 
         @Override
         public void write(Kryo kryo, Output output, Recommendation recommend) {
+            output.writeString(recommend.scoring.name());
+
             kryo.writeObject(output, recommend.limit);
             kryo.writeObject(output, recommend.sorters.size());
-            kryo.writeObject(output, recommend.scoring.name());
 
             TIntObjectIterator<Sorter> iter = recommend.sorters.iterator();
             while (iter.hasNext()) {
@@ -183,9 +185,9 @@ public class SerializerHelper {
                 kryo.writeObject(output, iter.key());
                 kryo.writeObject(output, sorter.waterline);
                 while (size > 0) {
+                    size--;
                     kryo.writeObject(output, sorter.vecids[size]);
                     kryo.writeObject(output, sorter.scores[size]);
-                    size--;
                 }
             }
         }

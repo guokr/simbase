@@ -88,8 +88,9 @@ public class SimBasis {
                     listener.onVecSetAdded(key(), vkey);
                 }
             }
-            for (String vkeySrc : recs.keySet()) {
-                Recommendation rec = recs.get(vkeySrc);
+            for (String key : recs.keySet()) {
+                Recommendation rec = recs.get(key);
+                String vkeySrc = rec.source.key();
                 String vkeyTgt = rec.target.key();
                 for (SimBasisListener listener : listeners) {
                     listener.onRecAdded(key(), vkeySrc, vkeyTgt);

@@ -410,7 +410,7 @@ public class SimEngineImpl implements SimEngine, SimBasisListener {
                     Collections.sort(vkeys);
                 }
                 int i = 0;
-                String[] result = new String[vkeys.size()]; 
+                String[] result = new String[vkeys.size()];
                 for (String key : vkeys) {
                     result[i++] = key;
                 }
@@ -741,6 +741,7 @@ public class SimEngineImpl implements SimEngine, SimBasisListener {
     @Override
     public void onVecSetAdded(String bkeySrc, String vkey) {
         basisOf.put(vkey, bkeySrc);
+
         List<String> vecs = vectorsOf.get(bkeySrc);
         if (vecs == null) {
             vecs = new ArrayList<String>();
@@ -760,10 +761,26 @@ public class SimEngineImpl implements SimEngine, SimBasisListener {
 
     @Override
     public void onRecAdded(String bkeySrc, String vkeyFrom, String vkeyTo) {
+        String rkey = rkey(vkeyFrom, vkeyTo);
+
+        basisOf.put(rkey, bkeySrc);
+
+        Set<String> tgt = rtargetsOf.get(vkeyFrom);
+        if (tgt == null) {
+            tgt = new HashSet<String>();
+            rtargetsOf.put(vkeyFrom, tgt);
+        }
+        tgt.add(vkeyTo);
+
+        kindOf.put(rkey, Kind.RECOMM);
     }
 
     @Override
     public void onRecDeleted(String bkeySrc, String vkeyFrom, String vkeyTo) {
+        String rkey = rkey(vkeyFrom, vkeyTo);
+        basisOf.remove(rkey);
+        rtargetsOf.get(vkeyFrom).remove(vkeyTo);
+        kindOf.remove(rkey);
     }
 
 }
