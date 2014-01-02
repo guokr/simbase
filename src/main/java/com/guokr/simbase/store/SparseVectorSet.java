@@ -202,10 +202,12 @@ public class SparseVectorSet implements VectorSet {
             int cursor = indexer.get(vecid);
             while (true) {
                 int pos = (int) probs.get(cursor++);
+                probs.set(cursor - 1, -1);
                 if (pos < 0) {
                     break;
                 }
                 float val = probs.get(cursor++) * (1f - accumuFactor);
+                probs.set(cursor - 1, -1);
                 results.put(pos, val);
                 indexes.add(pos);
             }
@@ -222,11 +224,7 @@ public class SparseVectorSet implements VectorSet {
                 }
             }
             indexes.sort();
-
-            listening = false;
-            remove(vecid);
-            listening = true;
-
+ 
             int start = probs.size();
             indexer.put(vecid, start);
             TIntIterator iter = indexes.iterator();
