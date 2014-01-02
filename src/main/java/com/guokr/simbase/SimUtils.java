@@ -3,9 +3,7 @@ package com.guokr.simbase;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.nio.charset.Charset;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
 public class SimUtils {
 
