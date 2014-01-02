@@ -1,7 +1,6 @@
 package com.guokr.simbase.store;
 
 import gnu.trove.iterator.TIntIterator;
-import gnu.trove.iterator.TIntObjectIterator;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.TIntObjectMap;
@@ -23,10 +22,11 @@ public class Recommendation implements VectorSetListener {
 
     int                                  limit;
 
-    TIntObjectMap<Sorter>                sorters;
+    TIntList                             sorterKeys     = new TIntArrayList();
+    TIntObjectMap<Sorter>                sorters        = new TIntObjectHashMap<Sorter>();
     TIntObjectHashMap<TIntList>          reverseIndexer = new TIntObjectHashMap<TIntList>();
 
-    private List<RecommendationListener> listeners;
+    private List<RecommendationListener> listeners      = new ArrayList<RecommendationListener>();
 
     public Recommendation(VectorSet source, VectorSet target) {
         this(source, target, new CosineSquareSimilarity(), 20);
@@ -41,8 +41,6 @@ public class Recommendation implements VectorSetListener {
         this.target = target;
         this.limit = limits;
         this.scoring = scoring;
-        this.sorters = new TIntObjectHashMap<Sorter>();
-        this.listeners = new ArrayList<RecommendationListener>();
     }
 
     private void processDenseChangedEvt(VectorSet evtSrc, int vecid, float[] vector) {
@@ -52,11 +50,10 @@ public class Recommendation implements VectorSetListener {
             scoring.endBatch();
         } else if (evtSrc == this.target) {
             int tgtVecId = vecid;
-            TIntObjectIterator<Sorter> iter = sorters.iterator();
+            TIntIterator iter = sorterKeys.iterator();
             scoring.beginBatch(target.key(), tgtVecId);
             while (iter.hasNext()) {
-                iter.advance();
-                int srcVecId = iter.key();
+                int srcVecId = iter.next();
                 float score = scoring.score(source.key(), srcVecId, source.get(srcVecId), target.key(), tgtVecId, vector);
                 add(srcVecId, tgtVecId, score);
             }
@@ -71,11 +68,10 @@ public class Recommendation implements VectorSetListener {
             scoring.endBatch();
         } else if (evtSrc == this.target) {
             int tgtVecId = vecid;
-            TIntObjectIterator<Sorter> iter = sorters.iterator();
+            TIntIterator iter = sorterKeys.iterator();
             scoring.beginBatch(target.key(), tgtVecId);
             while (iter.hasNext()) {
-                iter.advance();
-                int srcVecId = iter.key();
+                int srcVecId = iter.next();
                 float score = scoring.score(source.key(), srcVecId, source._get(srcVecId), target.key(), tgtVecId, vector);
                 add(srcVecId, tgtVecId, score);
             }
@@ -97,6 +93,7 @@ public class Recommendation implements VectorSetListener {
     public Sorter create(int srcVecId) {
         Sorter sorter = new Sorter(scoring.order(), this.limit);
         this.sorters.put(srcVecId, sorter);
+        this.sorterKeys.add(srcVecId);
         return sorter;
     }
 
@@ -168,7 +165,8 @@ public class Recommendation implements VectorSetListener {
     public void onVectorRemoved(VectorSet evtSrc, int vecid) {
         if (evtSrc == this.source) {
             this.sorters.remove(vecid);
-        } else if (evtSrc == this.target) {
+        } 
+        if (evtSrc == this.target) {
             processDeletedEvt(vecid);
         }
     }

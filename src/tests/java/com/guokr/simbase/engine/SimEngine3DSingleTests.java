@@ -41,10 +41,15 @@ public class SimEngine3DSingleTests {
         engine.bget(TestableCallback.noop(), "base");
         try {
             engine.vadd(TestableCallback.noop(), "article", 2, new float[] { 0.9f, 0.1f, 0f });
+            Thread.sleep(100);
             engine.vadd(TestableCallback.noop(), "article", 3, new float[] { 0.9f, 0f, 0.1f });
+            Thread.sleep(100);
             engine.vadd(TestableCallback.noop(), "article", 5, new float[] { 0.1f, 0.9f, 0f });
+            Thread.sleep(100);
             engine.vadd(TestableCallback.noop(), "article", 7, new float[] { 0.1f, 0f, 0.9f });
+            Thread.sleep(100);
             engine.vadd(TestableCallback.noop(), "article", 11, new float[] { 0f, 0.9f, 0.1f });
+            Thread.sleep(100);
             engine.vadd(TestableCallback.noop(), "article", 13, new float[] { 0f, 0.1f, 0.9f });
             Thread.sleep(100);
         } catch (InterruptedException e) {
@@ -57,7 +62,7 @@ public class SimEngine3DSingleTests {
         TestableCallback test = new TestableCallback() {
             @Override
             public void excepted() {
-                isIntegerList(new int[] { 7, 11, 5, 3, 2 });
+                isIntegerList(new int[] { 7, 11, 3, 5, 2 });
             }
         };
         engine.rrec(test, "article", 13, "article");
@@ -158,20 +163,20 @@ public class SimEngine3DSingleTests {
                 isOk();
             }
         };
-        engine.vrem(testok, "article", 2);
+        engine.vrem(testok, "article", 5);
         testok.waitForFinish();
         testok.validate();
         TestableCallback test = new TestableCallback() {
             @Override
             public void excepted() {
-                isIntegerList(new int[] { 7, 11, 5, 3 });
+                isIntegerList(new int[] { 7, 11, 3, 2 });
             }
         };
         engine.rrec(test, "article", 13, "article");
         test.waitForFinish();
         test.validate();
         try {
-            engine.vadd(TestableCallback.noop(), "article", 2, new float[] { 0.9f, 0.1f, 0f });
+            engine.vadd(TestableCallback.noop(), "article", 5, new float[] { 0.1f, 0.9f, 0f });
             Thread.sleep(100);
         } catch (InterruptedException e) {
             e.printStackTrace();

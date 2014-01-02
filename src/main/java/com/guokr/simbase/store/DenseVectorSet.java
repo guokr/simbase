@@ -27,8 +27,8 @@ public class DenseVectorSet implements VectorSet {
 
     Basis                           base;
 
-    private boolean                 listening;
-    private List<VectorSetListener> listeners;
+    private boolean                 listening = true;
+    private List<VectorSetListener> listeners = new ArrayList<VectorSetListener>();
 
     public DenseVectorSet(String key, Basis base) {
         this(key, base, 0.01f, 4096);
@@ -39,8 +39,6 @@ public class DenseVectorSet implements VectorSet {
         this.base = base;
         this.accumuFactor = accumuFactor;
         this.sparseFactor = sparseFactor;
-        this.listening = true;
-        this.listeners = new ArrayList<VectorSetListener>();
     }
 
     @Override
