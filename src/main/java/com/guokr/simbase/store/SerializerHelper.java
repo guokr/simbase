@@ -16,29 +16,23 @@ import com.guokr.simbase.score.JensenShannonDivergence;
 public class SerializerHelper {
 
     public static class BasisSerializer extends Serializer<Basis> {
-        {
-            setImmutable(true);
-        }
 
         @Override
         public Basis read(Kryo kryo, Input input, Class<Basis> type) {
-            String key = input.readString();
+            String key = kryo.readObject(input, String.class);
             String[] schema = kryo.readObject(input, String[].class);
             return new Basis(key, schema);
         }
 
         @Override
         public void write(Kryo kryo, Output output, Basis basis) {
-            output.writeString(basis.key());
+            kryo.writeObject(output, basis.key());
             kryo.writeObject(output, basis.get());
         }
 
     }
 
     public static class DenseVectorSetSerializer extends Serializer<DenseVectorSet> {
-        {
-            setImmutable(true);
-        }
 
         private Basis basis;
 
@@ -48,22 +42,18 @@ public class SerializerHelper {
 
         @Override
         public DenseVectorSet read(Kryo kryo, Input input, Class<DenseVectorSet> type) {
-            String key = input.readString();
-            System.out.println("vsets key:" + key);
-
-            float accumuFactor = input.readFloat();
-            int sparseFactor = input.readInt();
+            String key = kryo.readObject(input, String.class);
+            float accumuFactor = kryo.readObject(input, float.class);
+            int sparseFactor = kryo.readObject(input, int.class);
             DenseVectorSet vectorSet = new DenseVectorSet(key, basis, accumuFactor, sparseFactor);
-            int sizeVector = input.readInt();
+            int sizeVector = kryo.readObject(input, int.class);
             int sizeBase = basis.size();
-            System.out.println("vsets size:" + sizeVector);
-            System.out.println("vsets dim:" + sizeBase);
             for (int offset = 0; offset < sizeVector; offset++) {
                 for (int index = 0; index < sizeBase; index++) {
-                    float prob = input.readFloat();
+                    float prob = kryo.readObject(input, float.class);
                     vectorSet.probs.add(prob);
                 }
-                float vecid = input.readFloat();
+                float vecid = kryo.readObject(input, float.class);
                 vectorSet.probs.add(vecid);
                 vectorSet.indexer.put(offset * (sizeBase + 1), (int) vecid - 1);
             }
@@ -72,15 +62,15 @@ public class SerializerHelper {
 
         @Override
         public void write(Kryo kryo, Output output, DenseVectorSet vectorSet) {
-            output.writeString(vectorSet.key);
-            output.writeFloat(vectorSet.accumuFactor);
-            output.writeInt(vectorSet.sparseFactor);
-            output.writeInt(vectorSet.indexer.size());
+            output.writeString(vectorSet.key());
+            kryo.writeObject(output, vectorSet.accumuFactor);
+            kryo.writeObject(output, vectorSet.sparseFactor);
+            kryo.writeObject(output, vectorSet.indexer.size());
             int end = vectorSet.probs.size();
             for (int offset = 0; offset < end; offset++) {
                 float val = vectorSet.probs.get(offset);
                 if (val >= 0) {
-                    output.writeFloat(val);
+                    kryo.writeObject(output, val);
                 }
             }
         }
@@ -88,9 +78,6 @@ public class SerializerHelper {
     }
 
     public static class SparseVectorSetSerializer extends Serializer<SparseVectorSet> {
-        {
-            setImmutable(true);
-        }
 
         private Basis basis;
 
@@ -100,17 +87,17 @@ public class SerializerHelper {
 
         @Override
         public SparseVectorSet read(Kryo kryo, Input input, Class<SparseVectorSet> type) {
-            String key = input.readString();
-            float accumuFactor = input.readFloat();
-            int sparseFactor = input.readInt();
+            String key = kryo.readObject(input, String.class);
+            float accumuFactor = kryo.readObject(input, float.class);
+            int sparseFactor = kryo.readObject(input, int.class);
             SparseVectorSet vectorSet = new SparseVectorSet(key, basis, accumuFactor, sparseFactor);
-            int sizeVector = input.readInt();
+            int sizeVector = kryo.readObject(input, int.class);
             int offset = 0;
             while (sizeVector > 0) {
-                float value = input.readFloat();
+                float value = kryo.readObject(input, float.class);
                 while (value >= 0) {
                     vectorSet.probs.add(value);
-                    value = input.readFloat();
+                    value = kryo.readObject(input, float.class);
                     offset++;
                 }
                 vectorSet.probs.add(value);
@@ -122,24 +109,21 @@ public class SerializerHelper {
 
         @Override
         public void write(Kryo kryo, Output output, SparseVectorSet vectorSet) {
-            output.writeString(vectorSet.key);
-            output.writeFloat(vectorSet.accumuFactor);
-            output.writeInt(vectorSet.sparseFactor);
-            output.writeInt(vectorSet.indexer.size());
+            output.writeString(vectorSet.key());
+            kryo.writeObject(output, vectorSet.accumuFactor);
+            kryo.writeObject(output, vectorSet.sparseFactor);
+            kryo.writeObject(output, vectorSet.indexer.size());
             int end = vectorSet.probs.size();
             for (int offset = 0; offset < end; offset++) {
                 float val = vectorSet.probs.get(offset);
                 if (val != -1) {
-                    output.writeFloat(val);
+                    kryo.writeObject(output, val);
                 }
             }
         }
     }
 
     public static class RecommendationSerializer extends Serializer<Recommendation> {
-        {
-            setImmutable(true);
-        }
 
         private VectorSet source;
         private VectorSet target;
@@ -154,10 +138,10 @@ public class SerializerHelper {
 
         @Override
         public Recommendation read(Kryo kryo, Input input, Class<Recommendation> type) {
-            int limits = input.readInt();
-            int sortersSize = input.readInt();
+            int limits = kryo.readObject(input, int.class);
+            int sortersSize = kryo.readObject(input, int.class);
 
-            String scoringName = input.readString();
+            String scoringName = kryo.readObject(input, String.class);
             SimScore scoring;
             if (scoringName.equals("cosinesq")) {
                 scoring = new CosineSquareSimilarity();
@@ -169,12 +153,12 @@ public class SerializerHelper {
             Recommendation rec = new Recommendation(source, target, scoring, limits);
 
             while (sortersSize > 0) {
-                int size = input.readInt();
-                int srcId = input.readInt();
-                float waterline = input.readFloat();
+                int size = kryo.readObject(input, int.class);
+                int srcId = kryo.readObject(input, int.class);
+                float waterline = kryo.readObject(input, float.class);
                 while (size > 0) {
-                    int tgtId = input.readInt();
-                    float score = input.readFloat();
+                    int tgtId = kryo.readObject(input, int.class);
+                    float score = kryo.readObject(input, float.class);
                     rec.add(srcId, tgtId, score);
                     size--;
                 }
@@ -186,21 +170,21 @@ public class SerializerHelper {
 
         @Override
         public void write(Kryo kryo, Output output, Recommendation recommend) {
-            output.writeInt(recommend.limit);
-            output.writeInt(recommend.sorters.size());
-            output.writeString(recommend.scoring.name());
+            kryo.writeObject(output, recommend.limit);
+            kryo.writeObject(output, recommend.sorters.size());
+            kryo.writeObject(output, recommend.scoring.name());
 
             TIntObjectIterator<Sorter> iter = recommend.sorters.iterator();
             while (iter.hasNext()) {
                 iter.advance();
                 Sorter sorter = iter.value();
                 int size = sorter.size;
-                output.writeInt(size);
-                output.writeInt(iter.key());
-                output.writeFloat(sorter.waterline);
+                kryo.writeObject(output, size);
+                kryo.writeObject(output, iter.key());
+                kryo.writeObject(output, sorter.waterline);
                 while (size > 0) {
-                    output.writeInt(sorter.vecids[size]);
-                    output.writeFloat(sorter.scores[size]);
+                    kryo.writeObject(output, sorter.vecids[size]);
+                    kryo.writeObject(output, sorter.scores[size]);
                     size--;
                 }
             }
@@ -263,11 +247,9 @@ public class SerializerHelper {
 
     public Map<String, VectorSet> readVectorSets(Input input, Basis base) {
         Map<String, VectorSet> vectorSets = new HashMap<String, VectorSet>();
-        int size = input.readInt();
-        System.out.println("vsets size:" + size);
+        int size = kryo.readObject(input, int.class);
         while (size > 0) {
-            String type = input.readString();
-            System.out.println("vsets type:" + type);
+            String type = kryo.readObject(input, String.class);
             VectorSet vectorSet;
             if (type.equals("dense")) {
                 vectorSet = readDVS(base, input);
@@ -283,22 +265,20 @@ public class SerializerHelper {
     }
 
     public void writeVectorSets(Output output, Map<String, VectorSet> vectorSets) {
-        output.writeInt(vectorSets.size());
-        System.out.println("vsets size:" + vectorSets.size());
+        kryo.writeObject(output, vectorSets.size());
         for (String key : vectorSets.keySet()) {
             VectorSet vectorSet = vectorSets.get(key);
-            System.out.println("vsets type:" + vectorSet.type());
-            output.writeString("dense");
+            kryo.writeObject(output, "dense");
             kryo.writeObject(output, vectorSet);
         }
     }
 
     public Map<String, Recommendation> readRecommendations(Input input, Map<String, VectorSet> vectorSets) {
         Map<String, Recommendation> recs = new HashMap<String, Recommendation>();
-        int size = input.readInt();
+        int size = kryo.readObject(input, int.class);
         while (size > 0) {
-            String srcKey = input.readString();
-            String tgtKey = input.readString();
+            String srcKey = kryo.readObject(input, String.class);
+            String tgtKey = kryo.readObject(input, String.class);
             VectorSet src = vectorSets.get(srcKey);
             VectorSet tgt = vectorSets.get(srcKey);
             Recommendation rec = readR(src, tgt, input);
@@ -313,11 +293,11 @@ public class SerializerHelper {
     }
 
     public void writeRecommendations(Output output, Map<String, Recommendation> recommendations) {
-        output.writeInt(recommendations.size());
+        kryo.writeObject(output, recommendations.size());
         for (String key : recommendations.keySet()) {
             Recommendation rec = recommendations.get(key);
-            output.writeString(rec.source.key());
-            output.writeString(rec.target.key());
+            kryo.writeObject(output, rec.source.key());
+            kryo.writeObject(output, rec.target.key());
             kryo.writeObject(output, rec);
         }
     }

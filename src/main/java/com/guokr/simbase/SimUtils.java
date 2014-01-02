@@ -57,50 +57,18 @@ public class SimUtils {
     }
 
     public static byte[] bytes(String msg) {
-        return msg.getBytes(UTF_8).clone();
+        return msg.getBytes(UTF_8);
     }
 
     public static byte[] bytes(int val) {
-        return String.format("%d", val).getBytes();
-    }
-
-    public static byte[] bytes(int[] list) {
-        int len = list.length;
-        byte[] result = new byte[4 * len];
-        for (int i = 0; i < len; i++) {
-            byte[] array = bytes(list[i]);
-            result[4 * i] = array[0];
-            result[4 * i + 1] = array[1];
-            result[4 * i + 2] = array[2];
-            result[4 * i + 3] = array[3];
-        }
-        return result;
+        return String.format("%d", val).getBytes(UTF_8);
     }
 
     public static byte[] bytes(float val) {
         if (val == (int) val)
-            return String.format("%d", (int) val).getBytes();
+            return String.format("%d", (int) val).getBytes(UTF_8);
         else
-            return String.format("%s", val).getBytes();
-    }
-
-    public static byte[] bytes(String[] list) {
-        int len = list.length;
-        List<Byte> blist = new ArrayList<Byte>();
-        for (int i = 0; i < len; i++) {
-            byte[] array = bytes(list[i]);
-            for (byte b : array) {
-                blist.add(b);
-            }
-        }
-
-        int pos = 0;
-        byte[] result = new byte[blist.size()];
-        for (byte b : blist) {
-            result[pos] = b;
-            pos++;
-        }
-        return result;
+            return String.format("%s", val).getBytes(UTF_8);
     }
 
 }

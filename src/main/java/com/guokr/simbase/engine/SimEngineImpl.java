@@ -409,7 +409,12 @@ public class SimEngineImpl implements SimEngine, SimBasisListener {
                 } else {
                     Collections.sort(vkeys);
                 }
-                callback.stringList((String[]) vkeys.toArray(new String[vkeys.size()]));
+                int i = 0;
+                String[] result = new String[vkeys.size()]; 
+                for (String key : vkeys) {
+                    result[i++] = key;
+                }
+                callback.stringList(result);
             }
         });
     }
@@ -742,6 +747,7 @@ public class SimEngineImpl implements SimEngine, SimBasisListener {
             vectorsOf.put(bkeySrc, vecs);
         }
         vecs.add(vkey);
+
         kindOf.put(vkey, Kind.VECTORS);
     }
 
