@@ -8,10 +8,9 @@ import com.guokr.simbase.SimConfig;
 import com.guokr.simbase.TestableCallback;
 import com.guokr.simbase.engine.SimEngineImpl;
 import com.guokr.simbase.events.VectorSetListener;
-import com.guokr.simbase.store.Basis;
 import com.guokr.simbase.store.VectorSet;
 
-public class SparseBenchmark {
+public class DenseConsineSquareBenchmark {
 
     public static long start       = -1;
     public static long accumulated = 0;
@@ -21,17 +20,17 @@ public class SparseBenchmark {
         Map<String, Object> settings = new HashMap<String, Object>();
         Map<String, Object> defaults = new HashMap<String, Object>();
         Map<String, Object> basis = new HashMap<String, Object>();
-        Map<String, Object> sparse = new HashMap<String, Object>();
+        Map<String, Object> dense = new HashMap<String, Object>();
         Map<String, Object> econf = new HashMap<String, Object>();
-        sparse.put("accumuFactor", 0.01);
-        sparse.put("sparseFactor", 2048);
-        basis.put("vectorSetType", "sparse");
+        dense.put("accumuFactor", 0.01);
+        dense.put("sparseFactor", 2048);
+        basis.put("vectorSetType", "dense");
         econf.put("savepath", "data");
         econf.put("saveinterval", 7200000);
         econf.put("maxlimits", 20);
         econf.put("loadfactor", 0.75);
         econf.put("bycount", 100);
-        defaults.put("sparse", sparse);
+        defaults.put("dense", dense);
         defaults.put("basis", basis);
         defaults.put("engine", econf);
         settings.put("defaults", defaults);
@@ -71,7 +70,7 @@ public class SparseBenchmark {
                 distr[j] = distr[j] / total;
             }
 
-            engine.iadd(TestableCallback.noop(), "article", i, Basis.sparsify(4096, distr));
+            engine.vadd(TestableCallback.noop(), "article", i, distr);
 
         }
     }
