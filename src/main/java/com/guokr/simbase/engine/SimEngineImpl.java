@@ -114,7 +114,8 @@ public class SimEngineImpl implements SimEngine, SimBasisListener {
     private final Map<String, SimBasis>        bases       = new HashMap<String, SimBasis>();
 
     private final Map<String, ExecutorService> writerExecs = new HashMap<String, ExecutorService>();
-    private final ThreadPoolExecutor           readerPool  = new ThreadPoolExecutor(53, 83, 37, TimeUnit.SECONDS, new ArrayBlockingQueue<Runnable>(100),
+    private final ThreadPoolExecutor           readerPool  = new ThreadPoolExecutor(53, 83, 37, TimeUnit.SECONDS,
+                                                                   new ArrayBlockingQueue<Runnable>(100),
                                                                    new ServerThreadFactory(), new RejectedHandler());
 
     private final Map<String, Integer>         counters    = new HashMap<String, Integer>();
@@ -125,7 +126,8 @@ public class SimEngineImpl implements SimEngine, SimBasisListener {
         String separator = System.getProperty("file.separator");
         this.context = simContext;
         this.bycount = simContext.getInt("bycount");
-        this.savePath = new StringBuilder(System.getProperty("user.dir")).append(separator).append(context.getString("savepath")).append(separator).toString();
+        this.savePath = new StringBuilder(System.getProperty("user.dir")).append(separator)
+                .append(context.getString("savepath")).append(separator).toString();
         this.load(null);
         this.startCron();
     }
@@ -156,7 +158,8 @@ public class SimEngineImpl implements SimEngine, SimBasisListener {
 
     private void validateKind(String op, String toCheck, Kind kindShouldBe) throws SimEngineException {
         if (!kindOf.containsKey(toCheck) || !kindShouldBe.equals(kindOf.get(toCheck))) {
-            throw new SimEngineException(String.format("Operation '%s' against a non-%s type '%s'", op, kindShouldBe, toCheck));
+            throw new SimEngineException(String.format("Operation '%s' against a non-%s type '%s'", op, kindShouldBe,
+                    toCheck));
         }
     }
 
@@ -184,14 +187,16 @@ public class SimEngineImpl implements SimEngine, SimBasisListener {
                 throw new SimEngineException(String.format("Sparse matrix index '%d' out of bound", toCheck[offset]));
             }
             if (toCheck[offset + 1] < 0) {
-                throw new SimEngineException(String.format("Sparse matrix value '%d' should be non-negative", toCheck[offset + 1]));
+                throw new SimEngineException(String.format("Sparse matrix value '%d' should be non-negative",
+                        toCheck[offset + 1]));
             }
         }
     }
 
     private void validateSameBasis(String vkeySource, String vkeyTarget) {
         if (!basisOf.get(vkeySource).equals(basisOf.get(vkeyTarget))) {
-            throw new SimEngineException(String.format("Recommedation[%s, %s] must be between two vector set with same basis", vkeySource, vkeyTarget));
+            throw new SimEngineException(String.format(
+                    "Recommedation[%s, %s] must be between two vector set with same basis", vkeySource, vkeyTarget));
         }
     }
 
@@ -252,21 +257,24 @@ public class SimEngineImpl implements SimEngine, SimBasisListener {
                     for (String vkey : vectorsOf.get(key)) {
                         del(null, vkey);
                     }
-                    writerExecs.remove(key);
                     kindOf.remove(key);
                     basisOf.remove(key);
                     bases.remove(key);
+                    writerExecs.remove(key);
+                    writerExecs.notifyAll();
                     break;
                 case VECTORS:
                     String bkey = basisOf.get(key);
                     for (String target : rtargetsOf.get(key)) {
                         del(null, rkey(key, target));
                     }
+                    rtargetsOf.remove(key);
                     for (String source : rsourcesOf.get(key)) {
                         if (!source.equals(key)) {
                             del(null, rkey(source, key));
                         }
                     }
+                    rsourcesOf.remove(key);
 
                     vectorsOf.get(bkey).remove(key);
                     basisOf.remove(key);

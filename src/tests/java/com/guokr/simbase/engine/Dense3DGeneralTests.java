@@ -16,7 +16,6 @@ public class Dense3DGeneralTests {
 
     @BeforeClass
     public static void setup() throws Exception {
-
         Map<String, Object> settings = new HashMap<String, Object>();
         Map<String, Object> defaults = new HashMap<String, Object>();
         Map<String, Object> basis = new HashMap<String, Object>();
@@ -45,7 +44,6 @@ public class Dense3DGeneralTests {
 
         engine.bmk(TestableCallback.noop(), "base", components);
         Thread.sleep(100);
-
     }
 
     @Before
@@ -71,7 +69,7 @@ public class Dense3DGeneralTests {
     @After
     public void testDown() throws Exception {
         engine.del(TestableCallback.noop(), "test");
-        Thread.sleep(2000);
+        Thread.sleep(5000);
     }
 
     @Test
@@ -165,9 +163,9 @@ public class Dense3DGeneralTests {
         engine.vrem(TestableCallback.noop(), "test", 7);
         Thread.sleep(100);
         engine.bsave(TestableCallback.noop(), "test");
-        Thread.sleep(2000);
+        Thread.sleep(4000);
         engine.del(TestableCallback.noop(), "test");
-        Thread.sleep(100);
+        Thread.sleep(1000);
 
         TestableCallback testEmpty = new TestableCallback() {
             @Override

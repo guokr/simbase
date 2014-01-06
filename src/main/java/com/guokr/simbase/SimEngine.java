@@ -12,9 +12,9 @@ public interface SimEngine {
 
     public void del(SimCallback callback, String key);
 
-    public void bload(SimCallback callback, String path);
+    public void bload(SimCallback callback, String key);
 
-    public void bsave(SimCallback callback, String path);
+    public void bsave(SimCallback callback, String key);
 
     public void blist(SimCallback callback);
 
