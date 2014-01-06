@@ -141,13 +141,17 @@ public class DenseVectorSet implements VectorSet {
         if (indexer.containsKey(vecid)) {
             float[] old = get(vecid);
 
-            int cursor = indexer.get(vecid);
-            for (float val : vector) {
-                probs.set(cursor, val);
-                cursor++;
+            if (old.length != vector.length) {
+                remove(vecid);
+                add(vecid, vector);
+            } else {
+                int cursor = indexer.get(vecid);
+                for (float val : vector) {
+                    probs.set(cursor, val);
+                    cursor++;
+                }
+                probs.set(cursor++, (float) (vecid + 1));
             }
-            probs.set(cursor++, (float) (vecid + 1));
-
             if (listening) {
                 for (VectorSetListener l : listeners) {
                     l.onVectorSetted(this, vecid, old, vector);
