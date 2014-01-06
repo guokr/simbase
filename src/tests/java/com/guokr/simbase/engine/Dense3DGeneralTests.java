@@ -78,6 +78,8 @@ public class Dense3DGeneralTests {
             }
         };
         engine.brev(testbrev, "base", new String[] { "B3", "B1", "B0" });
+        engine.vset(TestableCallback.noop(), "article", 13, new float[] { 0.1f, 0.2f, 0.3f, 0.4f });
+        engine.vset(TestableCallback.noop(), "article", 17, new float[] { 0.4f, 0.3f, 0.2f, 0.1f });
         testbrev.waitForFinish();
         testbrev.validate();
         TestableCallback test2 = new TestableCallback() {
@@ -133,11 +135,21 @@ public class Dense3DGeneralTests {
         TestableCallback test13 = new TestableCallback() {
             @Override
             public void excepted() {
-                isFloatList(new float[] { 0f, 0.1f, 0.9f, 0f });
+                isFloatList(new float[] { 0.1f, 0.2f, 0.3f, 0.4f });
             }
         };
         engine.vget(test13, "article", 13);
         test13.waitForFinish();
         test13.validate();
+
+        TestableCallback test17 = new TestableCallback() {
+            @Override
+            public void excepted() {
+                isFloatList(new float[] { 0.4f, 0.3f, 0.2f, 0.1f });
+            }
+        };
+        engine.vget(test17, "article", 17);
+        test17.waitForFinish();
+        test17.validate();
     }
 }

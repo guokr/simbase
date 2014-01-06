@@ -87,7 +87,7 @@ public class SparseVectorSet implements VectorSet {
             probs.add(val);
 
             if (val < -1) {
-                indexer.put(- (int) val - 1, curbegin);
+                indexer.put(-(int) val - 1, curbegin);
                 curbegin = -1;
             }
             offset++;
@@ -117,7 +117,6 @@ public class SparseVectorSet implements VectorSet {
                 float val = probs.get(cursor);
                 if (val < 0) {
                     probs.set(cursor, -1);
-                    probs.set(cursor + 1, -1);
                     break;
                 }
                 probs.set(cursor, -1);

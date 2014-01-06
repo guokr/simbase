@@ -104,17 +104,13 @@ public class DenseVectorSet implements VectorSet {
                 float val = probs.get(cursor);
                 if (val < 0f) {
                     break;
-                }
-                if (val >= 1f) {
+                } else if (val <= 1) {
                     probs.set(cursor, -1);
                     cursor++;
-                    val = probs.get(cursor);
+                } else {
                     probs.set(cursor, -1);
                     break;
                 }
-
-                probs.set(cursor, -1);
-                cursor++;
             }
         }
 
