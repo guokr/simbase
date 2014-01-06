@@ -1,29 +1,41 @@
 package com.guokr.simbase.engine;
 
-import java.io.FileNotFoundException;
-import java.io.FileReader;
+import java.util.HashMap;
 import java.util.Map;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.yaml.snakeyaml.Yaml;
 
 import com.guokr.simbase.SimConfig;
 import com.guokr.simbase.TestableCallback;
 
-public class SimEngine3DSingleTests {
+public class Dense3DBasicTests {
     public static SimEngineImpl engine;
 
-    @SuppressWarnings("unchecked")
     @BeforeClass
     public static void setup() {
-        SimConfig config = null;
-        try {
-            Yaml yaml = new Yaml();
-            config = new SimConfig((Map<String, Object>) yaml.load(new FileReader("config/simbase.yaml")));
-        } catch (FileNotFoundException e) {
-        }
+
+        Map<String, Object> settings = new HashMap<String, Object>();
+        Map<String, Object> defaults = new HashMap<String, Object>();
+        Map<String, Object> basis = new HashMap<String, Object>();
+        Map<String, Object> dense = new HashMap<String, Object>();
+        Map<String, Object> econf = new HashMap<String, Object>();
+        dense.put("accumuFactor", 0.01);
+        dense.put("sparseFactor", 2048);
+        basis.put("vectorSetType", "dense");
+        econf.put("savepath", "data");
+        econf.put("saveinterval", 7200000);
+        econf.put("maxlimits", 20);
+        econf.put("loadfactor", 0.75);
+        econf.put("bycount", 100);
+        defaults.put("dense", dense);
+        defaults.put("basis", basis);
+        defaults.put("engine", econf);
+        settings.put("defaults", defaults);
+        SimConfig config = new SimConfig(settings);
+
         engine = new SimEngineImpl(config.getSub("engine"));
+
         String[] components = new String[3];
         for (int i = 0; i < components.length; i++) {
             components[i] = "B" + String.valueOf(i);
@@ -40,17 +52,17 @@ public class SimEngine3DSingleTests {
         }
         engine.bget(TestableCallback.noop(), "base");
         try {
-            engine.vadd(TestableCallback.noop(), "article", 2, new float[] { 0.9f, 0.1f, 0f });
+            engine.vadd(TestableCallback.noop(), "article", 2, new float[] { 0.9f, 0.1f, 0.01f });
             Thread.sleep(100);
-            engine.vadd(TestableCallback.noop(), "article", 3, new float[] { 0.9f, 0f, 0.1f });
+            engine.vadd(TestableCallback.noop(), "article", 3, new float[] { 0.9f, 0f, 0.11f });
             Thread.sleep(100);
-            engine.vadd(TestableCallback.noop(), "article", 5, new float[] { 0.1f, 0.9f, 0f });
+            engine.vadd(TestableCallback.noop(), "article", 5, new float[] { 0.1f, 0.9f, 0.01f });
             Thread.sleep(100);
-            engine.vadd(TestableCallback.noop(), "article", 7, new float[] { 0.1f, 0f, 0.9f });
+            engine.vadd(TestableCallback.noop(), "article", 7, new float[] { 0.1f, 0f, 0.91f });
             Thread.sleep(100);
-            engine.vadd(TestableCallback.noop(), "article", 11, new float[] { 0f, 0.9f, 0.1f });
+            engine.vadd(TestableCallback.noop(), "article", 11, new float[] { 0f, 0.9f, 0.11f });
             Thread.sleep(100);
-            engine.vadd(TestableCallback.noop(), "article", 13, new float[] { 0f, 0.1f, 0.9f });
+            engine.vadd(TestableCallback.noop(), "article", 13, new float[] { 0f, 0.1f, 0.91f });
             Thread.sleep(100);
         } catch (InterruptedException e) {
             e.printStackTrace();
@@ -84,7 +96,7 @@ public class SimEngine3DSingleTests {
         TestableCallback test2 = new TestableCallback() {
             @Override
             public void excepted() {
-                isFloatList(new float[] { 0.9f, 0.1f, 0f });
+                isFloatList(new float[] { 0.9f, 0.1f, 0.01f });
             }
         };
         engine.vget(test2, "article", 2);
@@ -94,7 +106,7 @@ public class SimEngine3DSingleTests {
         TestableCallback test3 = new TestableCallback() {
             @Override
             public void excepted() {
-                isFloatList(new float[] { 0.9f, 0f, 0.1f });
+                isFloatList(new float[] { 0.9f, 0f, 0.11f });
             }
         };
         engine.vget(test3, "article", 3);
@@ -104,7 +116,7 @@ public class SimEngine3DSingleTests {
         TestableCallback test5 = new TestableCallback() {
             @Override
             public void excepted() {
-                isFloatList(new float[] { 0.1f, 0.9f, 0f });
+                isFloatList(new float[] { 0.1f, 0.9f, 0.01f });
             }
         };
         engine.vget(test5, "article", 5);
@@ -114,7 +126,7 @@ public class SimEngine3DSingleTests {
         TestableCallback test7 = new TestableCallback() {
             @Override
             public void excepted() {
-                isFloatList(new float[] { 0.1f, 0f, 0.9f });
+                isFloatList(new float[] { 0.1f, 0f, 0.91f });
             }
         };
         engine.vget(test7, "article", 7);
@@ -124,7 +136,7 @@ public class SimEngine3DSingleTests {
         TestableCallback test11 = new TestableCallback() {
             @Override
             public void excepted() {
-                isFloatList(new float[] { 0f, 0.9f, 0.1f });
+                isFloatList(new float[] { 0f, 0.9f, 0.11f });
             }
         };
         engine.vget(test11, "article", 11);
@@ -134,7 +146,7 @@ public class SimEngine3DSingleTests {
         TestableCallback test13 = new TestableCallback() {
             @Override
             public void excepted() {
-                isFloatList(new float[] { 0f, 0.1f, 0.9f });
+                isFloatList(new float[] { 0f, 0.1f, 0.91f });
             }
         };
         engine.vget(test13, "article", 13);
@@ -184,7 +196,7 @@ public class SimEngine3DSingleTests {
         TestableCallback test2 = new TestableCallback() {
             @Override
             public void excepted() {
-                isIntegerList(new int[] { 7, 11, 5, 3, 2 });
+                isIntegerList(new int[] { 7, 11, 3, 5, 2 });
             }
         };
         engine.rrec(test2, "article", 13, "article");

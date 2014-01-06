@@ -39,7 +39,6 @@ public class SparseBenchmark {
 
         SimEngineImpl engine = new SimEngineImpl(config.getSub("engine"));
 
-
         String[] components = new String[1024];
         for (int i = 0; i < components.length; i++) {
             components[i] = "B" + String.valueOf(i);
