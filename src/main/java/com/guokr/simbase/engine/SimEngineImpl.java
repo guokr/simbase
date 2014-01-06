@@ -212,27 +212,6 @@ public class SimEngineImpl implements SimEngine, SimBasisListener {
     }
 
     @Override
-    public void cfg(final SimCallback callback, final String key) {
-        mngmExec.execute(new SafeRunner("cfg", callback) {
-            @Override
-            public void invoke() {
-                callback.stringValue(context.getString(key));
-            }
-        });
-    }
-
-    @Override
-    public void cfg(final SimCallback callback, final String key, final String val) {
-        mngmExec.execute(new SafeRunner("cfg", callback) {
-            @Override
-            public void invoke() {
-                context.put(key, val);
-                callback.ok();
-            }
-        });
-    }
-
-    @Override
     public void load(final SimCallback callback) {
         File[] files = new File(savePath).listFiles();
         for (File file : files) {
