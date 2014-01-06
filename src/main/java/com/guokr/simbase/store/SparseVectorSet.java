@@ -72,6 +72,29 @@ public class SparseVectorSet implements VectorSet {
     }
 
     @Override
+    public void clean() {
+        TFloatList tmp = probs;
+        probs = new TFloatArrayList();
+        indexer = new TIntIntHashMap();
+        int end = tmp.size();
+        int curbegin = -1;
+        for (int offset = 0; offset < end; offset++) {
+            float val = tmp.get(offset);
+            if (curbegin == -1) {
+                curbegin = offset;
+            }
+
+            probs.add(val);
+
+            if (val < -1) {
+                indexer.put(- (int) val - 1, curbegin);
+                curbegin = -1;
+            }
+            offset++;
+        }
+    }
+
+    @Override
     public int[] ids() {
         TIntArrayList resultList = new TIntArrayList();
         int end = probs.size();

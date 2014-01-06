@@ -44,12 +44,41 @@ public class DenseVectorSet implements VectorSet {
 
     @Override
     public String type() {
-        return "" + TYPE;
+        return TYPE;
     }
 
     @Override
     public String key() {
         return key;
+    }
+
+    @Override
+    public void clean() {
+        TFloatList tmp = probs;
+        probs = new TFloatArrayList();
+        dimns = new TIntIntHashMap();
+        indexer = new TIntIntHashMap();
+        int end = tmp.size();
+        int curbegin = -1, curdim = 0;
+        for (int offset = 0; offset < end; offset++) {
+            float val = tmp.get(offset);
+            if (val >= 0) {
+                if (curbegin == -1) {
+                    curbegin = offset;
+                }
+
+                probs.add(val);
+                curdim++;
+
+                if (val > 1) {
+                    indexer.put((int) val - 1, curbegin);
+                    dimns.put((int) val - 1, curdim);
+                    curbegin = -1;
+                    curdim = 0;
+                }
+            }
+            offset++;
+        }
     }
 
     @Override

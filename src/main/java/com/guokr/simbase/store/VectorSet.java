@@ -8,6 +8,8 @@ public interface VectorSet {
 
     public String key();
 
+    public void clean();
+
     public int[] ids();
 
     public void remove(int vecid);

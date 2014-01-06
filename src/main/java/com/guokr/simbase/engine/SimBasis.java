@@ -56,6 +56,10 @@ public class SimBasis {
     public void bsave(String filepath) {
         Output output = null;
         try {
+            for (String vkey : vectorSets.keySet()) {
+                vectorSets.get(vkey).clean();
+            }
+
             output = new Output(new FileOutputStream(filepath));
             SerializerHelper serializerHelper = helper.get();
             serializerHelper.writeB(output, this.base);
