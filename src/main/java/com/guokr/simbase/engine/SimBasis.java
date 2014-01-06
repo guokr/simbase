@@ -199,6 +199,10 @@ public class SimBasis {
         }
     }
 
+    public void rdel(String vkey) {
+        this.recommendations.remove(vkey);
+    }
+
     public String[] rget(String vkeySource, int vecid, String vkeyTarget) {
         return this.recommendations.get(rkey(vkeySource, vkeyTarget)).get(vecid);
     }

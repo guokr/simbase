@@ -85,7 +85,9 @@ public class Recommendation implements VectorSetListener {
             TIntIterator iter = range.iterator();
             while (iter.hasNext()) {
                 int srcVecId = iter.next();
-                this.sorters.get(srcVecId).remove(tgtVecId);
+                if (this.sorters.containsKey(srcVecId)) {
+                    this.sorters.get(srcVecId).remove(tgtVecId);
+                }
             }
         }
     }
@@ -165,7 +167,7 @@ public class Recommendation implements VectorSetListener {
     public void onVectorRemoved(VectorSet evtSrc, int vecid) {
         if (evtSrc == this.source) {
             this.sorters.remove(vecid);
-        } 
+        }
         if (evtSrc == this.target) {
             processDeletedEvt(vecid);
         }

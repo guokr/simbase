@@ -55,7 +55,7 @@ public class SerializerHelper {
                 }
                 float vecid = kryo.readObject(input, float.class);
                 vectorSet.probs.add(vecid);
-                vectorSet.indexer.put((int)vecid - 1, offset * (sizeBase + 1));
+                vectorSet.indexer.put((int) vecid - 1, offset * (sizeBase + 1));
             }
             return vectorSet;
         }
@@ -282,7 +282,7 @@ public class SerializerHelper {
             String srcKey = kryo.readObject(input, String.class);
             String tgtKey = kryo.readObject(input, String.class);
             VectorSet src = vectorSets.get(srcKey);
-            VectorSet tgt = vectorSets.get(srcKey);
+            VectorSet tgt = vectorSets.get(tgtKey);
             Recommendation rec = readR(src, tgt, input);
             recs.put(srcKey + '_' + tgtKey, rec);
             src.addListener(rec);
@@ -298,8 +298,8 @@ public class SerializerHelper {
         kryo.writeObject(output, recommendations.size());
         for (String key : recommendations.keySet()) {
             Recommendation rec = recommendations.get(key);
-            kryo.writeObject(output, rec.source.key());
-            kryo.writeObject(output, rec.target.key());
+            output.writeString(rec.source.key());
+            output.writeString(rec.target.key());
             kryo.writeObject(output, rec);
         }
     }

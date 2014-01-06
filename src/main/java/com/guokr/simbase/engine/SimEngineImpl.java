@@ -110,6 +110,7 @@ public class SimEngineImpl implements SimEngine, SimBasisListener {
     private final Map<String, String>          basisOf     = new HashMap<String, String>();
     private final Map<String, List<String>>    vectorsOf   = new HashMap<String, List<String>>();
     private final Map<String, Set<String>>     rtargetsOf  = new HashMap<String, Set<String>>();
+    private final Map<String, Set<String>>     rsourcesOf  = new HashMap<String, Set<String>>();
     private final Map<String, SimBasis>        bases       = new HashMap<String, SimBasis>();
 
     private final Map<String, ExecutorService> writerExecs = new HashMap<String, ExecutorService>();
@@ -258,12 +259,24 @@ public class SimEngineImpl implements SimEngine, SimBasisListener {
                     break;
                 case VECTORS:
                     String bkey = basisOf.get(key);
+                    for (String target : rtargetsOf.get(key)) {
+                        del(null, rkey(key, target));
+                    }
+                    for (String source : rsourcesOf.get(key)) {
+                        if (!source.equals(key)) {
+                            del(null, rkey(source, key));
+                        }
+                    }
+
                     vectorsOf.get(bkey).remove(key);
                     basisOf.remove(key);
                     kindOf.remove(key);
                     bases.get(bkey).vdel(key);
                     break;
                 case RECOMM:
+                    bases.get(basisOf.get(key)).rdel(key);
+                    basisOf.remove(key);
+                    kindOf.remove(key);
                     break;
                 }
             }
@@ -647,10 +660,18 @@ public class SimEngineImpl implements SimEngine, SimBasisListener {
                 final String bkey = basisOf.get(vkeySource);
                 bases.get(bkey).rmk(vkeySource, vkeyTarget, funcscore);
                 basisOf.put(rkey, basisOf.get(vkeySource));
+                kindOf.put(rkey, Kind.RECOMM);
+
                 if (rtargetsOf.get(vkeySource) == null) {
                     rtargetsOf.put(vkeySource, new HashSet<String>());
                 }
                 rtargetsOf.get(vkeySource).add(vkeyTarget);
+
+                if (rsourcesOf.get(vkeyTarget) == null) {
+                    rsourcesOf.put(vkeyTarget, new HashSet<String>());
+                }
+                rsourcesOf.get(vkeyTarget).add(vkeySource);
+
                 callback.ok();
             }
         });
