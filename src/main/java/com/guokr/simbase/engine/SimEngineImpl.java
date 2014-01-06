@@ -188,8 +188,10 @@ public class SimEngineImpl implements SimEngine, SimBasisListener {
         }
     }
 
-    private void validateSameBasis(String vkeyTarget, String vkeySource) {
-        // TODO
+    private void validateSameBasis(String vkeySource, String vkeyTarget) {
+        if (!basisOf.get(vkeySource).equals(basisOf.get(vkeyTarget))) {
+            throw new SimEngineException(String.format("Recommedation[%s, %s] must be between two vector set with same basis", vkeySource, vkeyTarget));
+        }
     }
 
     private String rkey(String vkeySource, String vkeyTarget) {
