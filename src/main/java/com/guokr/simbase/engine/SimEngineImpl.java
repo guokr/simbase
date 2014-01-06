@@ -232,7 +232,6 @@ public class SimEngineImpl implements SimEngine, SimBasisListener {
 
     @Override
     public void load(final SimCallback callback) {
-
         File[] files = new File(savePath).listFiles();
         for (File file : files) {
             String filename = file.getName();
