@@ -20,6 +20,7 @@ public class DenseVectorSet implements VectorSet {
     String                          key;
 
     TFloatList                      probs     = new TFloatArrayList();
+    TIntIntMap                      dimns     = new TIntIntHashMap();
     TIntIntMap                      indexer   = new TIntIntHashMap();
 
     float                           accumuFactor;
@@ -104,11 +105,16 @@ public class DenseVectorSet implements VectorSet {
             result = new float[this.base.size()];
             float ftmp = 0;
             int cursor = 0;
+            int dim = dimns.get(vecid);
             int start = indexer.get(vecid);
             while (cursor < result.length) {
-                ftmp = probs.get(start + cursor);
-                if (ftmp >= 0 && ftmp <= 1) {
-                    result[cursor] = ftmp;
+                if (cursor < dim) {
+                    ftmp = probs.get(start + cursor);
+                    if (ftmp >= 0 && ftmp <= 1) {
+                        result[cursor] = ftmp;
+                    }
+                } else {
+                    result[cursor] = 0;
                 }
                 cursor++;
             }
@@ -127,6 +133,7 @@ public class DenseVectorSet implements VectorSet {
                 probs.add(val);
             }
             probs.add((float) (vecid + 1));
+            dimns.put(vecid, vector.length);
 
             if (listening) {
                 for (VectorSetListener l : listeners) {
@@ -141,7 +148,7 @@ public class DenseVectorSet implements VectorSet {
         if (indexer.containsKey(vecid)) {
             float[] old = get(vecid);
 
-            if (old.length != vector.length) {
+            if (dimns.get(vecid) != vector.length) {
                 remove(vecid);
                 add(vecid, vector);
             } else {
