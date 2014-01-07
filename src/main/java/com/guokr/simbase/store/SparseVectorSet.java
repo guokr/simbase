@@ -83,30 +83,31 @@ public class SparseVectorSet implements VectorSet {
             if (curbegin == -1) {
                 curbegin = offset;
             }
-
-            probs.add(val);
-
-            if (val < -1) {
-                indexer.put(-(int) val - 1, curbegin);
-                curbegin = -1;
+            if (val != -1) {
+                if (val < -1) {
+                    indexer.put(-(int) val - 1, curbegin);
+                    curbegin = -1;
+                }
+                probs.add(val);
             }
-            offset++;
+
         }
     }
 
     @Override
     public int[] ids() {
-        TIntArrayList resultList = new TIntArrayList();
+        int[] result = new int[indexer.size()];
         int end = probs.size();
+        int pos = 0;
         for (int offset = 0; offset < end;) {
-            float pos = probs.get(offset);
-            if (pos < -1) {
-                resultList.add(-(int) pos - 1);
+            float value = probs.get(offset);
+            if (value < -1) {
+                result[pos] = -(int) value - 1;
+                pos++;
             }
-            offset += 2;
+            offset += 1;
         }
-        int[] result = new int[resultList.size()];
-        return resultList.toArray(result);
+        return result;
     }
 
     @Override

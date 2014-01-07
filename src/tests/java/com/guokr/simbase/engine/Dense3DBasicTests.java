@@ -41,28 +41,28 @@ public class Dense3DBasicTests {
             components[i] = "B" + String.valueOf(i);
         }
         try {
-            engine.bmk(TestableCallback.noop(), "base", components);
+            engine.bmk(TestableCallback.noop(), "btest", components);
             Thread.sleep(100);
-            engine.vmk(TestableCallback.noop(), "base", "article");
+            engine.vmk(TestableCallback.noop(), "btest", "vtest");
             Thread.sleep(100);
-            engine.rmk(TestableCallback.noop(), "article", "article", "cosinesq");
+            engine.rmk(TestableCallback.noop(), "vtest", "vtest", "cosinesq");
             Thread.sleep(100);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        engine.bget(TestableCallback.noop(), "base");
+        engine.bget(TestableCallback.noop(), "btest");
         try {
-            engine.vadd(TestableCallback.noop(), "article", 2, new float[] { 0.9f, 0.1f, 0.01f });
+            engine.vadd(TestableCallback.noop(), "vtest", 2, new float[] { 0.9f, 0.1f, 0.01f });
             Thread.sleep(100);
-            engine.vadd(TestableCallback.noop(), "article", 3, new float[] { 0.9f, 0f, 0.11f });
+            engine.vadd(TestableCallback.noop(), "vtest", 3, new float[] { 0.9f, 0f, 0.11f });
             Thread.sleep(100);
-            engine.vadd(TestableCallback.noop(), "article", 5, new float[] { 0.1f, 0.9f, 0.01f });
+            engine.vadd(TestableCallback.noop(), "vtest", 5, new float[] { 0.1f, 0.9f, 0.01f });
             Thread.sleep(100);
-            engine.vadd(TestableCallback.noop(), "article", 7, new float[] { 0.1f, 0f, 0.91f });
+            engine.vadd(TestableCallback.noop(), "vtest", 7, new float[] { 0.1f, 0f, 0.91f });
             Thread.sleep(100);
-            engine.vadd(TestableCallback.noop(), "article", 11, new float[] { 0f, 0.9f, 0.11f });
+            engine.vadd(TestableCallback.noop(), "vtest", 11, new float[] { 0f, 0.9f, 0.11f });
             Thread.sleep(100);
-            engine.vadd(TestableCallback.noop(), "article", 13, new float[] { 0f, 0.1f, 0.91f });
+            engine.vadd(TestableCallback.noop(), "vtest", 13, new float[] { 0f, 0.1f, 0.91f });
             Thread.sleep(100);
         } catch (InterruptedException e) {
             e.printStackTrace();
@@ -77,7 +77,7 @@ public class Dense3DBasicTests {
                 isIntegerList(new int[] { 7, 11, 3, 5, 2 });
             }
         };
-        engine.rrec(test, "article", 13, "article");
+        engine.rrec(test, "vtest", 13, "vtest");
         test.waitForFinish();
         test.validate();
         TestableCallback test2 = new TestableCallback() {
@@ -86,7 +86,7 @@ public class Dense3DBasicTests {
                 isIntegerList(new int[] { 13, 3, 11, 2, 5 });
             }
         };
-        engine.rrec(test2, "article", 7, "article");
+        engine.rrec(test2, "vtest", 7, "vtest");
         test2.waitForFinish();
         test2.validate();
     }
@@ -99,7 +99,7 @@ public class Dense3DBasicTests {
                 isFloatList(new float[] { 0.9f, 0.1f, 0.01f });
             }
         };
-        engine.vget(test2, "article", 2);
+        engine.vget(test2, "vtest", 2);
         test2.waitForFinish();
         test2.validate();
 
@@ -109,7 +109,7 @@ public class Dense3DBasicTests {
                 isFloatList(new float[] { 0.9f, 0f, 0.11f });
             }
         };
-        engine.vget(test3, "article", 3);
+        engine.vget(test3, "vtest", 3);
         test3.waitForFinish();
         test3.validate();
 
@@ -119,7 +119,7 @@ public class Dense3DBasicTests {
                 isFloatList(new float[] { 0.1f, 0.9f, 0.01f });
             }
         };
-        engine.vget(test5, "article", 5);
+        engine.vget(test5, "vtest", 5);
         test5.waitForFinish();
         test5.validate();
 
@@ -129,7 +129,7 @@ public class Dense3DBasicTests {
                 isFloatList(new float[] { 0.1f, 0f, 0.91f });
             }
         };
-        engine.vget(test7, "article", 7);
+        engine.vget(test7, "vtest", 7);
         test7.waitForFinish();
         test7.validate();
 
@@ -139,7 +139,7 @@ public class Dense3DBasicTests {
                 isFloatList(new float[] { 0f, 0.9f, 0.11f });
             }
         };
-        engine.vget(test11, "article", 11);
+        engine.vget(test11, "vtest", 11);
         test11.waitForFinish();
         test11.validate();
 
@@ -149,7 +149,7 @@ public class Dense3DBasicTests {
                 isFloatList(new float[] { 0f, 0.1f, 0.91f });
             }
         };
-        engine.vget(test13, "article", 13);
+        engine.vget(test13, "vtest", 13);
         test13.waitForFinish();
         test13.validate();
     }
@@ -159,10 +159,10 @@ public class Dense3DBasicTests {
         TestableCallback test = new TestableCallback() {
             @Override
             public void excepted() {
-                isStringList(new String[] { "article" });
+                isStringList(new String[] { "vtest" });
             }
         };
-        engine.rlist(test, "article");
+        engine.rlist(test, "vtest");
         test.waitForFinish();
         test.validate();
     }
@@ -175,7 +175,7 @@ public class Dense3DBasicTests {
                 isOk();
             }
         };
-        engine.vrem(testok, "article", 5);
+        engine.vrem(testok, "vtest", 5);
         testok.waitForFinish();
         testok.validate();
         TestableCallback test = new TestableCallback() {
@@ -184,11 +184,11 @@ public class Dense3DBasicTests {
                 isIntegerList(new int[] { 7, 11, 3, 2 });
             }
         };
-        engine.rrec(test, "article", 13, "article");
+        engine.rrec(test, "vtest", 13, "vtest");
         test.waitForFinish();
         test.validate();
         try {
-            engine.vadd(TestableCallback.noop(), "article", 5, new float[] { 0.1f, 0.9f, 0f });
+            engine.vadd(TestableCallback.noop(), "vtest", 5, new float[] { 0.1f, 0.9f, 0f });
             Thread.sleep(100);
         } catch (InterruptedException e) {
             e.printStackTrace();
@@ -199,7 +199,7 @@ public class Dense3DBasicTests {
                 isIntegerList(new int[] { 7, 11, 3, 5, 2 });
             }
         };
-        engine.rrec(test2, "article", 13, "article");
+        engine.rrec(test2, "vtest", 13, "vtest");
         test2.waitForFinish();
         test2.validate();
     }
@@ -213,10 +213,10 @@ public class Dense3DBasicTests {
                 isOk();
             }
         };
-        engine.vset(testok, "article", 2, new float[] { 0.1f, 0f, 0.9f });
+        engine.vset(testok, "vtest", 2, new float[] { 0.1f, 0f, 0.9f });
         testok.waitForFinish();
         testok.validate();
-        engine.vset(testok, "article", 7, new float[] { 0.9f, 0.1f, 0f });
+        engine.vset(testok, "vtest", 7, new float[] { 0.9f, 0.1f, 0f });
         testok.waitForFinish();
         testok.validate();
         TestableCallback test1 = new TestableCallback() {
@@ -225,14 +225,14 @@ public class Dense3DBasicTests {
                 isIntegerList(new int[] { 2, 11, 5, 3, 7 });
             }
         };
-        engine.rrec(test1, "article", 13, "article");
+        engine.rrec(test1, "vtest", 13, "vtest");
         // Restored to their original
         test1.waitForFinish();
         test1.validate();
-        engine.vset(testok, "article", 2, new float[] { 0.9f, 0.1f, 0f });
+        engine.vset(testok, "vtest", 2, new float[] { 0.9f, 0.1f, 0f });
         testok.waitForFinish();
         testok.validate();
-        engine.vset(testok, "article", 7, new float[] { 0.1f, 0f, 0.9f });
+        engine.vset(testok, "vtest", 7, new float[] { 0.1f, 0f, 0.9f });
         testok.waitForFinish();
         testok.validate();
 
@@ -243,7 +243,7 @@ public class Dense3DBasicTests {
                 isIntegerList(new int[] { 7, 11, 5, 3, 2 });
             }
         };
-        engine.rrec(test2, "article", 13, "article");
+        engine.rrec(test2, "vtest", 13, "vtest");
         test2.waitForFinish();
         test2.validate();
     }
@@ -253,7 +253,7 @@ public class Dense3DBasicTests {
         TestableCallback test = new TestableCallback() {
             @Override
             public void excepted() {
-                isStringList(new String[] { "base" });
+                isStringList(new String[] { "btest" });
             }
         };
         engine.blist(test);
@@ -266,10 +266,10 @@ public class Dense3DBasicTests {
         TestableCallback test = new TestableCallback() {
             @Override
             public void excepted() {
-                isStringList(new String[] { "article" });
+                isStringList(new String[] { "vtest" });
             }
         };
-        engine.vlist(test, "base");
+        engine.vlist(test, "btest");
         test.waitForFinish();
         test.validate();
     }
@@ -282,7 +282,7 @@ public class Dense3DBasicTests {
                 isOk();
             }
         };
-        engine.vacc(testok, "article", 5, new float[] { 0.1f, 0.9f, 0f });
+        engine.vacc(testok, "vtest", 5, new float[] { 0.1f, 0.9f, 0f });
         testok.waitForFinish();
         testok.validate();
         TestableCallback testget = new TestableCallback() {
@@ -291,7 +291,7 @@ public class Dense3DBasicTests {
                 isFloatList(new float[] { 0.1f, 0.9f, 0f });
             }
         };
-        engine.vget(testget, "article", 5);
+        engine.vget(testget, "vtest", 5);
         testget.waitForFinish();
         testget.validate();
     }
@@ -304,7 +304,7 @@ public class Dense3DBasicTests {
                 isOk();
             }
         };
-        engine.brev(testbrev, "base", new String[] { "B2", "B1", "B0" });
+        engine.brev(testbrev, "btest", new String[] { "B2", "B1", "B0" });
         testbrev.waitForFinish();
         testbrev.validate();
     }

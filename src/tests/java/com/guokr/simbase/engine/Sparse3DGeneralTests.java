@@ -1,8 +1,11 @@
 package com.guokr.simbase.engine;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.junit.After;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -41,32 +44,37 @@ public class Sparse3DGeneralTests {
             components[i] = "B" + String.valueOf(i);
         }
         try {
-            engine.bmk(TestableCallback.noop(), "base", components);
-            Thread.sleep(100);
-            engine.vmk(TestableCallback.noop(), "base", "article");
-            Thread.sleep(100);
-            engine.rmk(TestableCallback.noop(), "article", "article", "jensenshannon");
+            engine.bmk(TestableCallback.noop(), "btest", components);
             Thread.sleep(100);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        engine.bget(TestableCallback.noop(), "base");
-        try {
-            engine.vadd(TestableCallback.noop(), "article", 2, new float[] { 0.9f, 0.1f, 0f });
-            Thread.sleep(100);
-            engine.vadd(TestableCallback.noop(), "article", 3, new float[] { 0.9f, 0f, 0.1f });
-            Thread.sleep(100);
-            engine.vadd(TestableCallback.noop(), "article", 5, new float[] { 0.1f, 0.9f, 0f });
-            Thread.sleep(100);
-            engine.vadd(TestableCallback.noop(), "article", 7, new float[] { 0.1f, 0f, 0.9f });
-            Thread.sleep(100);
-            engine.vadd(TestableCallback.noop(), "article", 11, new float[] { 0f, 0.9f, 0.1f });
-            Thread.sleep(100);
-            engine.vadd(TestableCallback.noop(), "article", 13, new float[] { 0f, 0.1f, 0.9f });
-            Thread.sleep(100);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+    }
+
+    @Before
+    public void testUp() throws Exception {
+        engine.vmk(TestableCallback.noop(), "btest", "vtest");
+        Thread.sleep(100);
+        engine.rmk(TestableCallback.noop(), "vtest", "vtest", "jensenshannon");
+        Thread.sleep(100);
+        engine.vadd(TestableCallback.noop(), "vtest", 2, new float[] { 0.9f, 0.1f, 0f });
+        Thread.sleep(100);
+        engine.vadd(TestableCallback.noop(), "vtest", 3, new float[] { 0.9f, 0f, 0.1f });
+        Thread.sleep(100);
+        engine.vadd(TestableCallback.noop(), "vtest", 5, new float[] { 0.1f, 0.9f, 0f });
+        Thread.sleep(100);
+        engine.vadd(TestableCallback.noop(), "vtest", 7, new float[] { 0.1f, 0f, 0.9f });
+        Thread.sleep(100);
+        engine.vadd(TestableCallback.noop(), "vtest", 11, new float[] { 0f, 0.9f, 0.1f });
+        Thread.sleep(100);
+        engine.vadd(TestableCallback.noop(), "vtest", 13, new float[] { 0f, 0.1f, 0.9f });
+        Thread.sleep(100);
+    }
+
+    @After
+    public void testDown() throws Exception {
+        engine.del(TestableCallback.noop(), "vtest");
+        Thread.sleep(2000);
     }
 
     @Test
@@ -77,7 +85,7 @@ public class Sparse3DGeneralTests {
                 isOk();
             }
         };
-        engine.brev(testbrev, "base", new String[] { "B3", "B1", "B0" });
+        engine.brev(testbrev, "btest", new String[] { "B3", "B1", "B0" });
         testbrev.waitForFinish();
         testbrev.validate();
         TestableCallback test2 = new TestableCallback() {
@@ -86,7 +94,7 @@ public class Sparse3DGeneralTests {
                 isFloatList(new float[] { 0.9f, 0.1f, 0f, 0f });
             }
         };
-        engine.vget(test2, "article", 2);
+        engine.vget(test2, "vtest", 2);
         test2.waitForFinish();
         test2.validate();
 
@@ -96,7 +104,7 @@ public class Sparse3DGeneralTests {
                 isFloatList(new float[] { 0.9f, 0f, 0.1f, 0f });
             }
         };
-        engine.vget(test3, "article", 3);
+        engine.vget(test3, "vtest", 3);
         test3.waitForFinish();
         test3.validate();
 
@@ -106,7 +114,7 @@ public class Sparse3DGeneralTests {
                 isFloatList(new float[] { 0.1f, 0.9f, 0f, 0f });
             }
         };
-        engine.vget(test5, "article", 5);
+        engine.vget(test5, "vtest", 5);
         test5.waitForFinish();
         test5.validate();
 
@@ -116,7 +124,7 @@ public class Sparse3DGeneralTests {
                 isFloatList(new float[] { 0.1f, 0f, 0.9f, 0f });
             }
         };
-        engine.vget(test7, "article", 7);
+        engine.vget(test7, "vtest", 7);
         test7.waitForFinish();
         test7.validate();
 
@@ -126,7 +134,7 @@ public class Sparse3DGeneralTests {
                 isFloatList(new float[] { 0f, 0.9f, 0.1f, 0f });
             }
         };
-        engine.vget(test11, "article", 11);
+        engine.vget(test11, "vtest", 11);
         test11.waitForFinish();
         test11.validate();
 
@@ -136,8 +144,100 @@ public class Sparse3DGeneralTests {
                 isFloatList(new float[] { 0f, 0.1f, 0.9f, 0f });
             }
         };
-        engine.vget(test13, "article", 13);
+        engine.vget(test13, "vtest", 13);
         test13.waitForFinish();
         test13.validate();
+
+        TestableCallback testIds = new TestableCallback() {
+            @Override
+            public void excepted() {
+                isIntegerList(new int[] { 2, 3, 5, 7, 11, 13 });
+            }
+        };
+        engine.vids(testIds, "vtest");
+        testIds.waitForFinish();
+        testIds.validate();
+    }
+
+    @Test
+    public void testSaveLoad() throws Exception {
+        TestableCallback testOids = new TestableCallback() {
+            @Override
+            public void excepted() {
+                isIntegerList(new int[] { 2, 3, 5, 7, 11, 13 });
+            }
+        };
+        engine.vids(testOids, "vtest");
+        testOids.waitForFinish();
+        testOids.validate();
+        Thread.sleep(100);
+        engine.vrem(TestableCallback.noop(), "vtest", 3);
+        Thread.sleep(100);
+        engine.vrem(TestableCallback.noop(), "vtest", 7);
+        Thread.sleep(100);
+        TestableCallback testDids = new TestableCallback() {
+            @Override
+            public void excepted() {
+                isIntegerList(new int[] { 2, 5, 11, 13 });
+            }
+        };
+        engine.vids(testDids, "vtest");
+        testDids.waitForFinish();
+        testDids.validate();
+        engine.bsave(TestableCallback.noop(), "btest");
+        Thread.sleep(1000);
+        try {
+            engine.del(TestableCallback.noop(), "btest");
+            Thread.sleep(400);
+
+            TestableCallback testEmpty = new TestableCallback() {
+                @Override
+                public void excepted() {
+                    isStringList(new String[0]);
+                }
+            };
+            engine.blist(testEmpty);
+            testEmpty.waitForFinish();
+            testEmpty.validate();
+
+            engine.bload(TestableCallback.noop(), "btest");
+            Thread.sleep(300);
+        } catch (Throwable t) {
+            throw t;
+        } finally {
+            File file = new File("./data/btest.dmp");
+            file.delete();
+        }
+
+        TestableCallback testBases = new TestableCallback() {
+            @Override
+            public void excepted() {
+                isStringList(new String[] { "btest" });
+            }
+        };
+        engine.blist(testBases);
+        testBases.waitForFinish();
+        testBases.validate();
+
+        TestableCallback testVecs = new TestableCallback() {
+            @Override
+            public void excepted() {
+                isStringList(new String[] { "vtest" });
+            }
+        };
+        engine.vlist(testVecs, "btest");
+        testVecs.waitForFinish();
+        testVecs.validate();
+
+        TestableCallback testIds = new TestableCallback() {
+            @Override
+            public void excepted() {
+                isIntegerList(new int[] { 2, 5, 11, 13 });
+            }
+        };
+        engine.vids(testIds, "vtest");
+        testIds.waitForFinish();
+        testIds.validate();
+
     }
 }

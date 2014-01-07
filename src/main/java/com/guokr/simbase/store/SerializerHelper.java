@@ -270,7 +270,7 @@ public class SerializerHelper {
         kryo.writeObject(output, vectorSets.size());
         for (String key : vectorSets.keySet()) {
             VectorSet vectorSet = vectorSets.get(key);
-            kryo.writeObject(output, "dense");
+            kryo.writeObject(output, vectorSet.type());
             kryo.writeObject(output, vectorSet);
         }
     }
@@ -296,7 +296,6 @@ public class SerializerHelper {
 
     public void writeRecommendations(Output output, Map<String, Recommendation> recommendations) {
         kryo.writeObject(output, recommendations.size());
-        System.out.println("wrec:recs:size: " + recommendations.size());
         for (String key : recommendations.keySet()) {
             Recommendation rec = recommendations.get(key);
             kryo.writeObject(output, rec.source.key());

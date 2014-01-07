@@ -54,7 +54,6 @@ public class DenseVectorSet implements VectorSet {
 
     @Override
     public void clean() {
-        System.out.println("clean:indexer:size:" + indexer.size());
         TFloatList tmp = probs;
         probs = new TFloatArrayList();
         dimns = new TIntIntHashMap();
@@ -79,22 +78,22 @@ public class DenseVectorSet implements VectorSet {
                 }
             }
         }
-        System.out.println("clean:indexer:size:end:" + indexer.size());
     }
 
     @Override
     public int[] ids() {
-        TIntList resultList = new TIntArrayList();
+        int[] result = new int[indexer.size()];
         int end = probs.size();
+        int pos = 0;
         for (int offset = 0; offset < end; offset++) {
             float val = probs.get(offset);
             if (val > 1) {
-                resultList.add((int) val - 1);
+                result[pos] = (int) val - 1;
                 offset++;
+                pos++;
             }
         }
-        int[] result = new int[resultList.size()];
-        return resultList.toArray(result);
+        return result;
     }
 
     @Override

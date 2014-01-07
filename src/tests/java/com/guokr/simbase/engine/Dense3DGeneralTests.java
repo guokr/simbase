@@ -70,7 +70,7 @@ public class Dense3DGeneralTests {
     @After
     public void testDown() throws Exception {
         engine.del(TestableCallback.noop(), "vtest");
-        Thread.sleep(5000);
+        Thread.sleep(1000);
     }
 
     @Test
@@ -164,10 +164,10 @@ public class Dense3DGeneralTests {
         engine.vrem(TestableCallback.noop(), "vtest", 7);
         Thread.sleep(100);
         engine.bsave(TestableCallback.noop(), "btest");
-        Thread.sleep(4000);
+        Thread.sleep(1000);
         try {
             engine.del(TestableCallback.noop(), "btest");
-            Thread.sleep(1000);
+            Thread.sleep(400);
 
             TestableCallback testEmpty = new TestableCallback() {
                 @Override
