@@ -114,7 +114,8 @@ public class SimEngineImpl implements SimEngine, SimBasisListener {
     private final Map<String, SimBasis>        bases       = new HashMap<String, SimBasis>();
 
     private final Map<String, ExecutorService> writerExecs = new HashMap<String, ExecutorService>();
-    private final ThreadPoolExecutor           readerPool  = new ThreadPoolExecutor(53, 83, 37, TimeUnit.SECONDS, new ArrayBlockingQueue<Runnable>(100),
+    private final ThreadPoolExecutor           readerPool  = new ThreadPoolExecutor(53, 83, 37, TimeUnit.SECONDS,
+                                                                   new ArrayBlockingQueue<Runnable>(100),
                                                                    new ServerThreadFactory(), new RejectedHandler());
 
     private final Map<String, Integer>         counters    = new HashMap<String, Integer>();
@@ -125,7 +126,8 @@ public class SimEngineImpl implements SimEngine, SimBasisListener {
         String separator = System.getProperty("file.separator");
         this.context = simContext;
         this.bycount = simContext.getInt("bycount");
-        this.savePath = new StringBuilder(System.getProperty("user.dir")).append(separator).append(context.getString("savepath")).append(separator).toString();
+        this.savePath = new StringBuilder(System.getProperty("user.dir")).append(separator)
+                .append(context.getString("savepath")).append(separator).toString();
         this.load(null);
         this.startCron();
     }
@@ -156,7 +158,8 @@ public class SimEngineImpl implements SimEngine, SimBasisListener {
 
     private void validateKind(String op, String toCheck, Kind kindShouldBe) throws SimEngineException {
         if (!kindOf.containsKey(toCheck) || !kindShouldBe.equals(kindOf.get(toCheck))) {
-            throw new SimEngineException(String.format("Operation '%s' against a non-%s type '%s'", op, kindShouldBe, toCheck));
+            throw new SimEngineException(String.format("Operation '%s' against a non-%s type '%s'", op, kindShouldBe,
+                    toCheck));
         }
     }
 
@@ -184,14 +187,16 @@ public class SimEngineImpl implements SimEngine, SimBasisListener {
                 throw new SimEngineException(String.format("Sparse matrix index '%d' out of bound", toCheck[offset]));
             }
             if (toCheck[offset + 1] < 0) {
-                throw new SimEngineException(String.format("Sparse matrix value '%d' should be non-negative", toCheck[offset + 1]));
+                throw new SimEngineException(String.format("Sparse matrix value '%d' should be non-negative",
+                        toCheck[offset + 1]));
             }
         }
     }
 
     private void validateSameBasis(String vkeySource, String vkeyTarget) {
         if (!basisOf.get(vkeySource).equals(basisOf.get(vkeyTarget))) {
-            throw new SimEngineException(String.format("Recommedation[%s, %s] must be between two vector set with same basis", vkeySource, vkeyTarget));
+            throw new SimEngineException(String.format(
+                    "Recommedation[%s, %s] must be between two vector set with same basis", vkeySource, vkeyTarget));
         }
     }
 
@@ -246,39 +251,41 @@ public class SimEngineImpl implements SimEngine, SimBasisListener {
         writerExecs.get(basisOf.get(key)).execute(new AsyncSafeRunner("del") {
             @Override
             public void invoke() {
-                Kind kind = kindOf.get(key);
+                delete(key);
+            }
+
+            public void delete(String toDel) {
+                Kind kind = kindOf.get(toDel);
                 switch (kind) {
                 case BASIS:
-                    for (String vkey : vectorsOf.get(key)) {
-                        del(null, vkey);
-                    }
-                    kindOf.remove(key);
-                    basisOf.remove(key);
-                    bases.remove(key);
-                    writerExecs.remove(key);
+                    vectorsOf.remove(toDel);
+                    kindOf.remove(toDel);
+                    basisOf.remove(toDel);
+                    bases.remove(toDel);
+                    writerExecs.remove(toDel);
                     break;
                 case VECTORS:
-                    String bkey = basisOf.get(key);
-                    for (String target : rtargetsOf.get(key)) {
-                        del(null, rkey(key, target));
+                    String bkey = basisOf.get(toDel);
+                    for (String target : rtargetsOf.get(toDel)) {
+                        delete(rkey(toDel, target));
                     }
-                    rtargetsOf.remove(key);
-                    for (String source : rsourcesOf.get(key)) {
-                        if (!source.equals(key)) {
-                            del(null, rkey(source, key));
+                    rtargetsOf.remove(toDel);
+                    for (String source : rsourcesOf.get(toDel)) {
+                        if (!source.equals(toDel)) {
+                            delete(rkey(source, toDel));
                         }
                     }
-                    rsourcesOf.remove(key);
+                    rsourcesOf.remove(toDel);
 
-                    vectorsOf.get(bkey).remove(key);
-                    basisOf.remove(key);
-                    kindOf.remove(key);
-                    bases.get(bkey).vdel(key);
+                    vectorsOf.get(bkey).remove(toDel);
+                    basisOf.remove(toDel);
+                    kindOf.remove(toDel);
+                    bases.get(bkey).vdel(toDel);
                     break;
                 case RECOMM:
-                    bases.get(basisOf.get(key)).rdel(key);
-                    basisOf.remove(key);
-                    kindOf.remove(key);
+                    bases.get(basisOf.get(toDel)).rdel(toDel);
+                    basisOf.remove(toDel);
+                    kindOf.remove(toDel);
                     break;
                 }
             }

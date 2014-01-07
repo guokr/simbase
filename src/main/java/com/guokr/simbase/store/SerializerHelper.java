@@ -296,10 +296,11 @@ public class SerializerHelper {
 
     public void writeRecommendations(Output output, Map<String, Recommendation> recommendations) {
         kryo.writeObject(output, recommendations.size());
+        System.out.println("wrec:recs:size: " + recommendations.size());
         for (String key : recommendations.keySet()) {
             Recommendation rec = recommendations.get(key);
-            output.writeString(rec.source.key());
-            output.writeString(rec.target.key());
+            kryo.writeObject(output, rec.source.key());
+            kryo.writeObject(output, rec.target.key());
             kryo.writeObject(output, rec);
         }
     }
