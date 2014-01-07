@@ -1,5 +1,6 @@
 package com.guokr.simbase.engine;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -16,6 +17,7 @@ public class Dense3DGeneralTests {
 
     @BeforeClass
     public static void setup() throws Exception {
+        System.out.println(Thread.currentThread().getId() + ":" + "setup begin");
         Map<String, Object> settings = new HashMap<String, Object>();
         Map<String, Object> defaults = new HashMap<String, Object>();
         Map<String, Object> basis = new HashMap<String, Object>();
@@ -42,34 +44,39 @@ public class Dense3DGeneralTests {
             components[i] = "B" + String.valueOf(i);
         }
 
-        engine.bmk(TestableCallback.noop(), "base", components);
+        engine.bmk(TestableCallback.noop(), "btest", components);
         Thread.sleep(100);
+        System.out.println(Thread.currentThread().getId() + ":" + "setup end");
     }
 
     @Before
     public void testUp() throws Exception {
-        engine.vmk(TestableCallback.noop(), "base", "test");
+        System.out.println(Thread.currentThread().getId() + ":" + "testUp begin");
+        engine.vmk(TestableCallback.noop(), "btest", "vtest");
         Thread.sleep(100);
-        engine.rmk(TestableCallback.noop(), "test", "test", "jensenshannon");
+        engine.rmk(TestableCallback.noop(), "vtest", "vtest", "jensenshannon");
         Thread.sleep(100);
-        engine.vadd(TestableCallback.noop(), "test", 2, new float[] { 0.9f, 0.1f, 0f });
+        engine.vadd(TestableCallback.noop(), "vtest", 2, new float[] { 0.9f, 0.1f, 0f });
         Thread.sleep(100);
-        engine.vadd(TestableCallback.noop(), "test", 3, new float[] { 0.9f, 0f, 0.1f });
+        engine.vadd(TestableCallback.noop(), "vtest", 3, new float[] { 0.9f, 0f, 0.1f });
         Thread.sleep(100);
-        engine.vadd(TestableCallback.noop(), "test", 5, new float[] { 0.1f, 0.9f, 0f });
+        engine.vadd(TestableCallback.noop(), "vtest", 5, new float[] { 0.1f, 0.9f, 0f });
         Thread.sleep(100);
-        engine.vadd(TestableCallback.noop(), "test", 7, new float[] { 0.1f, 0f, 0.9f });
+        engine.vadd(TestableCallback.noop(), "vtest", 7, new float[] { 0.1f, 0f, 0.9f });
         Thread.sleep(100);
-        engine.vadd(TestableCallback.noop(), "test", 11, new float[] { 0f, 0.9f, 0.1f });
+        engine.vadd(TestableCallback.noop(), "vtest", 11, new float[] { 0f, 0.9f, 0.1f });
         Thread.sleep(100);
-        engine.vadd(TestableCallback.noop(), "test", 13, new float[] { 0f, 0.1f, 0.9f });
+        engine.vadd(TestableCallback.noop(), "vtest", 13, new float[] { 0f, 0.1f, 0.9f });
         Thread.sleep(100);
+        System.out.println(Thread.currentThread().getId() + ":" + "testUp end");
     }
 
     @After
     public void testDown() throws Exception {
-        engine.del(TestableCallback.noop(), "test");
+        System.out.println(Thread.currentThread().getId() + ":" + "testDown begin");
+        engine.del(TestableCallback.noop(), "vtest");
         Thread.sleep(5000);
+        System.out.println(Thread.currentThread().getId() + ":" + "testDown end");
     }
 
     @Test
@@ -80,9 +87,9 @@ public class Dense3DGeneralTests {
                 isOk();
             }
         };
-        engine.brev(testbrev, "base", new String[] { "B3", "B1", "B0" });
-        engine.vset(TestableCallback.noop(), "test", 13, new float[] { 0.1f, 0.2f, 0.3f, 0.4f });
-        engine.vset(TestableCallback.noop(), "test", 17, new float[] { 0.4f, 0.3f, 0.2f, 0.1f });
+        engine.brev(testbrev, "btest", new String[] { "B3", "B1", "B0" });
+        engine.vset(TestableCallback.noop(), "vtest", 13, new float[] { 0.1f, 0.2f, 0.3f, 0.4f });
+        engine.vset(TestableCallback.noop(), "vtest", 17, new float[] { 0.4f, 0.3f, 0.2f, 0.1f });
         testbrev.waitForFinish();
         testbrev.validate();
         TestableCallback test2 = new TestableCallback() {
@@ -91,7 +98,7 @@ public class Dense3DGeneralTests {
                 isFloatList(new float[] { 0.9f, 0.1f, 0f, 0f });
             }
         };
-        engine.vget(test2, "test", 2);
+        engine.vget(test2, "vtest", 2);
         test2.waitForFinish();
         test2.validate();
 
@@ -101,7 +108,7 @@ public class Dense3DGeneralTests {
                 isFloatList(new float[] { 0.9f, 0f, 0.1f, 0f });
             }
         };
-        engine.vget(test3, "test", 3);
+        engine.vget(test3, "vtest", 3);
         test3.waitForFinish();
         test3.validate();
 
@@ -111,7 +118,7 @@ public class Dense3DGeneralTests {
                 isFloatList(new float[] { 0.1f, 0.9f, 0f, 0f });
             }
         };
-        engine.vget(test5, "test", 5);
+        engine.vget(test5, "vtest", 5);
         test5.waitForFinish();
         test5.validate();
 
@@ -121,7 +128,7 @@ public class Dense3DGeneralTests {
                 isFloatList(new float[] { 0.1f, 0f, 0.9f, 0f });
             }
         };
-        engine.vget(test7, "test", 7);
+        engine.vget(test7, "vtest", 7);
         test7.waitForFinish();
         test7.validate();
 
@@ -131,7 +138,7 @@ public class Dense3DGeneralTests {
                 isFloatList(new float[] { 0f, 0.9f, 0.1f, 0f });
             }
         };
-        engine.vget(test11, "test", 11);
+        engine.vget(test11, "vtest", 11);
         test11.waitForFinish();
         test11.validate();
 
@@ -141,7 +148,7 @@ public class Dense3DGeneralTests {
                 isFloatList(new float[] { 0.1f, 0.2f, 0.3f, 0.4f });
             }
         };
-        engine.vget(test13, "test", 13);
+        engine.vget(test13, "vtest", 13);
         test13.waitForFinish();
         test13.validate();
 
@@ -151,20 +158,23 @@ public class Dense3DGeneralTests {
                 isFloatList(new float[] { 0.4f, 0.3f, 0.2f, 0.1f });
             }
         };
-        engine.vget(test17, "test", 17);
+        engine.vget(test17, "vtest", 17);
         test17.waitForFinish();
         test17.validate();
     }
 
     @Test
     public void testSaveLoad() throws Exception {
-        engine.vrem(TestableCallback.noop(), "test", 3);
+        engine.vrem(TestableCallback.noop(), "vtest", 3);
         Thread.sleep(100);
-        engine.vrem(TestableCallback.noop(), "test", 7);
+        engine.vrem(TestableCallback.noop(), "vtest", 7);
         Thread.sleep(100);
-        engine.bsave(TestableCallback.noop(), "test");
+
+        System.out.println(Thread.currentThread().getId() + ":" + "before error");
+
+        engine.bsave(TestableCallback.noop(), "btest");
         Thread.sleep(4000);
-        engine.del(TestableCallback.noop(), "test");
+        engine.del(TestableCallback.noop(), "btest");
         Thread.sleep(1000);
 
         TestableCallback testEmpty = new TestableCallback() {
@@ -173,11 +183,11 @@ public class Dense3DGeneralTests {
                 isStringList(new String[0]);
             }
         };
-        engine.bget(testEmpty, "test");
+        engine.blist(testEmpty);
         testEmpty.waitForFinish();
         testEmpty.validate();
 
-        engine.bload(TestableCallback.noop(), "test");
+        engine.bload(TestableCallback.noop(), "btest");
         Thread.sleep(100);
 
         TestableCallback testIds = new TestableCallback() {
@@ -186,9 +196,12 @@ public class Dense3DGeneralTests {
                 isIntegerList(new int[] { 2, 5, 11, 13 });
             }
         };
-        engine.vids(testIds, "test");
+        engine.vids(testIds, "vtest");
         testIds.waitForFinish();
         testIds.validate();
+
+        File file = new File("./data/btest.dmp");
+        file.delete();
     }
 
 }
