@@ -110,7 +110,6 @@ public class SimEngineImpl implements SimEngine, SimBasisListener {
     private final Map<String, String>          basisOf     = new HashMap<String, String>();
     private final Map<String, List<String>>    vectorsOf   = new HashMap<String, List<String>>();
     private final Map<String, Set<String>>     rtargetsOf  = new HashMap<String, Set<String>>();
-    private final Map<String, Set<String>>     rsourcesOf  = new HashMap<String, Set<String>>();
     private final Map<String, SimBasis>        bases       = new HashMap<String, SimBasis>();
 
     private final Map<String, ExecutorService> writerExecs = new HashMap<String, ExecutorService>();
@@ -258,6 +257,22 @@ public class SimEngineImpl implements SimEngine, SimBasisListener {
                 Kind kind = kindOf.get(toDel);
                 switch (kind) {
                 case BASIS:
+                    for (String vec : vectorsOf.get(key)) {
+                        for (String source : rtargetsOf.keySet()) {
+                            if (source.equals(vec)) {
+                                for (String target : rtargetsOf.get(vec)) {
+                                    String recKey = rkey(vec, target);
+                                    basisOf.remove(recKey);
+                                    kindOf.remove(recKey);
+                                }
+                                rtargetsOf.remove(vec);
+                            } else {
+                                rtargetsOf.get(source).remove(vec);
+                            }
+                        }
+                        kindOf.remove(vec);
+                        basisOf.remove(vec);
+                    }
                     vectorsOf.remove(toDel);
                     kindOf.remove(toDel);
                     basisOf.remove(toDel);
@@ -266,17 +281,16 @@ public class SimEngineImpl implements SimEngine, SimBasisListener {
                     break;
                 case VECTORS:
                     String bkey = basisOf.get(toDel);
-                    for (String target : rtargetsOf.get(toDel)) {
-                        delete(rkey(toDel, target));
-                    }
-                    rtargetsOf.remove(toDel);
-                    for (String source : rsourcesOf.get(toDel)) {
-                        if (!source.equals(toDel)) {
-                            delete(rkey(source, toDel));
+                    for (String source : rtargetsOf.keySet()) {
+                        if (source.equals(toDel)) {
+                            for (String target : rtargetsOf.get(toDel)) {
+                                delete(rkey(toDel, target));
+                            }
+                            rtargetsOf.remove(toDel);
+                        } else {
+                            rtargetsOf.get(source).remove(toDel);
                         }
                     }
-                    rsourcesOf.remove(toDel);
-
                     vectorsOf.get(bkey).remove(toDel);
                     basisOf.remove(toDel);
                     kindOf.remove(toDel);
@@ -665,7 +679,7 @@ public class SimEngineImpl implements SimEngine, SimBasisListener {
                 validateKind("rmk", vkeySource, Kind.VECTORS);
                 validateKind("rmk", vkeyTarget, Kind.VECTORS);
                 validateSameBasis(vkeyTarget, vkeySource);
-                String rkey = rkey(vkeyTarget, vkeySource);
+                String rkey = rkey(vkeySource, vkeyTarget);
                 validateNotExistence(rkey);
                 final String bkey = basisOf.get(vkeySource);
                 bases.get(bkey).rmk(vkeySource, vkeyTarget, funcscore);
@@ -677,11 +691,6 @@ public class SimEngineImpl implements SimEngine, SimBasisListener {
                 }
                 rtargetsOf.get(vkeySource).add(vkeyTarget);
 
-                if (rsourcesOf.get(vkeyTarget) == null) {
-                    rsourcesOf.put(vkeyTarget, new HashSet<String>());
-                }
-                rsourcesOf.get(vkeyTarget).add(vkeySource);
-
                 callback.ok();
             }
         });
@@ -691,7 +700,7 @@ public class SimEngineImpl implements SimEngine, SimBasisListener {
     public void rget(final SimCallback callback, final String vkeySource, final int vecid, final String vkeyTarget) {
         validateKind("rget", vkeySource, Kind.VECTORS);
         validateKind("rget", vkeyTarget, Kind.VECTORS);
-        String rkey = rkey(vkeyTarget, vkeySource);
+        String rkey = rkey(vkeySource, vkeyTarget);
         validateExistence(rkey);
         final String bkey = basisOf.get(vkeySource);
         readerPool.submit(new SafeRunner("rget", callback) {
@@ -706,7 +715,7 @@ public class SimEngineImpl implements SimEngine, SimBasisListener {
     public void rrec(final SimCallback callback, final String vkeySource, final int vecid, final String vkeyTarget) {
         validateKind("rget", vkeySource, Kind.VECTORS);
         validateKind("rget", vkeyTarget, Kind.VECTORS);
-        String rkey = rkey(vkeyTarget, vkeySource);
+        String rkey = rkey(vkeySource, vkeyTarget);
         validateExistence(rkey);
         final String bkey = basisOf.get(vkeySource);
         readerPool.submit(new SafeRunner("rrec", callback) {
