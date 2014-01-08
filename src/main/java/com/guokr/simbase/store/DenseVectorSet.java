@@ -112,13 +112,14 @@ public class DenseVectorSet implements VectorSet {
                     break;
                 }
             }
-        }
 
-        indexer.remove(vecid);
+            indexer.remove(vecid);
+            dimns.remove(vecid);
 
-        if (listening) {
-            for (VectorSetListener l : listeners) {
-                l.onVectorRemoved(this, vecid);
+            if (listening) {
+                for (VectorSetListener l : listeners) {
+                    l.onVectorRemoved(this, vecid);
+                }
             }
         }
     }

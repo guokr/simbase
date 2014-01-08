@@ -9,7 +9,7 @@ import org.junit.Test;
 import com.guokr.simbase.SimConfig;
 import com.guokr.simbase.TestableCallback;
 
-public class Dense3DBasicTests {
+public class DenseCosBasicTests {
     public static SimEngineImpl engine;
 
     @BeforeClass
@@ -175,13 +175,25 @@ public class Dense3DBasicTests {
                 isOk();
             }
         };
+
+        TestableCallback testRrec = new TestableCallback() {
+            @Override
+            public void excepted() {
+                isIntegerList(new int[] { 3, 5, 7, 11, 13 });
+            }
+        };
+        engine.rrec(testRrec, "vtest", 2, "vtest");
+        testRrec.waitForFinish();
+        testRrec.validate();
+
         engine.vrem(testok, "vtest", 5);
+        engine.vrem(testok, "vtest", 7);
         testok.waitForFinish();
         testok.validate();
         TestableCallback test = new TestableCallback() {
             @Override
             public void excepted() {
-                isIntegerList(new int[] { 7, 11, 3, 2 });
+                isIntegerList(new int[] { 11, 3, 2 });
             }
         };
         engine.rrec(test, "vtest", 13, "vtest");
@@ -196,12 +208,20 @@ public class Dense3DBasicTests {
         TestableCallback test2 = new TestableCallback() {
             @Override
             public void excepted() {
-                isIntegerList(new int[] { 7, 11, 3, 5, 2 });
+                isIntegerList(new int[] { 11, 3, 5, 2 });
             }
         };
         engine.rrec(test2, "vtest", 13, "vtest");
         test2.waitForFinish();
         test2.validate();
+
+        engine.vadd(TestableCallback.noop(), "vtest", 5, new float[] { 0.1f, 0.9f, 0.01f });
+        engine.vadd(TestableCallback.noop(), "vtest", 7, new float[] { 0.1f, 0f, 0.91f });
+
+        engine.rrec(testRrec, "vtest", 2, "vtest");
+        testRrec.waitForFinish();
+        testRrec.validate();
+
     }
 
     // @Test

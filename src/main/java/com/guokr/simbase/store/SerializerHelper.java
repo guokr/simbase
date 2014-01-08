@@ -47,15 +47,24 @@ public class SerializerHelper {
             int sparseFactor = kryo.readObject(input, int.class);
             DenseVectorSet vectorSet = new DenseVectorSet(key, basis, accumuFactor, sparseFactor);
             int sizeVector = kryo.readObject(input, int.class);
-            int sizeBase = basis.size();
-            for (int offset = 0; offset < sizeVector; offset++) {
-                for (int index = 0; index < sizeBase; index++) {
-                    float prob = kryo.readObject(input, float.class);
-                    vectorSet.probs.add(prob);
+            int offset = -1;
+            int vecid, dim;
+            float value;
+            while (sizeVector > 0) {
+                value = kryo.readObject(input, float.class);
+                offset++;
+                dim = 0;
+                while (value <= 1) {
+                    vectorSet.probs.add(value);
+                    value = kryo.readObject(input, float.class);
+                    offset++;
+                    dim++;
                 }
-                float vecid = kryo.readObject(input, float.class);
-                vectorSet.probs.add(vecid);
-                vectorSet.indexer.put((int) vecid - 1, offset * (sizeBase + 1));
+                vectorSet.probs.add(value);
+                vecid = (int) value - 1;
+                vectorSet.indexer.put(vecid, offset - dim);
+                vectorSet.dimns.put(vecid, dim);
+                sizeVector--;
             }
             return vectorSet;
         }
@@ -69,9 +78,7 @@ public class SerializerHelper {
             int end = vectorSet.probs.size();
             for (int offset = 0; offset < end; offset++) {
                 float val = vectorSet.probs.get(offset);
-                if (val >= 0) {
-                    kryo.writeObject(output, val);
-                }
+                kryo.writeObject(output, val);
             }
         }
 
@@ -92,9 +99,11 @@ public class SerializerHelper {
             int sparseFactor = kryo.readObject(input, int.class);
             SparseVectorSet vectorSet = new SparseVectorSet(key, basis, accumuFactor, sparseFactor);
             int sizeVector = kryo.readObject(input, int.class);
-            int offset = 0;
+            int offset = -1;
+            float value;
             while (sizeVector > 0) {
-                float value = kryo.readObject(input, float.class);
+                value = kryo.readObject(input, float.class);
+                offset++;
                 while (value >= 0) {
                     vectorSet.probs.add(value);
                     value = kryo.readObject(input, float.class);

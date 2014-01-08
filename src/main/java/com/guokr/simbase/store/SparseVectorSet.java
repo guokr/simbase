@@ -123,13 +123,13 @@ public class SparseVectorSet implements VectorSet {
                 probs.set(cursor, -1);
                 cursor++;
             }
-        }
 
-        indexer.remove(vecid);
+            indexer.remove(vecid);
 
-        if (listening) {
-            for (VectorSetListener l : listeners) {
-                l.onVectorRemoved(this, vecid);
+            if (listening) {
+                for (VectorSetListener l : listeners) {
+                    l.onVectorRemoved(this, vecid);
+                }
             }
         }
     }
