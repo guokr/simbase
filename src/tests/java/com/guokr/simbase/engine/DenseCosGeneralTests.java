@@ -169,6 +169,17 @@ public class DenseCosGeneralTests {
         testRrec.waitForFinish();
         testRrec.validate();
 
+        TestableCallback testRrec11 = new TestableCallback() {
+            @Override
+            public void excepted() {
+                isFloatList(new float[] { 5, 13, 7, 2, 3 });
+            }
+        };
+
+        engine.rrec(testRrec11, "vtest", 11, "vtest");
+        testRrec11.waitForFinish();
+        testRrec11.validate();
+
         engine.vrem(TestableCallback.noop(), "vtest", 3);
         Thread.sleep(100);
         engine.vrem(TestableCallback.noop(), "vtest", 7);
@@ -246,6 +257,9 @@ public class DenseCosGeneralTests {
         engine.rrec(testRrec, "vtest", 2, "vtest");
         testRrec.waitForFinish();
         testRrec.validate();
+        engine.rrec(testRrec11, "vtest", 11, "vtest");
+        testRrec11.waitForFinish();
+        testRrec11.validate();
 
     }
 }

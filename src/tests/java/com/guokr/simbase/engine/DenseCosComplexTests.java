@@ -22,7 +22,7 @@ public class DenseCosComplexTests {
         Map<String, Object> basis = new HashMap<String, Object>();
         Map<String, Object> dense = new HashMap<String, Object>();
         Map<String, Object> econf = new HashMap<String, Object>();
-        dense.put("accumuFactor", 0.01);
+        dense.put("accumuFactor", 0.5);
         dense.put("sparseFactor", 2048);
         basis.put("vectorSetType", "dense");
         econf.put("savepath", "data");
@@ -202,6 +202,17 @@ public class DenseCosComplexTests {
         testRrec2.waitForFinish();
         testRrec2.validate();
 
+        TestableCallback testRrec11 = new TestableCallback() {
+            @Override
+            public void excepted() {
+                isFloatList(new float[] { 11, 5, 13, 7, 2, 3 });
+            }
+        };
+
+        engine.rrec(testRrec11, "vtest", 11, "vtest2");
+        testRrec11.waitForFinish();
+        testRrec11.validate();
+
         engine.vrem(TestableCallback.noop(), "vtest", 3);
         engine.vrem(TestableCallback.noop(), "vtest2", 3);
         Thread.sleep(100);
@@ -286,6 +297,72 @@ public class DenseCosComplexTests {
         engine.rrec(testRrec2, "vtest", 2, "vtest2");
         testRrec2.waitForFinish();
         testRrec2.validate();
+        engine.rrec(testRrec11, "vtest", 11, "vtest2");
+        testRrec11.waitForFinish();
+        testRrec11.validate();
 
+    }
+
+    /**
+     * @throws Exception
+     */
+    @Test
+    public void testAcc() throws Exception {
+        float[] tmp3 = new float[] { 0.2f, 0f, 0.92f };
+        float[] tmp7 = new float[] { 0.4f, 0.41f, 0.2f };
+        float[] tmp11 = new float[] { 0.6f, 0.11f, 0.3f };
+        TestableCallback testRec = new TestableCallback() {
+            @Override
+            public void excepted() {
+                isFloatList(new float[] { 3, 5, 7, 11, 13 });
+            }
+        };
+        engine.rrec(testRec, "vtest", 2, "vtest");
+        Thread.sleep(100);
+        testRec.waitForFinish();
+        testRec.validate();
+
+        TestableCallback testRec2 = new TestableCallback() {
+            @Override
+            public void excepted() {
+                isFloatList(new float[] { 2, 3, 5, 7, 11, 13 });
+            }
+        };
+        engine.rrec(testRec2, "vtest", 2, "vtest2");
+        Thread.sleep(100);
+        testRec2.waitForFinish();
+        testRec2.validate();
+
+        engine.vacc(TestableCallback.noop(), "vtest", 3, tmp3);
+        engine.vacc(TestableCallback.noop(), "vtest", 3, tmp3);
+        engine.vacc(TestableCallback.noop(), "vtest", 7, tmp7);
+        engine.vacc(TestableCallback.noop(), "vtest", 7, tmp7);
+        engine.vacc(TestableCallback.noop(), "vtest", 11, tmp11);
+        engine.vacc(TestableCallback.noop(), "vtest", 11, tmp11);
+        engine.vacc(TestableCallback.noop(), "vtest2", 7, tmp7);
+        engine.vacc(TestableCallback.noop(), "vtest2", 7, tmp7);
+        Thread.sleep(200);
+
+        TestableCallback testRrec = new TestableCallback() {
+            @Override
+            public void excepted() {
+                isFloatList(new float[] { 11, 7, 3, 5, 13 });
+            }
+        };
+        engine.rrec(testRrec, "vtest", 2, "vtest");
+        Thread.sleep(100);
+        testRrec.waitForFinish();
+        testRrec.validate();
+
+        TestableCallback testRrec2 = new TestableCallback() {
+            @Override
+            public void excepted() {
+                isFloatList(new float[] { 2, 7, 3, 5, 11, 13 });
+            }
+        };
+        engine.rrec(testRrec2, "vtest", 2, "vtest2");
+        Thread.sleep(100);
+        testRrec2.waitForFinish();
+        testRrec2.validate();
     }
 }
