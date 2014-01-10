@@ -169,6 +169,7 @@ public class Recommendation implements VectorSetListener {
     public void onVectorRemoved(VectorSet evtSrc, int vecid) {
         if (evtSrc == this.source) {
             this.sorters.remove(vecid);
+            this.sorterKeys.remove(vecid);
         }
         if (evtSrc == this.target) {
             processDeletedEvt(vecid);

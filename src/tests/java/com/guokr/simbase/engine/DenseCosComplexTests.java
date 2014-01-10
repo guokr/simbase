@@ -54,30 +54,30 @@ public class DenseCosComplexTests {
         Thread.sleep(100);
         engine.rmk(TestableCallback.noop(), "vtest", "vtest2", "cosinesq");
         Thread.sleep(100);
-        engine.vadd(TestableCallback.noop(), "vtest", 2, new float[] { 0.9f, 0.1f, 0.01f });
+        engine.vadd(TestableCallback.noop(), "vtest", 2, new float[] { 0.9f, 0.09f, 0.01f });
         Thread.sleep(100);
-        engine.vadd(TestableCallback.noop(), "vtest", 3, new float[] { 0.9f, 0f, 0.11f });
+        engine.vadd(TestableCallback.noop(), "vtest", 3, new float[] { 0.89f, 0f, 0.11f });
         Thread.sleep(100);
-        engine.vadd(TestableCallback.noop(), "vtest", 5, new float[] { 0.1f, 0.9f, 0.01f });
+        engine.vadd(TestableCallback.noop(), "vtest", 5, new float[] { 0.1f, 0.89f, 0.01f });
         Thread.sleep(100);
-        engine.vadd(TestableCallback.noop(), "vtest", 7, new float[] { 0.1f, 0f, 0.91f });
+        engine.vadd(TestableCallback.noop(), "vtest", 7, new float[] { 0.09f, 0f, 0.91f });
         Thread.sleep(100);
-        engine.vadd(TestableCallback.noop(), "vtest", 11, new float[] { 0f, 0.9f, 0.11f });
+        engine.vadd(TestableCallback.noop(), "vtest", 11, new float[] { 0f, 0.89f, 0.11f });
         Thread.sleep(100);
-        engine.vadd(TestableCallback.noop(), "vtest", 13, new float[] { 0f, 0.1f, 0.91f });
+        engine.vadd(TestableCallback.noop(), "vtest", 13, new float[] { 0f, 0.09f, 0.91f });
         Thread.sleep(100);
 
-        engine.vadd(TestableCallback.noop(), "vtest2", 2, new float[] { 0.9f, 0.1f, 0.01f });
+        engine.vadd(TestableCallback.noop(), "vtest2", 2, new float[] { 0.9f, 0.09f, 0.01f });
         Thread.sleep(100);
-        engine.vadd(TestableCallback.noop(), "vtest2", 3, new float[] { 0.9f, 0f, 0.11f });
+        engine.vadd(TestableCallback.noop(), "vtest2", 3, new float[] { 0.89f, 0f, 0.11f });
         Thread.sleep(100);
-        engine.vadd(TestableCallback.noop(), "vtest2", 5, new float[] { 0.1f, 0.9f, 0.01f });
+        engine.vadd(TestableCallback.noop(), "vtest2", 5, new float[] { 0.1f, 0.89f, 0.01f });
         Thread.sleep(100);
-        engine.vadd(TestableCallback.noop(), "vtest2", 7, new float[] { 0.1f, 0f, 0.91f });
+        engine.vadd(TestableCallback.noop(), "vtest2", 7, new float[] { 0.09f, 0f, 0.91f });
         Thread.sleep(100);
-        engine.vadd(TestableCallback.noop(), "vtest2", 11, new float[] { 0f, 0.9f, 0.11f });
+        engine.vadd(TestableCallback.noop(), "vtest2", 11, new float[] { 0f, 0.89f, 0.11f });
         Thread.sleep(100);
-        engine.vadd(TestableCallback.noop(), "vtest2", 13, new float[] { 0f, 0.1f, 0.91f });
+        engine.vadd(TestableCallback.noop(), "vtest2", 13, new float[] { 0f, 0.09f, 0.91f });
         Thread.sleep(100);
 
     }
@@ -97,14 +97,14 @@ public class DenseCosComplexTests {
             }
         };
         engine.brev(testbrev, "btest", new String[] { "B3", "B1", "B0" });
-        engine.vset(TestableCallback.noop(), "vtest", 13, new float[] { 0.1f, 0.2f, 0.31f, 0.4f });
-        engine.vset(TestableCallback.noop(), "vtest", 17, new float[] { 0.4f, 0.3f, 0.21f, 0.1f });
+        engine.vset(TestableCallback.noop(), "vtest", 13, new float[] { 0.1f, 0.2f, 0.3f, 0.4f });
+        engine.vset(TestableCallback.noop(), "vtest", 17, new float[] { 0.4f, 0.3f, 0.2f, 0.1f });
         testbrev.waitForFinish();
         testbrev.validate();
         TestableCallback test2 = new TestableCallback() {
             @Override
             public void excepted() {
-                isFloatList(new float[] { 0.9f, 0.1f, 0.01f, 0f });
+                isFloatList(new float[] { 0.9f, 0.09f, 0.01f, 0f });
             }
         };
         engine.vget(test2, "vtest", 2);
@@ -114,7 +114,7 @@ public class DenseCosComplexTests {
         TestableCallback test3 = new TestableCallback() {
             @Override
             public void excepted() {
-                isFloatList(new float[] { 0.9f, 0f, 0.11f, 0f });
+                isFloatList(new float[] { 0.89f, 0f, 0.11f, 0f });
             }
         };
         engine.vget(test3, "vtest", 3);
@@ -124,7 +124,7 @@ public class DenseCosComplexTests {
         TestableCallback test5 = new TestableCallback() {
             @Override
             public void excepted() {
-                isFloatList(new float[] { 0.1f, 0.9f, 0.01f, 0f });
+                isFloatList(new float[] { 0.1f, 0.89f, 0.01f, 0f });
             }
         };
         engine.vget(test5, "vtest", 5);
@@ -134,7 +134,7 @@ public class DenseCosComplexTests {
         TestableCallback test7 = new TestableCallback() {
             @Override
             public void excepted() {
-                isFloatList(new float[] { 0.1f, 0f, 0.91f, 0f });
+                isFloatList(new float[] { 0.09f, 0f, 0.91f, 0f });
             }
         };
         engine.vget(test7, "vtest", 7);
@@ -144,7 +144,7 @@ public class DenseCosComplexTests {
         TestableCallback test11 = new TestableCallback() {
             @Override
             public void excepted() {
-                isFloatList(new float[] { 0f, 0.9f, 0.11f, 0f });
+                isFloatList(new float[] { 0f, 0.89f, 0.11f, 0f });
             }
         };
         engine.vget(test11, "vtest", 11);
@@ -154,7 +154,7 @@ public class DenseCosComplexTests {
         TestableCallback test13 = new TestableCallback() {
             @Override
             public void excepted() {
-                isFloatList(new float[] { 0.1f, 0.2f, 0.31f, 0.4f });
+                isFloatList(new float[] { 0.1f, 0.2f, 0.3f, 0.4f });
             }
         };
         engine.vget(test13, "vtest", 13);
@@ -164,7 +164,7 @@ public class DenseCosComplexTests {
         TestableCallback test17 = new TestableCallback() {
             @Override
             public void excepted() {
-                isFloatList(new float[] { 0.4f, 0.3f, 0.21f, 0.1f });
+                isFloatList(new float[] { 0.4f, 0.3f, 0.2f, 0.1f });
             }
         };
         engine.vget(test17, "vtest", 17);
@@ -284,11 +284,11 @@ public class DenseCosComplexTests {
         testRlist.waitForFinish();
         testRlist.validate();
 
-        engine.vadd(TestableCallback.noop(), "vtest", 3, new float[] { 0.9f, 0f, 0.11f });
-        engine.vadd(TestableCallback.noop(), "vtest2", 3, new float[] { 0.9f, 0f, 0.11f });
+        engine.vadd(TestableCallback.noop(), "vtest", 3, new float[] { 0.89f, 0f, 0.11f });
+        engine.vadd(TestableCallback.noop(), "vtest2", 3, new float[] { 0.89f, 0f, 0.11f });
         Thread.sleep(100);
-        engine.vadd(TestableCallback.noop(), "vtest", 7, new float[] { 0.1f, 0f, 0.91f });
-        engine.vadd(TestableCallback.noop(), "vtest2", 7, new float[] { 0.1f, 0f, 0.91f });
+        engine.vadd(TestableCallback.noop(), "vtest", 7, new float[] { 0.09f, 0f, 0.91f });
+        engine.vadd(TestableCallback.noop(), "vtest2", 7, new float[] { 0.09f, 0f, 0.91f });
         Thread.sleep(100);
 
         engine.rrec(testRrec, "vtest", 2, "vtest");
@@ -307,10 +307,10 @@ public class DenseCosComplexTests {
      * @throws Exception
      */
     @Test
-    public void testAcc() throws Exception {
-        float[] tmp3 = new float[] { 0.2f, 0f, 0.92f };
-        float[] tmp7 = new float[] { 0.4f, 0.41f, 0.2f };
-        float[] tmp11 = new float[] { 0.6f, 0.11f, 0.3f };
+    public void testVacc() throws Exception {
+        float[] tmp3 = new float[] { 0.2f, 0f, 0.8f };
+        float[] tmp7 = new float[] { 0.4f, 0.41f, 0.19f };
+        float[] tmp11 = new float[] { 0.6f, 0.11f, 0.29f };
         TestableCallback testRec = new TestableCallback() {
             @Override
             public void excepted() {
@@ -357,7 +357,7 @@ public class DenseCosComplexTests {
         TestableCallback testRrec2 = new TestableCallback() {
             @Override
             public void excepted() {
-                isFloatList(new float[] { 2, 7, 3, 5, 11, 13 });
+                isFloatList(new float[] { 2, 11, 7, 3, 5, 13 });
             }
         };
         engine.rrec(testRrec2, "vtest", 2, "vtest2");
