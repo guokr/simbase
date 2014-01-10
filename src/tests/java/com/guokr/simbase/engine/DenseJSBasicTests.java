@@ -21,7 +21,7 @@ public class DenseJSBasicTests {
         Map<String, Object> basis = new HashMap<String, Object>();
         Map<String, Object> dense = new HashMap<String, Object>();
         Map<String, Object> econf = new HashMap<String, Object>();
-        dense.put("accumuFactor", 0.01);
+        dense.put("accumuFactor", 0.5);
         dense.put("sparseFactor", 2048);
         basis.put("vectorSetType", "dense");
         econf.put("savepath", "data");
@@ -311,7 +311,7 @@ public class DenseJSBasicTests {
         TestableCallback testget = new TestableCallback() {
             @Override
             public void excepted() {
-                isFloatList(new float[] { 0.1f, 0.8901f, 0.0099f });
+                isFloatList(new float[] { 0.1f, 0.895f, 0.005f });
             }
         };
         engine.vget(testget, "vtest", 5);

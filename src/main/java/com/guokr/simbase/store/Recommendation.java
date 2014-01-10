@@ -91,6 +91,10 @@ public class Recommendation implements VectorSetListener {
                     this.sorters.get(srcVecId).remove(tgtVecId);
                 }
             }
+            this.reverseIndexer.remove(tgtVecId);
+        }
+        for (int vecid : reverseIndexer.keys()) {
+            reverseIndexer.get(vecid).remove(tgtVecId);
         }
     }
 
@@ -108,11 +112,10 @@ public class Recommendation implements VectorSetListener {
         this.sorters.get(srcVecId).add(tgtVecId, score);
         if (!this.reverseIndexer.containsKey(tgtVecId)) {
             this.reverseIndexer.put(tgtVecId, new TIntArrayList());
-        } else {
-            TIntList range = this.reverseIndexer.get(tgtVecId);
-            if (range.indexOf(srcVecId) == -1) {
-                range.add(srcVecId);
-            }
+        }
+        TIntList range = this.reverseIndexer.get(tgtVecId);
+        if (range.indexOf(srcVecId) == -1) {
+            range.add(srcVecId);
         }
     }
 

@@ -100,17 +100,19 @@ public class SerializerHelper {
             SparseVectorSet vectorSet = new SparseVectorSet(key, basis, accumuFactor, sparseFactor);
             int sizeVector = kryo.readObject(input, int.class);
             int offset = -1;
+            int index;
             float value;
             while (sizeVector > 0) {
                 value = kryo.readObject(input, float.class);
                 offset++;
+                index = offset;
                 while (value >= 0) {
                     vectorSet.probs.add(value);
                     value = kryo.readObject(input, float.class);
                     offset++;
                 }
                 vectorSet.probs.add(value);
-                vectorSet.indexer.put(-(int) value - 1, offset);
+                vectorSet.indexer.put(-(int) value - 1, index);
                 sizeVector--;
             }
             return vectorSet;
@@ -125,9 +127,7 @@ public class SerializerHelper {
             int end = vectorSet.probs.size();
             for (int offset = 0; offset < end; offset++) {
                 float val = vectorSet.probs.get(offset);
-                if (val != -1) {
-                    kryo.writeObject(output, val);
-                }
+                kryo.writeObject(output, val);
             }
         }
     }

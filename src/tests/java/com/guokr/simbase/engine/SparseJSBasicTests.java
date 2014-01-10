@@ -11,7 +11,7 @@ import org.junit.Test;
 import com.guokr.simbase.SimConfig;
 import com.guokr.simbase.TestableCallback;
 
-public class DenseCosBasicTests {
+public class SparseJSBasicTests {
     public static SimEngineImpl engine;
 
     @BeforeClass
@@ -19,17 +19,17 @@ public class DenseCosBasicTests {
         Map<String, Object> settings = new HashMap<String, Object>();
         Map<String, Object> defaults = new HashMap<String, Object>();
         Map<String, Object> basis = new HashMap<String, Object>();
-        Map<String, Object> dense = new HashMap<String, Object>();
+        Map<String, Object> sparse = new HashMap<String, Object>();
         Map<String, Object> econf = new HashMap<String, Object>();
-        dense.put("accumuFactor", 0.5);
-        dense.put("sparseFactor", 2048);
-        basis.put("vectorSetType", "dense");
+        sparse.put("accumuFactor", 0.5);
+        sparse.put("sparseFactor", 2048);
+        basis.put("vectorSetType", "sparse");
         econf.put("savepath", "data");
         econf.put("saveinterval", 7200000);
         econf.put("maxlimits", 20);
         econf.put("loadfactor", 0.75);
         econf.put("bycount", 100);
-        defaults.put("dense", dense);
+        defaults.put("sparse", sparse);
         defaults.put("basis", basis);
         defaults.put("engine", econf);
         settings.put("defaults", defaults);
@@ -50,7 +50,7 @@ public class DenseCosBasicTests {
     public void testUp() throws Exception {
         engine.vmk(TestableCallback.noop(), "btest", "vtest");
         Thread.sleep(100);
-        engine.rmk(TestableCallback.noop(), "vtest", "vtest", "cosinesq");
+        engine.rmk(TestableCallback.noop(), "vtest", "vtest", "jensenshannon");
         Thread.sleep(100);
         engine.vadd(TestableCallback.noop(), "vtest", 2, new float[] { 0.9f, 0.09f, 0.01f });
         Thread.sleep(100);
@@ -77,7 +77,7 @@ public class DenseCosBasicTests {
         TestableCallback test = new TestableCallback() {
             @Override
             public void excepted() {
-                isIntegerList(new int[] { 7, 11, 3, 5, 2 });
+                isIntegerList(new int[] { 7, 11, 5, 3, 2 });
             }
         };
         engine.rrec(test, "vtest", 13, "vtest");
@@ -86,7 +86,7 @@ public class DenseCosBasicTests {
         TestableCallback test2 = new TestableCallback() {
             @Override
             public void excepted() {
-                isIntegerList(new int[] { 13, 3, 11, 2, 5 });
+                isIntegerList(new int[] { 13, 3, 2, 11, 5 });
             }
         };
         engine.rrec(test2, "vtest", 7, "vtest");
