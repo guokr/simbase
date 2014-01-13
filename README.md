@@ -30,7 +30,7 @@ Simbase use a concept model as below:
 * Basis: the basis for vectors, vectors in one vector set have same basis
 * Recommendation: a one-direction binary relationship between two vector sets which have the same basis
 
-A real example following this model is as below:
+A real example follow the model below:
 
          + - - - - - +                 + - - - - - - - -+ 
     +--->|  Articles |<----------------|  User Profiles |
@@ -48,8 +48,8 @@ Limitations
 
 ### Assumptions on vectors
 
-Although Simbase is a vector data store, it does not accept vectors without any constraints.
-In fact, Simbase only accepts a vector with components are all greater than zero and less than one.
+Although Simbase is a vector data store, it does not accept vectors without any constrains.
+In fact, Simbase only accepts a vector which its components are all greater than zero and less than one.
 
 Especially, if you adopt "jensenshannon" as your score function, you should assure your vector is a
 probability distribution, i.e. the sum of all components equals to one.
@@ -59,12 +59,12 @@ probability distribution, i.e. the sum of all components equals to one.
 The write operation is handled in a single thread per basis, and comparison between any two vectors is needed,
 so the write operation is scaled at O(n).
 
-We had a non-final performance test on an i7-cpu Macbook; it can easily handle 120k 1k-dimensional vectors
-with each write operation under 1 sec.
+We had a non-final performance test on an i7-cpu Macbook, it can easily handle 120k 1k-dimensional vectors
+with each write operation in under 1 sec.
 
-Since the data are all in memory, the read operation is pretty fast.
+Since the data is all in memory, the read operation is pretty fast.
 
-We are still in the process to tune the performance.
+We are still in the process of tuning the performance.
 
 How to build and start
 -----------------------
@@ -179,7 +179,7 @@ great project http-kit ( https://github.com/http-kit/http-kit/ ).
 
 Also thanks for Kunwei Zhang from Tsinghua Univ. for his smart idea.  
 
-Contributers
+Contributors
 -------------
 
 * Mingli Yuan ( https://github.com/mountain )
