@@ -207,7 +207,7 @@ public class DenseJSBasicTests {
         TestableCallback test2 = new TestableCallback() {
             @Override
             public void excepted() {
-                isIntegerList(new int[] { 11, 3, 5, 2 });
+                isIntegerList(new int[] { 11, 5, 3, 2 });
             }
         };
         engine.rrec(test2, "vtest", 13, "vtest");
