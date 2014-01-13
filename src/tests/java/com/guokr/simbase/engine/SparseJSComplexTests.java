@@ -12,7 +12,7 @@ import org.junit.Test;
 import com.guokr.simbase.SimConfig;
 import com.guokr.simbase.TestableCallback;
 
-public class SparseSComplexTests {
+public class SparseJSComplexTests {
     public static SimEngineImpl engine;
 
     @BeforeClass
