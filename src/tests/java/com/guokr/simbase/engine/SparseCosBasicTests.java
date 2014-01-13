@@ -171,7 +171,7 @@ public class SparseCosBasicTests {
     }
 
     @Test
-    public void testVrem() {
+    public void testVrem() throws Exception {
         TestableCallback testok = new TestableCallback() {
             @Override
             public void excepted() {
@@ -202,12 +202,8 @@ public class SparseCosBasicTests {
         engine.rrec(test, "vtest", 13, "vtest");
         test.waitForFinish();
         test.validate();
-        try {
-            engine.vadd(TestableCallback.noop(), "vtest", 5, new float[] { 0.09f, 0.9f, 0f });
-            Thread.sleep(100);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        engine.vadd(TestableCallback.noop(), "vtest", 5, new float[] { 0.1f, 0.89f, 0.01f });
+        Thread.sleep(100);
         TestableCallback test2 = new TestableCallback() {
             @Override
             public void excepted() {
@@ -218,8 +214,8 @@ public class SparseCosBasicTests {
         test2.waitForFinish();
         test2.validate();
 
-        engine.vadd(TestableCallback.noop(), "vtest", 5, new float[] { 0.1f, 0.89f, 0.01f });
         engine.vadd(TestableCallback.noop(), "vtest", 7, new float[] { 0.09f, 0f, 0.91f });
+        Thread.sleep(100);
 
         engine.rrec(testRrec, "vtest", 2, "vtest");
         testRrec.waitForFinish();
