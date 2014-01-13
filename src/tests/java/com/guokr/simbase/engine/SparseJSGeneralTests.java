@@ -172,7 +172,7 @@ public class SparseJSGeneralTests {
         TestableCallback testRrec11 = new TestableCallback() {
             @Override
             public void excepted() {
-                isFloatList(new float[] { 5, 13, 2, 7, 3 });
+                isFloatList(new float[] { 5, 13, 7, 2, 3 });
             }
         };
 
