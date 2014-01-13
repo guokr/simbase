@@ -28,9 +28,9 @@ Simbase use a concept model as below:
 
 * Vector set: a set of vectors
 * Basis: the basis for vectors, vectors in one vector set have same basis
-* Recommendation: a one-direction binary relationship between two vector set which have the same basis
+* Recommendation: a one-direction binary relationship between two vector sets which have the same basis
 
-A real example follow this model is as below:
+A real example following this model is as below:
 
          + - - - - - +                 + - - - - - - - -+ 
     +--->|  Articles |<----------------|  User Profiles |
@@ -48,18 +48,18 @@ Limitations
 
 ### Assumptions on vectors
 
-Although Simbase is a vector data store, it dose not accept vectors without any constrains.
-In fact, Simbase only accept a vector which its components are all greater than zero and less than one.
+Although Simbase is a vector data store, it does not accept vectors without any constraints.
+In fact, Simbase only accepts a vector with components are all greater than zero and less than one.
 
 Especially, if you adopt "jensenshannon" as your score function, you should assure your vector is a
 probability distribution, i.e. the sum of all components equals to one.
 
 ### Performance consideration
 
-The write operation is handled in a single thread per basis, and comparison between any two vector is needed,
+The write operation is handled in a single thread per basis, and comparison between any two vectors is needed,
 so the write operation is scaled at O(n).
 
-We had a non-final performance test on an i7-cpu Macbook, it can easily handle 120k 1k-dimensional vectors
+We had a non-final performance test on an i7-cpu Macbook; it can easily handle 120k 1k-dimensional vectors
 with each write operation under 1 sec.
 
 Since the data are all in memory, the read operation is pretty fast.
