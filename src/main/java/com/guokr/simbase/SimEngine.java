@@ -1,259 +1,71 @@
 package com.guokr.simbase;
 
-import gnu.trove.list.TFloatList;
+import com.guokr.simbase.events.BasisListener;
+import com.guokr.simbase.events.RecommendationListener;
+import com.guokr.simbase.events.VectorSetListener;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.util.Date;
-import java.util.Map;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+public interface SimEngine {
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+	public void load(SimCallback callback);
 
-import com.esotericsoftware.kryo.Kryo;
-import com.esotericsoftware.kryo.KryoException;
-import com.esotericsoftware.kryo.io.Input;
-import com.esotericsoftware.kryo.io.Output;
+	public void save(SimCallback callback);
 
-public class SimEngine {
+	public void del(SimCallback callback, String key);
 
-    private static String dir = System.getProperty("user.dir")
-            + System.getProperty("file.separator");
-    private static final Logger logger = LoggerFactory
-            .getLogger(SimEngine.class);
+	public void bload(SimCallback callback, String key);
 
-    private ExecutorService service = Executors.newSingleThreadExecutor();
-    private SimTable table;
-    private final Kryo kryo = new Kryo();
-    private int counter = 0;
-    private long timestamp = -1;
+	public void bsave(SimCallback callback, String key);
 
-    private boolean debug;
-    private long cloneThrottle;
-    private int bycount;
-    private String name;
+	public void blist(SimCallback callback);
 
-    public SimEngine(String engineName, Map<String, Object> config) {
+	public void bmk(SimCallback callback, String bkey, String[] base);
 
-        name = engineName;
-        try {
-            cloneThrottle = (Integer) config.get("cloneThrottle");
-            debug = (Boolean) config.get("debug");
-            bycount = (Integer) config.get("bycount");
+	public void brev(SimCallback callback, String bkey, String[] base);
 
-            table = new SimTable(name, config);
-        } catch (NullPointerException e) {
-            logger.warn("YAML not found,loading default config");
-            cloneThrottle = 30000;
-            debug = true;
-            bycount = 100;
-        }
+	public void bget(SimCallback callback, String bkey);
 
-    }
+	public void vlist(SimCallback callback, String bkey);
 
-    /**
-     * clone 函数之前必须验证
-     *
-     * @return cloneInterval 秒内clone过，则返回false,否则true
-     **/
-    private boolean validateTime() {
-        long current = new Date().getTime();
-        if (current - timestamp < cloneThrottle) {
-            logger.info("Already cloned in " + cloneThrottle / 1000
-                    + "s, abort;");
-            return false;
-        } else {
-            timestamp = current;
-            return true;
-        }
-    }
+	public void vmk(SimCallback callback, String bkey, String vkey);
 
-    public void load(final String key) throws FileNotFoundException {
-        Input input = null;
-        String path = dir + "/data/" + key;
+	public void vids(SimCallback callback, String vkey);
 
-        try {
-            logger.info("Loading....");
-            input = new Input(new FileInputStream(path + ".dmp"));
-            table.read(kryo, input);
-            logger.info("Load finish");
-        } catch (KryoException e) {
-            input = new Input(new FileInputStream(path + ".bak"));
-            table.read(kryo, input);
-        } finally {
-            if (input != null) {
-                input.close();
-            }
-        }
-    }
+	public void vget(SimCallback callback, String vkey, int vecid);
 
-    public void clear() {
-        service.execute(new Runnable() {
-            public void run() {
-                logger.info("Clean begin...");
-                if (validateTime()) {
-                    SimTable data = table.clone();
-                    table.reload(data);
-                    data = null;
-                    System.gc();
-                }
-                logger.info("Clean finish!");
-            }
-        });
-    }
+	public void vadd(SimCallback callback, String vkey, int vecid,
+			float[] vector);
 
-    public void save(final String key) {
-        service.execute(new Runnable() {
-            public void run() {
+	public void vset(SimCallback callback, String vkey, int vecid,
+			float[] vector);
 
-                Runnable runner = new Runnable() {
-                    @Override
-                    public void run() {
-                        logger.info("Saving....");
-                        if (!validateTime()) {
-                            return;
-                        }
-                        SimTable data = table.clone();
-                        Output output = null;
-                        String path = dir + "/data/" + key;
-                        try {
-                            Process p = Runtime.getRuntime().exec(
-                                    "mv " + path + ".dmp " + path + ".bak");
-                            p.waitFor();
-                            output = new Output(new FileOutputStream(path
-                                    + ".dmp"));
-                            data.write(kryo, output);
-                        } catch (Throwable e) {
-                            throw new SimBaseException(e);
-                        } finally {
-                            if (output != null) {
-                                output.close();
-                            }
-                        }
-                        data = null;
-                        System.gc();
-                        logger.info("Save finish");
-                    }
-                };
-                new Thread(runner).start();
-            }
-        });
-    }
+	public void vacc(SimCallback callback, String vkey, int vecid,
+			float[] vector);
 
-    public void revise(final String[] schema) {
-        service.execute(new Runnable() {
-            public void run() {
-                try {
-                    table.revise(schema);
-                } catch (Throwable e) {
-                    logger.error("SimEngine Error:", e);
-                }
-            }
-        });
-    }
+	public void vrem(SimCallback callback, String vkey, int vecid);
 
-    public void add(final int docid, final float[] distr) {
-        service.execute(new Runnable() {
-            public void run() {
-                if (debug) {
-                    counter++;
-                    if (counter % bycount == 0) {
-                        logger.debug("add:" + counter);
-                    }
-                    int maxIndex = 0;
-                    float maxValue = 0.0f;
-                    int index = 0;
-                    for (float value: distr) {
-                        if (value > maxValue) {
-                            maxValue = value;
-                            maxIndex = index;
-                        }
-                        index++;
-                    }
-                    logger.debug(String.format("add: %s %d %d", name, docid, maxIndex));
-                }
-                try {
-                    table.add(docid, distr);
-                } catch (Throwable e) {
-                    logger.error("SimEngine Error:", e);
-                }
-            }
-        });
-    }
+	public void iget(SimCallback callback, String vkey, int vecid);
 
-    public void append(final int docid, final Object[] pairs) {
-        service.execute(new Runnable() {
-            public void run() {
-                if (debug) {
-                    counter++;
-                    if (counter % bycount == 0) {
-                        logger.debug("add:" + counter);
-                    }
-                }
-                try {
-                    table.append(docid, pairs);
-                } catch (Throwable e) {
-                    logger.error("SimEngine Error:", e);
-                }
-            }
-        });
-    }
+	public void iset(SimCallback callback, String vkey, int vecid, int[] pairs);
 
-    public void put(final int docid, final float[] distr) {
-        service.execute(new Runnable() {
-            public void run() {
-                try {
-                    table.put(docid, distr);
-                } catch (Throwable e) {
-                    logger.error("SimEngine Error:", e);
-                }
-            }
-        });
-    }
+	public void iadd(SimCallback callback, String vkey, int vecid, int[] pairs);
 
-    public void update(final int docid, final Object[] pairs) {
-        service.execute(new Runnable() {
-            public void run() {
-                try {
-                    table.update(docid, pairs);
-                } catch (Throwable e) {
-                    logger.error("SimEngine Error:", e);
-                }
-            }
-        });
-    }
+	public void iacc(SimCallback callback, String vkey, int vecid, int[] pairs);
 
-    public void delete(final int docid) {
-        service.execute(new Runnable() {
-            public void run() {
-                try {
-                    logger.info(String.format("delete: %s %s", name, docid));
-                    table.delete(docid);
-                    logger.info("Delete finish");
-                } catch (Throwable e) {
-                    logger.error("SimEngine Error:", e);
-                }
-            }
-        });
-    }
+	public void rlist(SimCallback callback, String vkey);
 
-    public String[] schema() {
-        return table.schema();
-    }
+	public void rmk(SimCallback callback, String vkeySource, String vkeyTarget,
+			String funcscore);
 
-    public TFloatList get(int docid) {
-        return table.get(docid);
-    }
+	public void rget(SimCallback callback, String vkeySource, int vecid,
+			String vkeyTarget);
 
-    public String[] retrieve(int docid) {
-        return table.retrieve(docid);
-    }
+	public void listen(String bkey, BasisListener listener);
 
-    public int[] recommend(int docid) {
-        return table.recommend(docid);
-    }
+	public void rrec(SimCallback callback, String vkeySource, int vecid,
+			String vkeyTarget);
 
+	public void listen(String vkey, VectorSetListener listener);
+
+	public void listen(String srcVkey, String tgtVkey,
+			RecommendationListener listener);
 }

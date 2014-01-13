@@ -4,7 +4,7 @@ import com.guokr.simbase.SimCallback;
 import com.guokr.simbase.SimCommand;
 import com.guokr.simbase.SimEngine;
 
-public class Save extends SimCommand {
+public class Load extends SimCommand {
 
     @Override
     public String signature() {
@@ -13,7 +13,7 @@ public class Save extends SimCommand {
 
     @Override
     public void invoke(SimEngine engine, SimCallback callback) {
-        engine.save(callback);
+        engine.load(callback);
     }
 
 }

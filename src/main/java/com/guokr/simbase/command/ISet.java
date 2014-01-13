@@ -4,16 +4,16 @@ import com.guokr.simbase.SimCallback;
 import com.guokr.simbase.SimCommand;
 import com.guokr.simbase.SimEngine;
 
-public class Save extends SimCommand {
+public class ISet extends SimCommand {
 
     @Override
     public String signature() {
-        return "";
+        return "siI";
     }
 
     @Override
-    public void invoke(SimEngine engine, SimCallback callback) {
-        engine.save(callback);
+    public void invoke(SimEngine engine, String vkey, int vecid, int[] distr, SimCallback callback) {
+        engine.iset(callback, vkey, vecid, distr);
     }
 
 }

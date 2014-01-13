@@ -1,15 +1,19 @@
 package com.guokr.simbase.command;
 
-import org.wahlque.net.action.Command;
+import com.guokr.simbase.SimCallback;
+import com.guokr.simbase.SimCommand;
+import com.guokr.simbase.SimEngine;
 
-public class Del implements Command {
+public class Del extends SimCommand {
 
-	public String key;
-	public int docid;
-	
-	@Override
-	public String actionName() {
-		return "vdel";
-	}
+    @Override
+    public String signature() {
+        return "s";
+    }
+
+    @Override
+    public void invoke(SimEngine engine, String key, SimCallback callback) {
+        engine.del(callback, key);
+    }
 
 }

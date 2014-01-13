@@ -1,0 +1,24 @@
+##
+#  SimBase Configuration
+##
+
+defaults:
+  server:
+    ip: 0.0.0.0
+    port: 7654
+  engine:
+    savepath: data
+    saveinterval: 7200000
+    savethrottle: 1800000
+    maxlimits: 20
+    loadfactor: 0.75
+    debug: true
+    bycount: 100
+  basis:
+    vectorSetType: dense
+  dense:
+    accumuFactor: 0.01
+    sparseFactor: 4096
+  sparse:
+    accumuFactor: 0.01
+    sparseFactor: 4096

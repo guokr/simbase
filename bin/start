@@ -14,5 +14,5 @@ CUR=`pwd`;
 popd  > /dev/null
 
 cd ${CUR}/../
-java -server -jar target/simbase-0.0.1-standalone.jar -Xmx16g >/dev/null 2>/dev/null &
+java -server -jar target/simbase-standalone.jar -Xmx10g >/dev/null 2>/dev/null &
 cd ${ORG}
