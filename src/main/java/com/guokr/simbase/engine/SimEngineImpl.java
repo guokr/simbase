@@ -346,6 +346,9 @@ public class SimEngineImpl implements SimEngine, SimBasisListener {
 				if (basisOf.containsKey(bkey)) {
 					del(null, bkey);
 				}
+
+				logger.info(String.format("loading basis[%s]", bkey));
+
 				Basis basis = new Basis(bkey);
 				SimBasis simBasis = new SimBasis(context.getSub("basis", bkey),
 						basis);
@@ -374,6 +377,9 @@ public class SimEngineImpl implements SimEngine, SimBasisListener {
 			@Override
 			public void invoke() {
 				validateKind("bsave", bkey, Kind.BASIS);
+
+				logger.info(String.format("saving basis[%s]", bkey));
+
 				bases.get(bkey).bsave(
 						new StringBuilder(savePath).append(bkey).append(".dmp")
 								.toString());
@@ -766,6 +772,11 @@ public class SimEngineImpl implements SimEngine, SimBasisListener {
 				validateSameBasis(vkeyTarget, vkeySource);
 				String rkey = rkey(vkeySource, vkeyTarget);
 				validateNotExistence(rkey);
+
+				logger.info(String.format(
+						"creating recommendation[%s_%s] with funcscore[%s]",
+						vkeySource, vkeyTarget, funcscore));
+
 				final String bkey = basisOf.get(vkeySource);
 				bases.get(bkey).rmk(vkeySource, vkeyTarget, funcscore);
 				basisOf.put(rkey, basisOf.get(vkeySource));
