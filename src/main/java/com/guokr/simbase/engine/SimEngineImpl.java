@@ -212,7 +212,7 @@ public class SimEngineImpl implements SimEngine, SimBasisListener {
 		if (!basisOf.get(vkeySource).equals(basisOf.get(vkeyTarget))) {
 			throw new SimEngineException(
 					String.format(
-							"Recommedation[%s, %s] must be between two vector set with same basis",
+							"Recommedation[%s_%s] must be between two vector set with same basis",
 							vkeySource, vkeyTarget));
 		}
 	}
@@ -777,7 +777,7 @@ public class SimEngineImpl implements SimEngine, SimBasisListener {
 				rtargetsOf.get(vkeySource).add(vkeyTarget);
 
 				logger.info(String.format(
-						"recommendation[%s, %s] created with funcscore[%s]",
+						"recommendation[%s_%s] created with funcscore[%s]",
 						vkeySource, vkeyTarget, funcscore));
 
 				callback.ok();
