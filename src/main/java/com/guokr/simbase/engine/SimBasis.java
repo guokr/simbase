@@ -197,6 +197,14 @@ public class SimBasis {
         if (target != source) {
             target.addListener(rec);
         }
+
+        for(int srcVecId: source.ids()) {
+        	rec.create(srcVecId);
+        	float[] vector = source.get(srcVecId);
+            scoring.beginBatch(source.key(), srcVecId);
+            target.rescore(source.key(), srcVecId, vector, rec);
+            scoring.endBatch();
+        }
     }
 
     public void rdel(String vkey) {
