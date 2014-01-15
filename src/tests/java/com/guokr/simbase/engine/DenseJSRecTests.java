@@ -11,7 +11,7 @@ import org.junit.Test;
 import com.guokr.simbase.SimConfig;
 import com.guokr.simbase.TestableCallback;
 
-public class DenseCosRecTests {
+public class DenseJSRecTests {
     public static SimEngineImpl engine;
 
     @BeforeClass
@@ -87,15 +87,15 @@ public class DenseCosRecTests {
     @Test
     public void testRec() throws Exception {
         Thread.sleep(100);
-        engine.rmk(TestableCallback.noop(), "vtest", "vtest", "cosinesq");
+        engine.rmk(TestableCallback.noop(), "vtest", "vtest", "jensenshannon");
         Thread.sleep(100);
-        engine.rmk(TestableCallback.noop(), "vtest", "vtest2", "cosinesq");
+        engine.rmk(TestableCallback.noop(), "vtest", "vtest2", "jensenshannon");
         Thread.sleep(100);
 
         TestableCallback test = new TestableCallback() {
             @Override
             public void excepted() {
-                isIntegerList(new int[] { 7, 11, 3, 5, 2 });
+                isIntegerList(new int[] { 7, 11, 5, 3, 2 });
             }
         };
         engine.rrec(test, "vtest", 13, "vtest");
@@ -104,7 +104,7 @@ public class DenseCosRecTests {
         TestableCallback test2 = new TestableCallback() {
             @Override
             public void excepted() {
-                isIntegerList(new int[] { 7, 13, 3, 11, 2, 5 });
+                isIntegerList(new int[] { 7, 13, 3, 2, 11, 5 });
             }
         };
         engine.rrec(test2, "vtest", 7, "vtest2");

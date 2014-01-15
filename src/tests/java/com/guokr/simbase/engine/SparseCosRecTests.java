@@ -11,7 +11,7 @@ import org.junit.Test;
 import com.guokr.simbase.SimConfig;
 import com.guokr.simbase.TestableCallback;
 
-public class DenseCosRecTests {
+public class SparseCosRecTests {
     public static SimEngineImpl engine;
 
     @BeforeClass
@@ -19,17 +19,17 @@ public class DenseCosRecTests {
         Map<String, Object> settings = new HashMap<String, Object>();
         Map<String, Object> defaults = new HashMap<String, Object>();
         Map<String, Object> basis = new HashMap<String, Object>();
-        Map<String, Object> dense = new HashMap<String, Object>();
+        Map<String, Object> sparse = new HashMap<String, Object>();
         Map<String, Object> econf = new HashMap<String, Object>();
-        dense.put("accumuFactor", 0.5);
-        dense.put("sparseFactor", 2048);
-        basis.put("vectorSetType", "dense");
+        sparse.put("accumuFactor", 0.5);
+        sparse.put("sparseFactor", 2048);
+        basis.put("vectorSetType", "sparse");
         econf.put("savepath", "data");
         econf.put("saveinterval", 7200000);
         econf.put("maxlimits", 20);
         econf.put("loadfactor", 0.75);
         econf.put("bycount", 100);
-        defaults.put("dense", dense);
+        defaults.put("sparse", sparse);
         defaults.put("basis", basis);
         defaults.put("engine", econf);
         settings.put("defaults", defaults);
