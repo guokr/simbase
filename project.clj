@@ -21,7 +21,7 @@
     :java-source-paths ["src/main/java"]
     :resource-paths ["src/main/resources"]
 
-    :test-paths ["src/test/clojure" "src/test/java/benchmarks"]
+    :test-paths ["src/test/java/"]
     :test-selectors {:default (complement :integration)
                      :integration :integration
                      :all (constantly true)}
