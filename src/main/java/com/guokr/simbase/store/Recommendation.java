@@ -44,8 +44,6 @@ public class Recommendation implements VectorSetListener {
 
         scoring.onAttached(source.key());
         source.addListener(scoring);
-        scoring.onAttached(target.key());
-        target.addListener(scoring);
 
         if (source.type().equals("dense")) {
             for (int id : source.ids()) {
@@ -57,13 +55,18 @@ public class Recommendation implements VectorSetListener {
             }
         }
 
-        if (target.type().equals("dense")) {
-            for (int id : source.ids()) {
-                scoring.onVectorAdded(target, id, target.get(id));
-            }
-        } else {
-            for (int id : target.ids()) {
-                scoring.onVectorAdded(target, id, target._get(id));
+        if (source != target) {
+            scoring.onAttached(target.key());
+            target.addListener(scoring);
+
+            if (target.type().equals("dense")) {
+                for (int id : source.ids()) {
+                    scoring.onVectorAdded(target, id, target.get(id));
+                }
+            } else {
+                for (int id : target.ids()) {
+                    scoring.onVectorAdded(target, id, target._get(id));
+                }
             }
         }
     }
