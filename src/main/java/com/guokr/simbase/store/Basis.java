@@ -108,11 +108,11 @@ public class Basis {
 
         if (sum > 0f) {
             for (int i = 0; i < size; i++) {
-                result[i] = ((float)Math.round(1000 * result[i] / sum)) / 1000 ;
+                result[i] = ((float) Math.round(1000 * result[i] / sum)) / 1000;
             }
         } else {
             for (int i = 0; i < size; i++) {
-                result[i] = ((float)Math.round(1000f / size)) / 1000;
+                result[i] = ((float) Math.round(1000f / size)) / 1000;
             }
         }
 

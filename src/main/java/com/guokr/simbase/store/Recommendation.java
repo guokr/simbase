@@ -41,43 +41,60 @@ public class Recommendation implements VectorSetListener {
         this.target = target;
         this.limit = limits;
         this.scoring = scoring;
+
+        scoring.onAttached(source.key());
+        source.addListener(scoring);
+        scoring.onAttached(target.key());
+        target.addListener(scoring);
+
+        if (source.type().equals("dense")) {
+            for (int id : source.ids()) {
+                scoring.onVectorAdded(source, id, source.get(id));
+            }
+        } else {
+            for (int id : source.ids()) {
+                scoring.onVectorAdded(source, id, source._get(id));
+            }
+        }
+
+        if (target.type().equals("dense")) {
+            for (int id : source.ids()) {
+                scoring.onVectorAdded(target, id, target.get(id));
+            }
+        } else {
+            for (int id : target.ids()) {
+                scoring.onVectorAdded(target, id, target._get(id));
+            }
+        }
     }
 
     private void processDenseChangedEvt(VectorSet evtSrc, int vecid, float[] vector) {
         if (evtSrc == this.source) {
-            scoring.beginBatch(source.key(), vecid);
             target.rescore(source.key(), vecid, vector, this);
-            scoring.endBatch();
         } else if (evtSrc == this.target) {
             int tgtVecId = vecid;
             TIntIterator iter = sorterKeys.iterator();
-            scoring.beginBatch(target.key(), tgtVecId);
             while (iter.hasNext()) {
                 int srcVecId = iter.next();
                 float score = scoring.score(source.key(), srcVecId, source.get(srcVecId), target.key(), tgtVecId,
                         vector);
                 add(srcVecId, tgtVecId, score);
             }
-            scoring.endBatch();
         }
     }
 
     private void processSparseChangedEvt(VectorSet evtSrc, int vecid, int[] vector) {
         if (evtSrc == this.source) {
-            scoring.beginBatch(source.key(), vecid);
             target.rescore(source.key(), vecid, vector, this);
-            scoring.endBatch();
         } else if (evtSrc == this.target) {
             int tgtVecId = vecid;
             TIntIterator iter = sorterKeys.iterator();
-            scoring.beginBatch(target.key(), tgtVecId);
             while (iter.hasNext()) {
                 int srcVecId = iter.next();
                 float score = scoring.score(source.key(), srcVecId, source._get(srcVecId), target.key(), tgtVecId,
                         vector);
                 add(srcVecId, tgtVecId, score);
             }
-            scoring.endBatch();
         }
     }
 
@@ -132,6 +149,12 @@ public class Recommendation implements VectorSetListener {
             return this.sorters.get(vecid).vecids();
         } else
             return new int[0];
+    }
+
+    public void remove(int srcVecId, int tgtVecId) {
+        if (this.sorters.containsKey(srcVecId)) {
+            this.sorters.get(srcVecId).remove(tgtVecId);
+        }
     }
 
     public void addListener(RecommendationListener listener) {

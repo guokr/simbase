@@ -3,183 +3,170 @@ package com.guokr.simbase.score;
 import gnu.trove.map.TIntFloatMap;
 import gnu.trove.map.TIntIntMap;
 import gnu.trove.map.hash.TIntFloatHashMap;
-import gnu.trove.map.hash.TIntIntHashMap;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import com.guokr.simbase.SimScore;
+import com.guokr.simbase.store.VectorSet;
 
 public class JensenShannonDivergence implements SimScore {
 
-	private static final String name = "jensenshannon";
-	private static Map<String, TIntFloatMap> denseCaches = new HashMap<String, TIntFloatMap>();
-	private static Map<String, TIntIntMap> sparseCaches = new HashMap<String, TIntIntMap>();
+    private static final String              name         = "jensenshannon";
+    private static Map<String, TIntFloatMap> denseCaches  = new HashMap<String, TIntFloatMap>();
+    private static Map<String, TIntIntMap>   sparseCaches = new HashMap<String, TIntIntMap>();
 
-	private static final float ratio = (float) Math.log(2);
+    private static final float               ratio        = (float) Math.log(2);
 
-	private String batchKey = null;
-	private int batchId = -1;
-	private boolean consumed = false;
+    private static float lb(float val) {
+        if (val > 0f) {
+            float result = ((float) Math.log(val)) / ratio;
+            return result;
+        } else {
+            return 0f;
+        }
+    }
 
-	private static float lb(float val) {
-		if (val > 0f) {
-			float result = ((float) Math.log(val)) / ratio;
-			return result;
-		} else {
-			return 0f;
-		}
-	}
+    private static float finfo(float[] prob) {
+        float info = 0f;
+        for (float p : prob) {
+            info += p * lb(p);
+        }
+        return info;
+    }
 
-	private static float finfo(float[] prob) {
-		float info = 0f;
-		for (float p : prob) {
-			info += p * lb(p);
-		}
-		return info;
-	}
+    private static int iinfo(int[] freq) {
+        float info = 0f;
+        int len = freq.length;
+        for (int i = 0; i < len; i += 2) {
+            int p = freq[i + 1];
+            info += p * lb(p);
+        }
+        return Math.round(info);
+    }
 
-	private static int iinfo(int[] freq) {
-		float info = 0f;
-		int len = freq.length;
-		for (int i = 0; i < len; i += 2) {
-			int p = freq[i + 1];
-			info += p * lb(p);
-		}
-		return Math.round(info);
-	}
+    @Override
+    public String name() {
+        return name;
+    }
 
-	@Override
-	public String name() {
-		return name;
-	}
+    @Override
+    public SortOrder order() {
+        return SortOrder.Asc;
+    }
 
-	@Override
-	public SortOrder order() {
-		return SortOrder.Asc;
-	}
+    @Override
+    public float score(String srcVKey, int srcId, float[] source, String tgtVKey, int tgtId, float[] target) {
+        TIntFloatMap sourceCache = denseCaches.get(srcVKey);
+        TIntFloatMap targetCache = denseCaches.get(tgtVKey);
 
-	@Override
-	public void beginBatch(String vkey, int vecId) {
-		this.batchKey = vkey;
-		this.batchId = vecId;
-	}
+        float scoring = 0f;
+        int len = source.length;
+        for (int i = 0; i < len; i++) {
+            float p = source[i];
+            float q = target[i];
+            float m = (p + q) / 2;
+            scoring += (-m * lb(m));
+        }
+        scoring += sourceCache.get(srcId) / 2f + targetCache.get(tgtId) / 2f;
 
-	@Override
-	public void endBatch() {
-		this.batchKey = null;
-		this.batchId = -1;
-		this.consumed = false;
-	}
+        return scoring;
+    }
 
-	@Override
-	public float score(String srcVKey, int srcId, float[] source,
-			String tgtVKey, int tgtId, float[] target) {
-		TIntFloatMap sourceCache = denseCaches.get(srcVKey);
-		if (sourceCache == null) {
-			sourceCache = new TIntFloatHashMap();
-			denseCaches.put(srcVKey, sourceCache);
-		}
+    @Override
+    public float score(String srcVKey, int srcId, int[] source, String tgtVKey, int tgtId, int[] target) {
+        TIntIntMap sourceCache = sparseCaches.get(srcVKey);
+        TIntIntMap targetCache = sparseCaches.get(tgtVKey);
 
-		TIntFloatMap targetCache = denseCaches.get(tgtVKey);
-		if (targetCache == null) {
-			targetCache = new TIntFloatHashMap();
-			denseCaches.put(tgtVKey, targetCache);
-		}
+        float scoring = 0f;
+        int len1 = source.length;
+        int len2 = target.length;
+        int idx1 = 0, idx2 = 0;
+        while (idx1 < len1 && idx2 < len2) {
+            if (source[idx1] == target[idx2]) {
+                float p = source[idx1 + 1];
+                float q = target[idx2 + 1];
+                float m = (p + q) / 2;
+                scoring += (-m * lb(m));
+                idx1 += 2;
+                idx2 += 2;
+            } else if (source[idx1] < target[idx2]) {
+                float p = source[idx1 + 1];
+                float m = p / 2;
+                scoring += (-m * lb(m));
+                idx1 += 2;
+            } else {
+                float q = target[idx2 + 1];
+                float m = q / 2;
+                scoring += (-m * lb(m));
+                idx2 += 2;
+            }
+        }
+        float srcScore = sourceCache.get(srcId);
+        float tgtScore = targetCache.get(tgtId);
+        scoring += srcScore / 2f + tgtScore / 2f;
 
-		if (!consumed && batchKey.equals(srcVKey) && batchId == srcId) {
-			sourceCache.put(srcId, finfo(source));
-			consumed = true;
-		}
+        return scoring;
+    }
 
-		if (!consumed && batchKey.equals(tgtVKey) && batchId == tgtId) {
-			targetCache.put(tgtId, finfo(target));
-			consumed = true;
-		}
+    public void onAttached(String vkey) {
+        denseCaches.put(vkey, new TIntFloatHashMap());
+    }
 
-		if (!sourceCache.containsKey(srcId)) {
-			sourceCache.put(srcId, finfo(source));
-		}
+    public void onUpdated(String vkey, int vid, float[] vector) {
+        TIntFloatMap cache = denseCaches.get(vkey);
+        cache.put(vid, finfo(vector));
+    }
 
-		if (!targetCache.containsKey(tgtId)) {
-			targetCache.put(tgtId, finfo(target));
-		}
+    public void onUpdated(String vkey, int vid, int[] vector) {
+        TIntFloatMap cache = denseCaches.get(vkey);
+        cache.put(vid, iinfo(vector));
+    }
 
-		float scoring = 0f;
-		int len = source.length;
-		for (int i = 0; i < len; i++) {
-			float p = source[i];
-			float q = target[i];
-			float m = (p + q) / 2;
-			scoring += (-m * lb(m));
-		}
-		scoring += sourceCache.get(srcId) / 2f + targetCache.get(tgtId) / 2f;
+    public void onRemoved(String vkey, int vid) {
+        TIntFloatMap denseCache = denseCaches.get(vkey);
+        if (denseCache != null) {
+            denseCache.remove(vid);
+        }
+        TIntIntMap sparseCache = sparseCaches.get(vkey);
+        if (sparseCache != null) {
+            sparseCache.remove(vid);
+        }
+    }
 
-		return scoring;
-	}
+    @Override
+    public void onVectorAdded(VectorSet evtSrc, int vecid, float[] vector) {
+        onUpdated(evtSrc.key(), vecid, vector);
+    }
 
-	@Override
-	public float score(String srcVKey, int srcId, int[] source, String tgtVKey,
-			int tgtId, int[] target) {
-		TIntIntMap sourceCache = sparseCaches.get(srcVKey);
-		if (sourceCache == null) {
-			sourceCache = new TIntIntHashMap();
-			sparseCaches.put(srcVKey, sourceCache);
-		}
+    @Override
+    public void onVectorAdded(VectorSet evtSrc, int vecid, int[] vector) {
+        onUpdated(evtSrc.key(), vecid, vector);
+    }
 
-		TIntIntMap targetCache = sparseCaches.get(tgtVKey);
-		if (targetCache == null) {
-			targetCache = new TIntIntHashMap();
-			sparseCaches.put(tgtVKey, targetCache);
-		}
+    @Override
+    public void onVectorSetted(VectorSet evtSrc, int vecid, float[] old, float[] vector) {
+        onUpdated(evtSrc.key(), vecid, vector);
+    }
 
-		if (!consumed && batchKey.equals(srcVKey) && batchId == srcId) {
-			sourceCache.put(srcId, iinfo(source));
-			consumed = true;
-		}
+    @Override
+    public void onVectorSetted(VectorSet evtSrc, int vecid, int[] old, int[] vector) {
+        onUpdated(evtSrc.key(), vecid, vector);
+    }
 
-		if (!consumed && batchKey.equals(tgtVKey) && batchId == tgtId) {
-			targetCache.put(tgtId, iinfo(target));
-			consumed = true;
-		}
+    @Override
+    public void onVectorAccumulated(VectorSet evtSrc, int vecid, float[] vector, float[] accumulated) {
+        onUpdated(evtSrc.key(), vecid, accumulated);
+    }
 
-		if (!sourceCache.containsKey(srcId)) {
-			sourceCache.put(srcId, iinfo(source));
-		}
+    @Override
+    public void onVectorAccumulated(VectorSet evtSrc, int vecid, int[] vector, int[] accumulated) {
+        onUpdated(evtSrc.key(), vecid, accumulated);
+    }
 
-		if (!targetCache.containsKey(tgtId)) {
-			targetCache.put(tgtId, iinfo(target));
-		}
-
-		float scoring = 0f;
-		int len1 = source.length;
-		int len2 = target.length;
-		int idx1 = 0, idx2 = 0;
-		while (idx1 < len1 && idx2 < len2) {
-			if (source[idx1] == target[idx2]) {
-				float p = source[idx1 + 1];
-				float q = target[idx2 + 1];
-				float m = (p + q) / 2;
-				scoring += (-m * lb(m));
-				idx1 += 2;
-				idx2 += 2;
-			} else if (source[idx1] < target[idx2]) {
-				float p = source[idx1 + 1];
-				float m = p / 2;
-				scoring += (-m * lb(m));
-				idx1 += 2;
-			} else {
-				float q = target[idx2 + 1];
-				float m = q / 2;
-				scoring += (-m * lb(m));
-				idx2 += 2;
-			}
-		}
-		float srcScore = sourceCache.get(srcId);
-		float tgtScore = targetCache.get(tgtId);
-		scoring += srcScore / 2f + tgtScore / 2f;
-
-		return scoring;
-	}
+    @Override
+    public void onVectorRemoved(VectorSet evtSrc, int vecid) {
+        onRemoved(evtSrc.key(), vecid);
+    }
 
 }

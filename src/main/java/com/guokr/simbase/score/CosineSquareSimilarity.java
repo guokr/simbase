@@ -3,22 +3,18 @@ package com.guokr.simbase.score;
 import gnu.trove.map.TIntFloatMap;
 import gnu.trove.map.TIntIntMap;
 import gnu.trove.map.hash.TIntFloatHashMap;
-import gnu.trove.map.hash.TIntIntHashMap;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import com.guokr.simbase.SimScore;
+import com.guokr.simbase.store.VectorSet;
 
 public class CosineSquareSimilarity implements SimScore {
 
     private static String                    name         = "cosinesq";
     private static Map<String, TIntFloatMap> denseCaches  = new HashMap<String, TIntFloatMap>();
     private static Map<String, TIntIntMap>   sparseCaches = new HashMap<String, TIntIntMap>();
-
-    private String                           batchKey     = null;
-    private int                              batchId      = -1;
-    private boolean                          consumed     = false;
 
     private float flengthsq(float[] vector) {
         float result = 0f;
@@ -50,49 +46,9 @@ public class CosineSquareSimilarity implements SimScore {
     }
 
     @Override
-    public void beginBatch(String vkey, int vecId) {
-        this.batchKey = vkey;
-        this.batchId = vecId;
-    }
-
-    @Override
-    public void endBatch() {
-        this.batchKey = null;
-        this.batchId = -1;
-        this.consumed = false;
-    }
-
-    @Override
     public float score(String srcVKey, int srcId, float[] source, String tgtVKey, int tgtId, float[] target) {
         TIntFloatMap sourceCache = denseCaches.get(srcVKey);
-        if (sourceCache == null) {
-            sourceCache = new TIntFloatHashMap();
-            denseCaches.put(srcVKey, sourceCache);
-        }
-
         TIntFloatMap targetCache = denseCaches.get(tgtVKey);
-        if (targetCache == null) {
-            targetCache = new TIntFloatHashMap();
-            denseCaches.put(tgtVKey, targetCache);
-        }
-
-        if (!consumed && batchKey.equals(srcVKey) && batchId == srcId) {
-            sourceCache.put(srcId, flengthsq(source));
-            consumed = true;
-        }
-
-        if (!consumed && batchKey.equals(tgtVKey) && batchId == tgtId) {
-            targetCache.put(tgtId, flengthsq(target));
-            consumed = true;
-        }
-
-        if (!sourceCache.containsKey(srcId)) {
-            sourceCache.put(srcId, flengthsq(source));
-        }
-
-        if (!targetCache.containsKey(tgtId)) {
-            targetCache.put(tgtId, flengthsq(target));
-        }
 
         float scoring = 0;
         int len = source.length;
@@ -108,34 +64,7 @@ public class CosineSquareSimilarity implements SimScore {
     @Override
     public float score(String srcVKey, int srcId, int[] source, String tgtVKey, int tgtId, int[] target) {
         TIntIntMap sourceCache = sparseCaches.get(srcVKey);
-        if (sourceCache == null) {
-            sourceCache = new TIntIntHashMap();
-            sparseCaches.put(srcVKey, sourceCache);
-        }
-
         TIntIntMap targetCache = sparseCaches.get(tgtVKey);
-        if (targetCache == null) {
-            targetCache = new TIntIntHashMap();
-            sparseCaches.put(tgtVKey, targetCache);
-        }
-
-        if (!consumed && batchKey.equals(srcVKey) && batchId == srcId) {
-            sourceCache.put(srcId, ilengthsq(source));
-            consumed = true;
-        }
-
-        if (!consumed && batchKey.equals(tgtVKey) && batchId == tgtId) {
-            targetCache.put(tgtId, ilengthsq(target));
-            consumed = true;
-        }
-
-        if (!sourceCache.containsKey(srcId)) {
-            sourceCache.put(srcId, ilengthsq(source));
-        }
-
-        if (!targetCache.containsKey(tgtId)) {
-            targetCache.put(tgtId, ilengthsq(target));
-        }
 
         float scoring = 0f;
         int len1 = source.length;
@@ -156,6 +85,66 @@ public class CosineSquareSimilarity implements SimScore {
         scoring = scoring * scoring / sourceCache.get(srcId) / targetCache.get(tgtId);
 
         return scoring;
+    }
+
+    public void onAttached(String vkey) {
+        denseCaches.put(vkey, new TIntFloatHashMap());
+    }
+
+    public void onUpdated(String vkey, int vid, float[] vector) {
+        TIntFloatMap cache = denseCaches.get(vkey);
+        cache.put(vid, flengthsq(vector));
+    }
+
+    public void onUpdated(String vkey, int vid, int[] vector) {
+        TIntFloatMap cache = denseCaches.get(vkey);
+        cache.put(vid, ilengthsq(vector));
+    }
+
+    public void onRemoved(String vkey, int vid) {
+        TIntFloatMap denseCache = denseCaches.get(vkey);
+        if (denseCache != null) {
+            denseCache.remove(vid);
+        }
+        TIntIntMap sparseCache = sparseCaches.get(vkey);
+        if (sparseCache != null) {
+            sparseCache.remove(vid);
+        }
+    }
+
+    @Override
+    public void onVectorAdded(VectorSet evtSrc, int vecid, float[] vector) {
+        onUpdated(evtSrc.key(), vecid, vector);
+    }
+
+    @Override
+    public void onVectorAdded(VectorSet evtSrc, int vecid, int[] vector) {
+        onUpdated(evtSrc.key(), vecid, vector);
+    }
+
+    @Override
+    public void onVectorSetted(VectorSet evtSrc, int vecid, float[] old, float[] vector) {
+        onUpdated(evtSrc.key(), vecid, vector);
+    }
+
+    @Override
+    public void onVectorSetted(VectorSet evtSrc, int vecid, int[] old, int[] vector) {
+        onUpdated(evtSrc.key(), vecid, vector);
+    }
+
+    @Override
+    public void onVectorAccumulated(VectorSet evtSrc, int vecid, float[] vector, float[] accumulated) {
+        onUpdated(evtSrc.key(), vecid, accumulated);
+    }
+
+    @Override
+    public void onVectorAccumulated(VectorSet evtSrc, int vecid, int[] vector, int[] accumulated) {
+        onUpdated(evtSrc.key(), vecid, accumulated);
+    }
+
+    @Override
+    public void onVectorRemoved(VectorSet evtSrc, int vecid) {
+        onRemoved(evtSrc.key(), vecid);
     }
 
 }
