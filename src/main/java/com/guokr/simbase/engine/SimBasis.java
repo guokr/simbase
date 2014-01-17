@@ -186,26 +186,22 @@ public class SimBasis {
             scoring = new JensenShannonDivergence();
         }
 
-        try {
-            VectorSet source = vectorSets.get(vkeySource);
-            VectorSet target = vectorSets.get(vkeyTarget);
-            Recommendation rec = new Recommendation(source, target, scoring, 20);
+        VectorSet source = vectorSets.get(vkeySource);
+        VectorSet target = vectorSets.get(vkeyTarget);
+        Recommendation rec = new Recommendation(source, target, scoring, 20);
 
-            String rkey = rkey(vkeySource, vkeyTarget);
-            this.recommendations.put(rkey, rec);
+        String rkey = rkey(vkeySource, vkeyTarget);
+        this.recommendations.put(rkey, rec);
 
-            source.addListener(rec);
-            if (target != source) {
-                target.addListener(rec);
-            }
+        source.addListener(rec);
+        if (target != source) {
+            target.addListener(rec);
+        }
 
-            for (int srcVecId : source.ids()) {
-                rec.create(srcVecId);
-                float[] vector = source.get(srcVecId);
-                target.rescore(source.key(), srcVecId, vector, rec);
-            }
-        } catch (Exception e) {
-            throw new SimException(e);
+        for (int srcVecId : source.ids()) {
+            rec.create(srcVecId);
+            float[] vector = source.get(srcVecId);
+            target.rescore(source.key(), srcVecId, vector, rec);
         }
     }
 

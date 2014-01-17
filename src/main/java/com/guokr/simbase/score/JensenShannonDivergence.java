@@ -3,6 +3,7 @@ package com.guokr.simbase.score;
 import gnu.trove.map.TIntFloatMap;
 import gnu.trove.map.TIntIntMap;
 import gnu.trove.map.hash.TIntFloatHashMap;
+import gnu.trove.map.hash.TIntIntHashMap;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -12,11 +13,10 @@ import com.guokr.simbase.store.VectorSet;
 
 public class JensenShannonDivergence implements SimScore {
 
-    private static final String              name         = "jensenshannon";
-    private static Map<String, TIntFloatMap> denseCaches  = new HashMap<String, TIntFloatMap>();
-    private static Map<String, TIntIntMap>   sparseCaches = new HashMap<String, TIntIntMap>();
+    private static final String              name   = "jensenshannon";
+    private static Map<String, TIntFloatMap> caches = new HashMap<String, TIntFloatMap>();
 
-    private static final float               ratio        = (float) Math.log(2);
+    private static final float               ratio  = (float) Math.log(2);
 
     private static float lb(float val) {
         if (val > 0f) {
@@ -57,8 +57,8 @@ public class JensenShannonDivergence implements SimScore {
 
     @Override
     public float score(String srcVKey, int srcId, float[] source, String tgtVKey, int tgtId, float[] target) {
-        TIntFloatMap sourceCache = denseCaches.get(srcVKey);
-        TIntFloatMap targetCache = denseCaches.get(tgtVKey);
+        TIntFloatMap sourceCache = caches.get(srcVKey);
+        TIntFloatMap targetCache = caches.get(tgtVKey);
 
         float scoring = 0f;
         int len = source.length;
@@ -75,8 +75,8 @@ public class JensenShannonDivergence implements SimScore {
 
     @Override
     public float score(String srcVKey, int srcId, int[] source, String tgtVKey, int tgtId, int[] target) {
-        TIntIntMap sourceCache = sparseCaches.get(srcVKey);
-        TIntIntMap targetCache = sparseCaches.get(tgtVKey);
+        TIntFloatMap sourceCache = caches.get(srcVKey);
+        TIntFloatMap targetCache = caches.get(tgtVKey);
 
         float scoring = 0f;
         int len1 = source.length;
@@ -110,28 +110,19 @@ public class JensenShannonDivergence implements SimScore {
     }
 
     public void onAttached(String vkey) {
-        denseCaches.put(vkey, new TIntFloatHashMap());
+        caches.put(vkey, new TIntFloatHashMap());
     }
 
     public void onUpdated(String vkey, int vid, float[] vector) {
-        TIntFloatMap cache = denseCaches.get(vkey);
-        cache.put(vid, finfo(vector));
+        caches.get(vkey).put(vid, finfo(vector));
     }
 
     public void onUpdated(String vkey, int vid, int[] vector) {
-        TIntFloatMap cache = denseCaches.get(vkey);
-        cache.put(vid, iinfo(vector));
+        caches.get(vkey).put(vid, iinfo(vector));
     }
 
     public void onRemoved(String vkey, int vid) {
-        TIntFloatMap denseCache = denseCaches.get(vkey);
-        if (denseCache != null) {
-            denseCache.remove(vid);
-        }
-        TIntIntMap sparseCache = sparseCaches.get(vkey);
-        if (sparseCache != null) {
-            sparseCache.remove(vid);
-        }
+        caches.get(vkey).remove(vid);
     }
 
     @Override

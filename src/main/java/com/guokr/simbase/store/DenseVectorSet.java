@@ -270,18 +270,24 @@ public class DenseVectorSet implements VectorSet {
     public void rescore(String key, int vecid, int[] vector, Recommendation rec) {
         rec.create(vecid);
         TIntIntIterator iter = indexer.iterator();
-        while (iter.hasNext()) {
-            iter.advance();
-            int tgtId = iter.key();
-            int[] target = _get(tgtId);
-            float score = rec.scoring.score(key, vecid, vector, this.key, tgtId, target);
-            if (!(this == rec.source && vecid == tgtId)) {
+        if (this == rec.source) {
+            while (iter.hasNext()) {
+                iter.advance();
+                int tgtId = iter.key();
+                int[] target = _get(tgtId);
+                float score = rec.scoring.score(key, vecid, vector, this.key, tgtId, target);
                 rec.add(vecid, tgtId, score);
-                if (this == rec.target) {
-                    rec.add(tgtId, vecid, score);
-                }
+                rec.add(tgtId, vecid, score);
+            }
+            rec.remove(vecid, vecid);
+        } else {
+            while (iter.hasNext()) {
+                iter.advance();
+                int tgtId = iter.key();
+                int[] target = _get(tgtId);
+                float score = rec.scoring.score(key, vecid, vector, this.key, tgtId, target);
+                rec.add(vecid, tgtId, score);
             }
         }
     }
-
 }

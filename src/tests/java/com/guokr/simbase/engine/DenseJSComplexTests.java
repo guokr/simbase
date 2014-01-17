@@ -346,7 +346,7 @@ public class DenseJSComplexTests {
         TestableCallback testRrec = new TestableCallback() {
             @Override
             public void excepted() {
-                isFloatList(new float[] { 11, 7, 5, 3, 13 });
+                isFloatList(new float[] { 11, 7, 3, 5, 13 });
             }
         };
         engine.rrec(testRrec, "vtest", 2, "vtest");
@@ -357,7 +357,7 @@ public class DenseJSComplexTests {
         TestableCallback testRrec2 = new TestableCallback() {
             @Override
             public void excepted() {
-                isFloatList(new float[] { 2, 11, 7, 5, 3, 13 });
+                isFloatList(new float[] { 2, 3, 7, 5, 11, 13 });
             }
         };
         engine.rrec(testRrec2, "vtest", 2, "vtest2");
