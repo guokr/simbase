@@ -1,9 +1,7 @@
 package com.guokr.simbase.score;
 
 import gnu.trove.map.TIntFloatMap;
-import gnu.trove.map.TIntIntMap;
 import gnu.trove.map.hash.TIntFloatHashMap;
-import gnu.trove.map.hash.TIntIntHashMap;
 
 import java.util.HashMap;
 import java.util.Map;

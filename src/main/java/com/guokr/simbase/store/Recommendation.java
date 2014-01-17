@@ -183,12 +183,12 @@ public class Recommendation implements VectorSetListener {
 
     @Override
     public void onVectorAccumulated(VectorSet evtSrc, int vecid, float[] vector, float[] accumulated) {
-        processDenseChangedEvt(evtSrc, vecid, vector);
+        processDenseChangedEvt(evtSrc, vecid, accumulated);
     }
 
     @Override
     public void onVectorAccumulated(VectorSet evtSrc, int vecid, int[] vector, int[] accumulated) {
-        processSparseChangedEvt(evtSrc, vecid, vector);
+        processSparseChangedEvt(evtSrc, vecid, accumulated);
     }
 
     @Override

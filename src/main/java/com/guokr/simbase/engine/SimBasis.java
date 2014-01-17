@@ -198,10 +198,18 @@ public class SimBasis {
             target.addListener(rec);
         }
 
-        for (int srcVecId : source.ids()) {
-            rec.create(srcVecId);
-            float[] vector = source.get(srcVecId);
-            target.rescore(source.key(), srcVecId, vector, rec);
+        if (source.type().equals("dense")) {
+            for (int srcVecId : source.ids()) {
+                rec.create(srcVecId);
+                float[] vector = source.get(srcVecId);
+                target.rescore(source.key(), srcVecId, vector, rec);
+            }
+        } else {
+            for (int srcVecId : source.ids()) {
+                rec.create(srcVecId);
+                int[] vector = source._get(srcVecId);
+                target.rescore(source.key(), srcVecId, vector, rec);
+            }
         }
     }
 

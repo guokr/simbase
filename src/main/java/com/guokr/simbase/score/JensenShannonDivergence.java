@@ -1,9 +1,7 @@
 package com.guokr.simbase.score;
 
 import gnu.trove.map.TIntFloatMap;
-import gnu.trove.map.TIntIntMap;
 import gnu.trove.map.hash.TIntFloatHashMap;
-import gnu.trove.map.hash.TIntIntHashMap;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -35,14 +33,14 @@ public class JensenShannonDivergence implements SimScore {
         return info;
     }
 
-    private static int iinfo(int[] freq) {
+    private static float iinfo(int[] freq) {
         float info = 0f;
         int len = freq.length;
         for (int i = 0; i < len; i += 2) {
             int p = freq[i + 1];
             info += p * lb(p);
         }
-        return Math.round(info);
+        return info;
     }
 
     @Override
