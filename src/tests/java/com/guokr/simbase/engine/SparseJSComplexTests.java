@@ -22,7 +22,7 @@ public class SparseJSComplexTests {
         Map<String, Object> basis = new HashMap<String, Object>();
         Map<String, Object> sparse = new HashMap<String, Object>();
         Map<String, Object> econf = new HashMap<String, Object>();
-        sparse.put("accumuFactor", 0.01);
+        sparse.put("accumuFactor", 0.5);
         sparse.put("sparseFactor", 2048);
         basis.put("vectorSetType", "sparse");
         econf.put("savepath", "data");
