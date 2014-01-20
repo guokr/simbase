@@ -122,26 +122,30 @@ public class DenseVectorSet implements VectorSet {
         }
     }
 
+    protected void get(int vecid, float[] result) {
+        float ftmp = 0;
+        int cursor = 0;
+        int dim = dimns.get(vecid);
+        int start = indexer.get(vecid);
+        while (cursor < result.length) {
+            if (cursor < dim) {
+                ftmp = probs.get(start + cursor);
+                if (ftmp >= 0 && ftmp <= 1) {
+                    result[cursor] = ftmp;
+                }
+            } else {
+                result[cursor] = 0;
+            }
+            cursor++;
+        }
+    }
+
     @Override
     public float[] get(int vecid) {
         float[] result;
         if (indexer.containsKey(vecid)) {
             result = new float[this.base.size()];
-            float ftmp = 0;
-            int cursor = 0;
-            int dim = dimns.get(vecid);
-            int start = indexer.get(vecid);
-            while (cursor < result.length) {
-                if (cursor < dim) {
-                    ftmp = probs.get(start + cursor);
-                    if (ftmp >= 0 && ftmp <= 1) {
-                        result[cursor] = ftmp;
-                    }
-                } else {
-                    result[cursor] = 0;
-                }
-                cursor++;
-            }
+            get(vecid, result);
         } else {
             result = new float[0];
         }
@@ -216,9 +220,17 @@ public class DenseVectorSet implements VectorSet {
         }
     }
 
+    protected void _get(int vecid, float[] input, int[] result) {
+        get(vecid, input);
+        Basis.sparsify(sparseFactor, input, result);
+    }
+
     @Override
     public int[] _get(int vecid) {
-        return Basis.sparsify(sparseFactor, get(vecid));
+        int[] result = new int[this.base.size()];
+        float[] input = new float[this.base.size()];
+        _get(vecid, input, result);
+        return result;
     }
 
     @Override
@@ -245,11 +257,12 @@ public class DenseVectorSet implements VectorSet {
     public void rescore(String key, int vecid, float[] vector, Recommendation rec) {
         rec.create(vecid);
         TIntIntIterator iter = indexer.iterator();
+        float[] target = new float[this.base.size()];
         if (this == rec.source) {
             while (iter.hasNext()) {
                 iter.advance();
                 int tgtId = iter.key();
-                float[] target = get(tgtId);
+                get(tgtId, target);
                 float score = rec.scoring.score(key, vecid, vector, this.key, tgtId, target);
                 rec.add(vecid, tgtId, score);
                 rec.add(tgtId, vecid, score);
@@ -259,7 +272,7 @@ public class DenseVectorSet implements VectorSet {
             while (iter.hasNext()) {
                 iter.advance();
                 int tgtId = iter.key();
-                float[] target = get(tgtId);
+                get(tgtId, target);
                 float score = rec.scoring.score(key, vecid, vector, this.key, tgtId, target);
                 rec.add(vecid, tgtId, score);
             }
@@ -270,11 +283,13 @@ public class DenseVectorSet implements VectorSet {
     public void rescore(String key, int vecid, int[] vector, Recommendation rec) {
         rec.create(vecid);
         TIntIntIterator iter = indexer.iterator();
+        float[] input = new float[this.base.size()];
+        int[] target = new int[this.base.size() * 2];
         if (this == rec.source) {
             while (iter.hasNext()) {
                 iter.advance();
                 int tgtId = iter.key();
-                int[] target = _get(tgtId);
+                _get(tgtId, input, target);
                 float score = rec.scoring.score(key, vecid, vector, this.key, tgtId, target);
                 rec.add(vecid, tgtId, score);
                 rec.add(tgtId, vecid, score);
@@ -284,7 +299,7 @@ public class DenseVectorSet implements VectorSet {
             while (iter.hasNext()) {
                 iter.advance();
                 int tgtId = iter.key();
-                int[] target = _get(tgtId);
+                _get(tgtId, input, target);
                 float score = rec.scoring.score(key, vecid, vector, this.key, tgtId, target);
                 rec.add(vecid, tgtId, score);
             }

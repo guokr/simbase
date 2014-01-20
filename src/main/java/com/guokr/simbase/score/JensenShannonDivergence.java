@@ -81,7 +81,9 @@ public class JensenShannonDivergence implements SimScore {
         int len2 = target.length;
         int idx1 = 0, idx2 = 0;
         while (idx1 < len1 && idx2 < len2) {
-            if (source[idx1] == target[idx2]) {
+            if (source[idx1] < 0 || target[idx2] < 0) {
+                break;
+            } else if (source[idx1] == target[idx2]) {
                 float p = source[idx1 + 1];
                 float q = target[idx2 + 1];
                 float m = (p + q) / 2;

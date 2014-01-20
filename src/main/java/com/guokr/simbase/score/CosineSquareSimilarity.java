@@ -69,7 +69,9 @@ public class CosineSquareSimilarity implements SimScore {
         int len2 = target.length;
         int idx1 = 0, idx2 = 0;
         while (idx1 < len1 && idx2 < len2) {
-            if (source[idx1] == target[idx2]) {
+            if (source[idx1] < 0 || target[idx2] < 0) {
+                break;
+            } else if (source[idx1] == target[idx2]) {
                 scoring += source[idx1 + 1] * target[idx2 + 1];
                 idx1 += 2;
                 idx2 += 2;

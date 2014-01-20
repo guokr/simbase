@@ -88,10 +88,8 @@ public class Basis {
         }
     }
 
-    public static float[] densify(int size, int sparseFactor, int[] pairs) {
+    public static void densify(int size, int sparseFactor, int[] pairs, float[] result) {
         int length = pairs.length;
-        float[] result = new float[size];
-
         int index = 0, cursor = 0;
         float sum = 0f;
         while (cursor < size) {
@@ -115,8 +113,33 @@ public class Basis {
                 result[i] = ((float) Math.round(1000f / size)) / 1000;
             }
         }
+    }
 
+    public static float[] densify(int size, int sparseFactor, int[] pairs) {
+        float[] result = new float[size];
+        densify(size, sparseFactor, pairs, result);
         return result;
+    }
+
+    public static void sparsify(int sparseFactor, float[] distr, int[] result) {
+        int cursor = 0, sum = 0, idx = 0, length = result.length;
+        for (float ftmp : distr) {
+            int itmp = Math.round(ftmp * sparseFactor);
+            if (itmp > 0) {
+                result[idx] = cursor;
+                result[idx + 1] = itmp;
+                sum += itmp;
+            }
+            cursor++;
+            idx = idx + 2;
+        }
+        for (int i = idx; i < length; i++) {
+            result[i++] = -1;
+        }
+        for (int i = 0; i < idx;) {
+            result[i + 1] = (int) Math.round(((float) result[i + 1]) / sum * sparseFactor);
+            i += 2;
+        }
     }
 
     public static int[] sparsify(int sparseFactor, float[] distr) {

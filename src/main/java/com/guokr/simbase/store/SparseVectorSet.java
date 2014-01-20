@@ -134,9 +134,17 @@ public class SparseVectorSet implements VectorSet {
         }
     }
 
+    public float[] get(int vecid, int[] input, float[] result) {
+        _get(vecid, input);
+        Basis.densify(base.size(), sparseFactor, input, result);
+        return result;
+    }
+
     @Override
     public float[] get(int vecid) {
-        return Basis.densify(base.size(), sparseFactor, _get(vecid));
+        float[] result = new float[base.size()];
+        Basis.densify(base.size(), sparseFactor, _get(vecid), result);
+        return result;
     }
 
     @Override
@@ -154,23 +162,24 @@ public class SparseVectorSet implements VectorSet {
         _accumulate(vecid, Basis.sparsify(sparseFactor, vector));
     }
 
+    protected void _get(int vecid, int[] result) {
+        int cursor = indexer.get(vecid), i = 0;
+        while (true) {
+            int pos = (int) probs.get(cursor++);
+            if (pos < 0) {
+                break;
+            }
+            int val = Math.round(probs.get(cursor++));
+            result[i++] = pos;
+            result[i++] = val;
+        }
+    }
+
     @Override
     public int[] _get(int vecid) {
-        TIntArrayList resultList = new TIntArrayList(base.size());
-        if (indexer.containsKey(vecid)) {
-            int cursor = indexer.get(vecid);
-            while (true) {
-                int pos = (int) probs.get(cursor++);
-                if (pos < 0) {
-                    break;
-                }
-                int val = Math.round(probs.get(cursor++));
-                resultList.add(pos);
-                resultList.add(val);
-            }
-        }
-        int[] result = new int[resultList.size()];
-        return resultList.toArray(result);
+        int[] result = new int[base.size() * 2];
+        _get(vecid, result);
+        return result;
     }
 
     @Override
@@ -277,11 +286,13 @@ public class SparseVectorSet implements VectorSet {
     public void rescore(String key, int vecid, float[] vector, Recommendation rec) {
         rec.create(vecid);
         TIntIntIterator iter = indexer.iterator();
+        int[] input = new int[this.base.size() * 2];
+        float[] target = new float[this.base.size()];
         if (this == rec.source) {
             while (iter.hasNext()) {
                 iter.advance();
                 int tgtId = iter.key();
-                float[] target = get(tgtId);
+                get(tgtId, input, target);
                 float score = rec.scoring.score(key, vecid, vector, this.key, tgtId, target);
                 rec.add(vecid, tgtId, score);
                 rec.add(tgtId, vecid, score);
@@ -291,7 +302,7 @@ public class SparseVectorSet implements VectorSet {
             while (iter.hasNext()) {
                 iter.advance();
                 int tgtId = iter.key();
-                float[] target = get(tgtId);
+                get(tgtId, input, target);
                 float score = rec.scoring.score(key, vecid, vector, this.key, tgtId, target);
                 rec.add(vecid, tgtId, score);
             }
@@ -302,11 +313,12 @@ public class SparseVectorSet implements VectorSet {
     public void rescore(String key, int vecid, int[] vector, Recommendation rec) {
         rec.create(vecid);
         TIntIntIterator iter = indexer.iterator();
+        int[] target = new int[this.base.size() * 2];
         if (this == rec.source) {
             while (iter.hasNext()) {
                 iter.advance();
                 int tgtId = iter.key();
-                int[] target = _get(tgtId);
+                _get(tgtId, target);
                 float score = rec.scoring.score(key, vecid, vector, this.key, tgtId, target);
                 rec.add(vecid, tgtId, score);
                 rec.add(tgtId, vecid, score);
@@ -316,7 +328,7 @@ public class SparseVectorSet implements VectorSet {
             while (iter.hasNext()) {
                 iter.advance();
                 int tgtId = iter.key();
-                int[] target = _get(tgtId);
+                _get(tgtId, target);
                 float score = rec.scoring.score(key, vecid, vector, this.key, tgtId, target);
                 rec.add(vecid, tgtId, score);
             }
