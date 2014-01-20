@@ -8,7 +8,7 @@ set or between two vector sets.
 Release
 --------
 
-Current version is [v0.1.0-alpha1](https://github.com/guokr/simbase/releases/tag/v0.1.0-alpha1).
+Current version is [v0.1.0-alpha2](https://github.com/guokr/simbase/releases/tag/v0.1.0-alpha2).
 
 Concepts
 --------
