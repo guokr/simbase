@@ -5,6 +5,8 @@ import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
+import gnu.trove.set.TIntSet;
+import gnu.trove.set.hash.TIntHashSet;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,7 +26,7 @@ public class Recommendation implements VectorSetListener {
 
     TIntList                             sorterKeys     = new TIntArrayList();
     TIntObjectMap<Sorter>                sorters        = new TIntObjectHashMap<Sorter>();
-    TIntObjectHashMap<TIntList>          reverseIndexer = new TIntObjectHashMap<TIntList>();
+    TIntObjectHashMap<TIntSet>           reverseIndexer = new TIntObjectHashMap<TIntSet>();
 
     private List<RecommendationListener> listeners      = new ArrayList<RecommendationListener>();
 
@@ -103,7 +105,7 @@ public class Recommendation implements VectorSetListener {
 
     private void processDeletedEvt(int tgtVecId) {
         if (this.reverseIndexer.containsKey(tgtVecId)) {
-            TIntList range = this.reverseIndexer.get(tgtVecId);
+            TIntSet range = this.reverseIndexer.get(tgtVecId);
             TIntIterator iter = range.iterator();
             while (iter.hasNext()) {
                 int srcVecId = iter.next();
@@ -130,12 +132,10 @@ public class Recommendation implements VectorSetListener {
         create(srcVecId);
         this.sorters.get(srcVecId).add(tgtVecId, score);
         if (!this.reverseIndexer.containsKey(tgtVecId)) {
-            this.reverseIndexer.put(tgtVecId, new TIntArrayList());
+            this.reverseIndexer.put(tgtVecId, new TIntHashSet());
         }
-        TIntList range = this.reverseIndexer.get(tgtVecId);
-        if (range.indexOf(srcVecId) == -1) {
-            range.add(srcVecId);
-        }
+        TIntSet range = this.reverseIndexer.get(tgtVecId);
+        range.add(srcVecId);
     }
 
     public String[] get(int vecid) {

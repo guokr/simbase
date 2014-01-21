@@ -7,6 +7,7 @@ import gnu.trove.map.TIntIntMap;
 import gnu.trove.map.hash.TIntIntHashMap;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import com.guokr.simbase.events.VectorSetListener;
@@ -123,21 +124,10 @@ public class DenseVectorSet implements VectorSet {
     }
 
     protected void get(int vecid, float[] result) {
-        float ftmp = 0;
-        int cursor = 0;
+        Arrays.fill(result, 0);
         int dim = dimns.get(vecid);
         int start = indexer.get(vecid);
-        while (cursor < result.length) {
-            if (cursor < dim) {
-                ftmp = probs.get(start + cursor);
-                if (ftmp >= 0 && ftmp <= 1) {
-                    result[cursor] = ftmp;
-                }
-            } else {
-                result[cursor] = 0;
-            }
-            cursor++;
-        }
+        probs.toArray(result, start, dim);
     }
 
     @Override

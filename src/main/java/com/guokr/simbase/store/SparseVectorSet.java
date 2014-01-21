@@ -12,6 +12,7 @@ import gnu.trove.map.hash.TIntFloatHashMap;
 import gnu.trove.map.hash.TIntIntHashMap;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import com.guokr.simbase.events.VectorSetListener;
@@ -163,6 +164,7 @@ public class SparseVectorSet implements VectorSet {
     }
 
     protected void _get(int vecid, int[] result) {
+        Arrays.fill(result, 0);
         int cursor = indexer.get(vecid), i = 0;
         while (true) {
             int pos = (int) probs.get(cursor++);
