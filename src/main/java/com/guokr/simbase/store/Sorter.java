@@ -12,10 +12,12 @@ public class Sorter {
 
     int[]     vecids;
     float[]   scores;
+    Recommendation container;
 
-    public Sorter(SortOrder order, int limits) {
+    public Sorter(SortOrder order, int limits, Recommendation container) {
         this.order = order;
         this.limits = limits;
+        this.container = container;
 
         int maxlen = 1 + limits;
         this.vecids = new int[maxlen];
@@ -164,6 +166,7 @@ public class Sorter {
     }
 
     public float removeLast() {
+        container.cleanReverseIndex(vecids[this.size - 1]);
         this.scores[this.size - 1] = -1.0f;
         this.size = this.size - 1;
         return this.scores[this.size - 1];

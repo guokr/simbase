@@ -73,6 +73,21 @@ public class Recommendation implements VectorSetListener {
         }
     }
 
+    public void cleanReverseIndex(int tgtVecId) {
+        if (this.reverseIndexer.containsKey(tgtVecId)) {
+            TIntSet range = this.reverseIndexer.get(tgtVecId);
+            TIntIterator iter = range.iterator();
+            while (iter.hasNext()) {
+                int srcVecId = iter.next();
+                this.sorters.get(srcVecId).remove(tgtVecId);
+            }
+            this.reverseIndexer.remove(tgtVecId);
+        }
+        for (int vecid : reverseIndexer.keys()) {
+            reverseIndexer.get(vecid).remove(tgtVecId);
+        }
+    }
+
     private void processDenseChangedEvt(VectorSet evtSrc, int vecid, float[] vector) {
         if (evtSrc == this.source) {
             target.rescore(source.key(), vecid, vector, this);
@@ -104,25 +119,12 @@ public class Recommendation implements VectorSetListener {
     }
 
     private void processDeletedEvt(int tgtVecId) {
-        if (this.reverseIndexer.containsKey(tgtVecId)) {
-            TIntSet range = this.reverseIndexer.get(tgtVecId);
-            TIntIterator iter = range.iterator();
-            while (iter.hasNext()) {
-                int srcVecId = iter.next();
-                if (this.sorters.containsKey(srcVecId)) {
-                    this.sorters.get(srcVecId).remove(tgtVecId);
-                }
-            }
-            this.reverseIndexer.remove(tgtVecId);
-        }
-        for (int vecid : reverseIndexer.keys()) {
-            reverseIndexer.get(vecid).remove(tgtVecId);
-        }
+        cleanReverseIndex(tgtVecId);
     }
 
     public void create(int srcVecId) {
         if (!sorters.containsKey(srcVecId)) {
-            Sorter sorter = new Sorter(scoring.order(), this.limit);
+            Sorter sorter = new Sorter(scoring.order(), this.limit, this);
             this.sorters.put(srcVecId, sorter);
             this.sorterKeys.add(srcVecId);
         }
@@ -134,8 +136,7 @@ public class Recommendation implements VectorSetListener {
         if (!this.reverseIndexer.containsKey(tgtVecId)) {
             this.reverseIndexer.put(tgtVecId, new TIntHashSet());
         }
-        TIntSet range = this.reverseIndexer.get(tgtVecId);
-        range.add(srcVecId);
+        this.reverseIndexer.get(tgtVecId).add(srcVecId);
     }
 
     public String[] get(int vecid) {
@@ -154,9 +155,8 @@ public class Recommendation implements VectorSetListener {
     }
 
     public void remove(int srcVecId, int tgtVecId) {
-        if (this.sorters.containsKey(srcVecId)) {
-            this.sorters.get(srcVecId).remove(tgtVecId);
-        }
+        this.sorters.get(srcVecId).remove(tgtVecId);
+        this.reverseIndexer.get(tgtVecId).remove(srcVecId);
     }
 
     public void addListener(RecommendationListener listener) {
@@ -195,12 +195,15 @@ public class Recommendation implements VectorSetListener {
 
     @Override
     public void onVectorRemoved(VectorSet evtSrc, int vecid) {
-        if (evtSrc == this.source) {
-            this.sorters.remove(vecid);
-            this.sorterKeys.remove(vecid);
-        }
         if (evtSrc == this.target) {
             processDeletedEvt(vecid);
+        }
+        if (evtSrc == this.source) {
+            for (int tgtId : this.sorters.get(vecid).vecids()) {
+                this.reverseIndexer.get(tgtId).remove(vecid);
+            }
+            this.sorters.remove(vecid);
+            this.sorterKeys.remove(vecid);
         }
     }
 
