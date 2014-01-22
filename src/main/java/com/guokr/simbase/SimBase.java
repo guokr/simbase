@@ -75,7 +75,7 @@ public class SimBase {
         registry.add("rget", new RGet());
         registry.add("rrec", new RRec());
 
-        server = new SimServer(conf.getSub("server", "server"), new ServerHandler(32, "", 100, registry, engine));
+        server = new SimServer(conf.getSub("server", "server"), new ServerHandler(32, "simbase", 100, registry, engine));
 
     }
 
