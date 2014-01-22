@@ -124,10 +124,10 @@ public class DenseVectorSet implements VectorSet {
     }
 
     protected void get(int vecid, float[] result) {
-        Arrays.fill(result, 0);
         int dim = dimns.get(vecid);
         int start = indexer.get(vecid);
         probs.toArray(result, start, dim);
+        Arrays.fill(result, dim, result.length, 0);
     }
 
     @Override
