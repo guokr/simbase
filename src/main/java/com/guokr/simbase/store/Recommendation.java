@@ -122,17 +122,19 @@ public class Recommendation implements VectorSetListener {
         cleanReverseIndex(tgtVecId);
     }
 
-    public void create(int srcVecId) {
-        if (!sorters.containsKey(srcVecId)) {
-            Sorter sorter = new Sorter(scoring.order(), this.limit, this);
+    public Sorter create(int srcVecId) {
+        Sorter sorter = sorters.get(srcVecId);
+        if (sorter == null) {
+            sorter = new Sorter(scoring.order(), this.limit, this);
             this.sorters.put(srcVecId, sorter);
             this.sorterKeys.add(srcVecId);
         }
+        return sorter;
     }
 
     public void add(int srcVecId, int tgtVecId, float score) {
-        create(srcVecId);
-        this.sorters.get(srcVecId).add(tgtVecId, score);
+        create(srcVecId).add(tgtVecId, score);
+
         if (!this.reverseIndexer.containsKey(tgtVecId)) {
             this.reverseIndexer.put(tgtVecId, new TIntHashSet());
         }
