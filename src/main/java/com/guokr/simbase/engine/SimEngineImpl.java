@@ -14,7 +14,6 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.RejectedExecutionHandler;
-import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
@@ -31,6 +30,7 @@ import com.guokr.simbase.events.RecommendationListener;
 import com.guokr.simbase.events.SimBasisListener;
 import com.guokr.simbase.events.VectorSetListener;
 import com.guokr.simbase.store.Basis;
+import com.guokr.simbase.util.PrefixThreadFactory;
 
 public class SimEngineImpl implements SimEngine, SimBasisListener {
 
@@ -85,15 +85,6 @@ public class SimEngineImpl implements SimEngine, SimBasisListener {
         }
     }
 
-    public class ServerThreadFactory implements ThreadFactory {
-
-        @Override
-        public Thread newThread(Runnable r) {
-            return new Thread(r);
-        }
-
-    }
-
     public class RejectedHandler implements RejectedExecutionHandler {
 
         @Override
@@ -115,7 +106,8 @@ public class SimEngineImpl implements SimEngine, SimBasisListener {
     private final Map<String, ExecutorService> writerExecs = new HashMap<String, ExecutorService>();
     private final ThreadPoolExecutor           readerPool  = new ThreadPoolExecutor(53, 83, 37, TimeUnit.SECONDS,
                                                                    new ArrayBlockingQueue<Runnable>(100),
-                                                                   new ServerThreadFactory(), new RejectedHandler());
+                                                                   new PrefixThreadFactory("reader"),
+                                                                   new RejectedHandler());
 
     private final Map<String, Integer>         counters    = new HashMap<String, Integer>();
     private final int                          bycount;
