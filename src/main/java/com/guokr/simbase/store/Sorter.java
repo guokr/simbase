@@ -4,14 +4,14 @@ import com.guokr.simbase.SimScore.SortOrder;
 
 public class Sorter {
 
-    SortOrder order;
-    int       limits    = 20;
+    SortOrder      order;
+    int            limits    = 20;
 
-    int       size      = 0;
-    float     waterline = 0f;
+    int            size      = 0;
+    float          waterline = 0f;
 
-    int[]     vecids;
-    float[]   scores;
+    int[]          vecids;
+    float[]        scores;
     Recommendation container;
 
     public Sorter(SortOrder order, int limits, Recommendation container) {
@@ -88,38 +88,25 @@ public class Sorter {
         return this.size;
     }
 
-    public void add(int vecid, float score) {
-        if (order == SortOrder.Asc && score > waterline) {
-            return;
-        }
-        if (order == SortOrder.Desc && score < waterline) {
-            return;
-        }
-
-        remove(vecid);
-        int pos = order == SortOrder.Asc ? asclookup(score) : desclookup(score);
-        if (pos == 0 && this.size == 0) {
-            this.vecids = new int[] { vecid };
-            this.scores = new float[] { score };
+    protected void insert(int vecid, float score, int pos) {
+        if (pos > -1) {
             this.size = this.size + 1;
-        } else {
-            if (pos > -1) {
-                this.size = this.size + 1;
-                int[] tvecids = this.vecids;
-                float[] tscores = this.scores;
-                this.vecids = new int[this.size];
-                this.scores = new float[this.size];
+            int[] tvecids = this.vecids;
+            float[] tscores = this.scores;
+            this.vecids = new int[this.size];
+            this.scores = new float[this.size];
 
-                System.arraycopy(tvecids, 0, this.vecids, 0, pos);
-                System.arraycopy(tvecids, pos, this.vecids, pos + 1, this.size - pos - 1);
-                System.arraycopy(tscores, 0, this.scores, 0, pos);
-                System.arraycopy(tscores, pos, this.scores, pos + 1, this.size - pos - 1);
+            System.arraycopy(tvecids, 0, this.vecids, 0, pos);
+            System.arraycopy(tvecids, pos, this.vecids, pos + 1, this.size - pos - 1);
+            System.arraycopy(tscores, 0, this.scores, 0, pos);
+            System.arraycopy(tscores, pos, this.scores, pos + 1, this.size - pos - 1);
 
-                this.vecids[pos] = vecid;
-                this.scores[pos] = score;
-            }
+            this.vecids[pos] = vecid;
+            this.scores[pos] = score;
         }
+    }
 
+    protected void tidy() {
         if (this.size() > this.limits) {
             int count = this.size - this.limits - 1;
             for (int i = count; i > 0; i--) {
@@ -129,6 +116,31 @@ public class Sorter {
                 }
             }
         }
+    }
+
+    public void add(int vecid, float score) {
+        if (this.size == 0) {
+            this.vecids = new int[] { vecid };
+            this.scores = new float[] { score };
+            this.size = this.size + 1;
+        } else {
+            remove(vecid);
+
+            if (order == SortOrder.Asc) {
+                if (score < waterline) {
+                    int pos = asclookup(score);
+                    insert(vecid, score, pos);
+                    tidy();
+                }
+            } else {
+                if (score > waterline) {
+                    int pos = desclookup(score);
+                    insert(vecid, score, pos);
+                    tidy();
+                }
+            }
+        }
+
     }
 
     public int[] vecids() {
