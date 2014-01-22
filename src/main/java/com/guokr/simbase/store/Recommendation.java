@@ -83,9 +83,6 @@ public class Recommendation implements VectorSetListener {
             }
             this.reverseIndexer.remove(tgtVecId);
         }
-        for (int vecid : reverseIndexer.keys()) {
-            reverseIndexer.get(vecid).remove(tgtVecId);
-        }
     }
 
     private void processDenseChangedEvt(VectorSet evtSrc, int vecid, float[] vector) {
