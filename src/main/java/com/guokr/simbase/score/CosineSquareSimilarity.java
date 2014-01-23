@@ -60,15 +60,14 @@ public class CosineSquareSimilarity implements SimScore {
     }
 
     @Override
-    public float score(String srcVKey, int srcId, int[] source, String tgtVKey, int tgtId, int[] target) {
+    public float score(String srcVKey, int srcId, int[] source, int srclen, String tgtVKey, int tgtId, int[] target,
+            int tgtlen) {
         TIntFloatMap sourceCache = caches.get(srcVKey);
         TIntFloatMap targetCache = caches.get(tgtVKey);
 
         float scoring = 0f;
-        int len1 = source.length;
-        int len2 = target.length;
         int idx1 = 0, idx2 = 0;
-        while (idx1 < len1 && idx2 < len2) {
+        while (idx1 < srclen && idx2 < tgtlen) {
             if (source[idx1] < 0 || target[idx2] < 0) {
                 break;
             } else if (source[idx1] == target[idx2]) {

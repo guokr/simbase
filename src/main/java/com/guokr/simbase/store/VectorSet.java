@@ -24,6 +24,8 @@ public interface VectorSet {
 
     public int[] _get(int vecid);
 
+    public int length(int vecid);
+
     void _add(int vecid, int[] pairs);
 
     void _set(int vecid, int[] pairs);

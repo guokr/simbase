@@ -123,6 +123,10 @@ public class DenseVectorSet implements VectorSet {
         }
     }
 
+    public int length(int vecid) {
+        return lengths.get(vecid);
+    }
+
     protected void get(int vecid, float[] result) {
         int len = lengths.get(vecid);
         int start = indexer.get(vecid);
@@ -280,7 +284,8 @@ public class DenseVectorSet implements VectorSet {
                 iter.advance();
                 int tgtId = iter.key();
                 _get(tgtId, input, target);
-                float score = rec.scoring.score(key, vecid, vector, this.key, tgtId, target);
+                float score = rec.scoring.score(key, vecid, vector, vector.length, this.key, tgtId, target,
+                        length(tgtId));
                 rec.add(vecid, tgtId, score);
                 rec.add(tgtId, vecid, score);
             }
@@ -290,7 +295,8 @@ public class DenseVectorSet implements VectorSet {
                 iter.advance();
                 int tgtId = iter.key();
                 _get(tgtId, input, target);
-                float score = rec.scoring.score(key, vecid, vector, this.key, tgtId, target);
+                float score = rec.scoring.score(key, vecid, vector, vector.length, this.key, tgtId, target,
+                        length(tgtId));
                 rec.add(vecid, tgtId, score);
             }
         }
