@@ -14,7 +14,8 @@ public interface SimScore extends VectorSetListener {
 
     public float score(String srcVKey, int srcId, float[] source, String tgtVKey, int tgtId, float[] target);
 
-    public float score(String srcVKey, int srcId, int[] source, String tgtVKey, int tgtId, int[] target);
+    public float score(String srcVKey, int srcId, int[] source, int tgt, String tgtVKey, int tgtId, int[] target,
+            int tgtlen);
 
     public void onAttached(String vkey);
 

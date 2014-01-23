@@ -108,8 +108,8 @@ public class Recommendation implements VectorSetListener {
             TIntIterator iter = sorterKeys.iterator();
             while (iter.hasNext()) {
                 int srcVecId = iter.next();
-                float score = scoring.score(source.key(), srcVecId, source._get(srcVecId), target.key(), tgtVecId,
-                        vector);
+                float score = scoring.score(source.key(), srcVecId, source._get(srcVecId), source.length(srcVecId),
+                        target.key(), tgtVecId, vector, vector.length);
                 add(srcVecId, tgtVecId, score);
             }
         }

@@ -12,7 +12,6 @@ import gnu.trove.map.hash.TIntFloatHashMap;
 import gnu.trove.map.hash.TIntIntHashMap;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import com.guokr.simbase.events.VectorSetListener;
@@ -171,7 +170,7 @@ public class SparseVectorSet implements VectorSet {
         _accumulate(vecid, Basis.sparsify(sparseFactor, vector));
     }
 
-    protected int _length(int vecid) {
+    public int length(int vecid) {
         return lengths.get(vecid);
     }
 
@@ -332,7 +331,8 @@ public class SparseVectorSet implements VectorSet {
                 iter.advance();
                 int tgtId = iter.key();
                 _get(tgtId, target);
-                float score = rec.scoring.score(key, vecid, vector, this.key, tgtId, target);
+                float score = rec.scoring.score(key, vecid, vector, vector.length, this.key, tgtId, target,
+                        length(tgtId));
                 rec.add(vecid, tgtId, score);
                 rec.add(tgtId, vecid, score);
             }
@@ -342,7 +342,8 @@ public class SparseVectorSet implements VectorSet {
                 iter.advance();
                 int tgtId = iter.key();
                 _get(tgtId, target);
-                float score = rec.scoring.score(key, vecid, vector, this.key, tgtId, target);
+                float score = rec.scoring.score(key, vecid, vector, vector.length, this.key, tgtId, target,
+                        length(tgtId));
                 rec.add(vecid, tgtId, score);
             }
         }
