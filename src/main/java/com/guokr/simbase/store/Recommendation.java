@@ -1,6 +1,7 @@
 package com.guokr.simbase.store;
 
 import gnu.trove.iterator.TIntIterator;
+import gnu.trove.iterator.TIntObjectIterator;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.TIntObjectMap;
@@ -26,8 +27,8 @@ public class Recommendation implements VectorSetListener {
 
     TIntList                             sorterKeys     = new TIntArrayList();
     TIntObjectMap<Sorter>                sorters        = new TIntObjectHashMap<Sorter>();
-    TIntObjectHashMap<TIntSet>           reverseIndexer = new TIntObjectHashMap<TIntSet>();
 
+    private TIntObjectMap<TIntSet>       reverseIndexer = new TIntObjectHashMap<TIntSet>();
     private List<RecommendationListener> listeners      = new ArrayList<RecommendationListener>();
 
     public Recommendation(VectorSet source, VectorSet target) {
@@ -73,16 +74,15 @@ public class Recommendation implements VectorSetListener {
         }
     }
 
-    public void cleanReverseIndex(int tgtVecId) {
-        if (this.reverseIndexer.containsKey(tgtVecId)) {
-            TIntSet range = this.reverseIndexer.get(tgtVecId);
-            TIntIterator iter = range.iterator();
-            while (iter.hasNext()) {
-                int srcVecId = iter.next();
-                this.sorters.get(srcVecId).remove(tgtVecId);
-            }
-            this.reverseIndexer.remove(tgtVecId);
+    public void addReverseIndex(int srcVecId, int tgtVecId) {
+        if (!this.reverseIndexer.containsKey(tgtVecId)) {
+            this.reverseIndexer.put(tgtVecId, new TIntHashSet());
         }
+        reverseIndexer.get(tgtVecId).add(srcVecId);
+    }
+
+    public void deleteReverseIndex(int srcVecId, int tgtVecId) {
+        reverseIndexer.get(tgtVecId).remove(srcVecId);
     }
 
     private void processDenseChangedEvt(VectorSet evtSrc, int vecid, float[] vector) {
@@ -116,13 +116,21 @@ public class Recommendation implements VectorSetListener {
     }
 
     private void processDeletedEvt(int tgtVecId) {
-        cleanReverseIndex(tgtVecId);
+        if (this.reverseIndexer.containsKey(tgtVecId)) {
+            TIntSet range = this.reverseIndexer.get(tgtVecId);
+            TIntIterator iter = range.iterator();
+            while (iter.hasNext()) {
+                int srcVecId = iter.next();
+                this.sorters.get(srcVecId).remove(tgtVecId);
+            }
+        }
+        reverseIndexer.remove(tgtVecId);
     }
 
     public Sorter create(int srcVecId) {
         Sorter sorter = sorters.get(srcVecId);
         if (sorter == null) {
-            sorter = new Sorter(scoring.order(), this.limit, this);
+            sorter = new Sorter(this, srcVecId, scoring.order(), this.limit);
             this.sorters.put(srcVecId, sorter);
             this.sorterKeys.add(srcVecId);
         }
@@ -131,11 +139,6 @@ public class Recommendation implements VectorSetListener {
 
     public void add(int srcVecId, int tgtVecId, float score) {
         create(srcVecId).add(tgtVecId, score);
-
-        if (!this.reverseIndexer.containsKey(tgtVecId)) {
-            this.reverseIndexer.put(tgtVecId, new TIntHashSet());
-        }
-        this.reverseIndexer.get(tgtVecId).add(srcVecId);
     }
 
     public String[] get(int vecid) {
@@ -143,7 +146,6 @@ public class Recommendation implements VectorSetListener {
             return this.sorters.get(vecid).pickle();
         } else
             return new String[0];
-
     }
 
     public int[] rec(int vecid) {
@@ -199,11 +201,24 @@ public class Recommendation implements VectorSetListener {
         }
         if (evtSrc == this.source) {
             for (int tgtId : this.sorters.get(vecid).vecids()) {
-                this.reverseIndexer.get(tgtId).remove(vecid);
+                if (this.reverseIndexer.containsKey(tgtId)) {
+                    this.reverseIndexer.get(tgtId).remove(vecid);
+                }
             }
             this.sorters.remove(vecid);
             this.sorterKeys.remove(vecid);
         }
     }
 
+    public void printReverseIndexer() {
+        int sum = 0, max = 0;
+        TIntObjectIterator<TIntSet> iter = this.reverseIndexer.iterator();
+        while (iter.hasNext()) {
+            iter.advance();
+            int size = iter.value().size();
+            sum += size;
+            max = max > size ? max : size;
+        }
+        System.out.println("reverseIndexer:" + sum + ", " + max);
+    }
 }

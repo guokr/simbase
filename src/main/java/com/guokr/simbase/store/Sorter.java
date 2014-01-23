@@ -12,12 +12,15 @@ public class Sorter {
 
     int[]          vecids;
     float[]        scores;
+
+    int            id;
     Recommendation container;
 
-    public Sorter(SortOrder order, int limits, Recommendation container) {
+    public Sorter(Recommendation container, int vecid, SortOrder order, int limits) {
+        this.id = vecid;
+        this.container = container;
         this.order = order;
         this.limits = limits;
-        this.container = container;
 
         int maxlen = 1 + limits;
         this.vecids = new int[maxlen];
@@ -103,18 +106,15 @@ public class Sorter {
 
             this.vecids[pos] = vecid;
             this.scores[pos] = score;
+
+            container.addReverseIndex(id, vecid);
         }
     }
 
     protected void tidy() {
         if (this.size() > this.limits) {
-            int count = this.size - this.limits - 1;
-            for (int i = count; i > 0; i--) {
-                float last = removeLast();
-                if (i == 1) {
-                    this.waterline = last;
-                }
-            }
+            float last = removeLast();
+            this.waterline = last;
         }
     }
 
@@ -178,7 +178,7 @@ public class Sorter {
     }
 
     public float removeLast() {
-        container.cleanReverseIndex(vecids[this.size - 1]);
+        container.deleteReverseIndex(id, vecids[this.size - 1]);
         this.scores[this.size - 1] = -1.0f;
         this.size = this.size - 1;
         return this.scores[this.size - 1];
