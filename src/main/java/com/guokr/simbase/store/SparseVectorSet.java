@@ -24,6 +24,7 @@ public class SparseVectorSet implements VectorSet {
     String                          key;
 
     TFloatList                      probs   = new TFloatArrayList();
+    TIntIntMap                      lengths = new TIntIntHashMap();
     TIntIntMap                      indexer = new TIntIntHashMap();
 
     float                           accumuFactor;
@@ -76,9 +77,11 @@ public class SparseVectorSet implements VectorSet {
     public void clean() {
         TFloatList tmp = probs;
         probs = new TFloatArrayList();
+        lengths = new TIntIntHashMap();
         indexer = new TIntIntHashMap();
         int end = tmp.size();
-        int curbegin = -1;
+        int curbegin = -1, curdim = 0;
+        int vecid;
         for (int offset = 0; offset < end; offset++) {
             float val = tmp.get(offset);
             if (curbegin == -1) {
@@ -86,10 +89,14 @@ public class SparseVectorSet implements VectorSet {
             }
             if (val != -1) {
                 if (val < -1) {
-                    indexer.put(-(int) val - 1, curbegin);
+                    vecid = -(int) val - 1;
+                    indexer.put(vecid, curbegin);
+                    lengths.put(vecid, curdim);
                     curbegin = -1;
+                    curdim = 0;
                 }
                 probs.add(val);
+                curdim++;
             }
 
         }
@@ -126,6 +133,7 @@ public class SparseVectorSet implements VectorSet {
             }
 
             indexer.remove(vecid);
+            lengths.remove(vecid);
 
             if (listening) {
                 for (VectorSetListener l : listeners) {
@@ -163,23 +171,25 @@ public class SparseVectorSet implements VectorSet {
         _accumulate(vecid, Basis.sparsify(sparseFactor, vector));
     }
 
+    protected int _length(int vecid) {
+        return lengths.get(vecid);
+    }
+
     protected void _get(int vecid, int[] result) {
-        Arrays.fill(result, 0);
+        int length = lengths.get(vecid);
         int cursor = indexer.get(vecid), i = 0;
-        while (true) {
+        while (length > 0) {
             int pos = (int) probs.get(cursor++);
-            if (pos < 0) {
-                break;
-            }
             int val = Math.round(probs.get(cursor++));
             result[i++] = pos;
             result[i++] = val;
+            length -= 2;
         }
     }
 
     @Override
     public int[] _get(int vecid) {
-        int[] result = new int[base.size() * 2];
+        int[] result = new int[lengths.get(vecid)];
         _get(vecid, result);
         return result;
     }
@@ -190,6 +200,7 @@ public class SparseVectorSet implements VectorSet {
         if (!indexer.containsKey(vecid)) {
             int start = probs.size();
             indexer.put(vecid, start);
+            lengths.put(vecid, pairs.length);
             for (int val : pairs) {
                 probs.add(val);
             }

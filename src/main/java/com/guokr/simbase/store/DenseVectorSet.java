@@ -19,7 +19,7 @@ public class DenseVectorSet implements VectorSet {
     String                          key;
 
     TFloatList                      probs     = new TFloatArrayList();
-    TIntIntMap                      dimns     = new TIntIntHashMap();
+    TIntIntMap                      lengths   = new TIntIntHashMap();
     TIntIntMap                      indexer   = new TIntIntHashMap();
 
     float                           accumuFactor;
@@ -55,26 +55,26 @@ public class DenseVectorSet implements VectorSet {
     public void clean() {
         TFloatList tmp = probs;
         probs = new TFloatArrayList();
-        dimns = new TIntIntHashMap();
+        lengths = new TIntIntHashMap();
         indexer = new TIntIntHashMap();
         int end = tmp.size();
-        int curbegin = -1, curdim = 0;
+        int curbegin = -1, curlen = 0;
+        int vecid;
         for (int offset = 0; offset < end; offset++) {
             float val = tmp.get(offset);
             if (val >= 0) {
                 if (curbegin == -1) {
                     curbegin = offset;
                 }
-
-                probs.add(val);
-                curdim++;
-
                 if (val > 1) {
-                    indexer.put((int) val - 1, curbegin);
-                    dimns.put((int) val - 1, curdim);
+                    vecid = (int) val - 1;
+                    indexer.put(vecid, curbegin);
+                    lengths.put(vecid, curlen);
                     curbegin = -1;
-                    curdim = 0;
+                    curlen = 0;
                 }
+                probs.add(val);
+                curlen++;
             }
         }
     }
@@ -113,7 +113,7 @@ public class DenseVectorSet implements VectorSet {
             }
 
             indexer.remove(vecid);
-            dimns.remove(vecid);
+            lengths.remove(vecid);
 
             if (listening) {
                 for (VectorSetListener l : listeners) {
@@ -124,10 +124,10 @@ public class DenseVectorSet implements VectorSet {
     }
 
     protected void get(int vecid, float[] result) {
-        int dim = dimns.get(vecid);
+        int len = lengths.get(vecid);
         int start = indexer.get(vecid);
-        probs.toArray(result, start, dim);
-        Arrays.fill(result, dim, result.length, 0);
+        probs.toArray(result, start, len);
+        Arrays.fill(result, len, result.length, 0);
     }
 
     @Override
@@ -151,7 +151,7 @@ public class DenseVectorSet implements VectorSet {
                 probs.add(val);
             }
             probs.add((float) (vecid + 1));
-            dimns.put(vecid, vector.length);
+            lengths.put(vecid, vector.length);
 
             if (listening) {
                 for (VectorSetListener l : listeners) {
@@ -166,7 +166,7 @@ public class DenseVectorSet implements VectorSet {
         if (indexer.containsKey(vecid)) {
             float[] old = get(vecid);
 
-            if (dimns.get(vecid) != vector.length) {
+            if (lengths.get(vecid) != vector.length) {
                 remove(vecid);
                 add(vecid, vector);
             } else {

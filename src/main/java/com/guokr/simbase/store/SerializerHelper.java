@@ -48,22 +48,22 @@ public class SerializerHelper {
             DenseVectorSet vectorSet = new DenseVectorSet(key, basis, accumuFactor, sparseFactor);
             int sizeVector = kryo.readObject(input, int.class);
             int offset = -1;
-            int vecid, dim;
+            int vecid, length;
             float value;
             while (sizeVector > 0) {
                 value = kryo.readObject(input, float.class);
                 offset++;
-                dim = 0;
+                length = 0;
                 while (value <= 1) {
                     vectorSet.probs.add(value);
                     value = kryo.readObject(input, float.class);
                     offset++;
-                    dim++;
+                    length++;
                 }
                 vectorSet.probs.add(value);
                 vecid = (int) value - 1;
-                vectorSet.indexer.put(vecid, offset - dim);
-                vectorSet.dimns.put(vecid, dim);
+                vectorSet.indexer.put(vecid, offset - length);
+                vectorSet.lengths.put(vecid, length);
                 sizeVector--;
             }
             return vectorSet;
@@ -100,19 +100,23 @@ public class SerializerHelper {
             SparseVectorSet vectorSet = new SparseVectorSet(key, basis, accumuFactor, sparseFactor);
             int sizeVector = kryo.readObject(input, int.class);
             int offset = -1;
-            int index;
+            int index, vecid, length;
             float value;
             while (sizeVector > 0) {
                 value = kryo.readObject(input, float.class);
                 offset++;
                 index = offset;
+                length = 0;
                 while (value >= 0) {
                     vectorSet.probs.add(value);
                     value = kryo.readObject(input, float.class);
                     offset++;
+                    length++;
                 }
                 vectorSet.probs.add(value);
-                vectorSet.indexer.put(-(int) value - 1, index);
+                vecid = -(int) value - 1;
+                vectorSet.indexer.put(vecid, index);
+                vectorSet.lengths.put(vecid, length);
                 sizeVector--;
             }
             return vectorSet;
