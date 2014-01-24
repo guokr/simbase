@@ -14,15 +14,16 @@ import gnu.trove.map.hash.TIntIntHashMap;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.guokr.simbase.events.BasisListener;
 import com.guokr.simbase.events.VectorSetListener;
 
-public class SparseVectorSet implements VectorSet {
+public class SparseVectorSet implements VectorSet, BasisListener {
 
     public static final String      TYPE    = "sparse";
 
     String                          key;
 
-    TFloatList                      data   = new TFloatArrayList();
+    TFloatList                      data    = new TFloatArrayList();
     TIntIntMap                      lengths = new TIntIntHashMap();
     TIntIntMap                      indexer = new TIntIntHashMap();
 
@@ -33,6 +34,9 @@ public class SparseVectorSet implements VectorSet {
 
     private boolean                 listening;
     private List<VectorSetListener> listeners;
+
+    private int[]                   iReuseList;
+    private float[]                 fReuseList;
 
     public SparseVectorSet(String key, Basis base) {
         this(key, base, 0.01f, 4096);
@@ -45,6 +49,10 @@ public class SparseVectorSet implements VectorSet {
         this.sparseFactor = sparseFactor;
         this.listening = true;
         this.listeners = new ArrayList<VectorSetListener>();
+
+        this.fReuseList = new float[this.base.size()];
+        this.iReuseList = new int[this.base.size() * 2];
+        this.base.addListener(this);
     }
 
     private void validateParams(int vecid, int[] pairs) {
@@ -233,7 +241,7 @@ public class SparseVectorSet implements VectorSet {
 
             int start = data.size();
             indexer.put(vecid, start);
-            lengths.put(vecid,  indexes.size() * 2);
+            lengths.put(vecid, indexes.size() * 2);
             TIntIterator iter = indexes.iterator();
             while (iter.hasNext()) {
                 int key = iter.next();
@@ -261,13 +269,12 @@ public class SparseVectorSet implements VectorSet {
         rec.create(vecid);
         TIntIntIterator iter = indexer.iterator();
         int[] input = new int[this.base.size() * 2];
-        float[] target = new float[this.base.size()];
         if (this == rec.source) {
             while (iter.hasNext()) {
                 iter.advance();
                 int tgtId = iter.key();
-                get(tgtId, input, target);
-                float score = rec.scoring.score(key, vecid, vector, this.key, tgtId, target);
+                get(tgtId, input, fReuseList);
+                float score = rec.scoring.score(key, vecid, vector, this.key, tgtId, fReuseList);
                 rec.add(vecid, tgtId, score);
                 rec.add(tgtId, vecid, score);
             }
@@ -276,8 +283,8 @@ public class SparseVectorSet implements VectorSet {
             while (iter.hasNext()) {
                 iter.advance();
                 int tgtId = iter.key();
-                get(tgtId, input, target);
-                float score = rec.scoring.score(key, vecid, vector, this.key, tgtId, target);
+                get(tgtId, input, fReuseList);
+                float score = rec.scoring.score(key, vecid, vector, this.key, tgtId, fReuseList);
                 rec.add(vecid, tgtId, score);
             }
         }
@@ -287,13 +294,12 @@ public class SparseVectorSet implements VectorSet {
     public void rescore(String key, int vecid, int[] vector, Recommendation rec) {
         rec.create(vecid);
         TIntIntIterator iter = indexer.iterator();
-        int[] target = new int[this.base.size() * 2];
         if (this == rec.source) {
             while (iter.hasNext()) {
                 iter.advance();
                 int tgtId = iter.key();
-                _get(tgtId, target);
-                float score = rec.scoring.score(key, vecid, vector, vector.length, this.key, tgtId, target,
+                _get(tgtId, iReuseList);
+                float score = rec.scoring.score(key, vecid, vector, vector.length, this.key, tgtId, iReuseList,
                         length(tgtId));
                 rec.add(vecid, tgtId, score);
                 rec.add(tgtId, vecid, score);
@@ -303,11 +309,17 @@ public class SparseVectorSet implements VectorSet {
             while (iter.hasNext()) {
                 iter.advance();
                 int tgtId = iter.key();
-                _get(tgtId, target);
-                float score = rec.scoring.score(key, vecid, vector, vector.length, this.key, tgtId, target,
+                _get(tgtId, iReuseList);
+                float score = rec.scoring.score(key, vecid, vector, vector.length, this.key, tgtId, iReuseList,
                         length(tgtId));
                 rec.add(vecid, tgtId, score);
             }
         }
+    }
+
+    @Override
+    public void onBasisRevised(Basis evtSrc, String[] oldSchema, String[] newSchema) {
+        fReuseList = new float[this.base.size()];
+        iReuseList = new int[this.base.size() * 2];
     }
 }

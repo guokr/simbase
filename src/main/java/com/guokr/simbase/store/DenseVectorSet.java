@@ -10,9 +10,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import com.guokr.simbase.events.BasisListener;
 import com.guokr.simbase.events.VectorSetListener;
 
-public class DenseVectorSet implements VectorSet {
+public class DenseVectorSet implements VectorSet, BasisListener {
 
     public static final String      TYPE      = "dense";
 
@@ -30,6 +31,9 @@ public class DenseVectorSet implements VectorSet {
     private boolean                 listening = true;
     private List<VectorSetListener> listeners = new ArrayList<VectorSetListener>();
 
+    private int[]                   iReuseList;
+    private float[]                 fReuseList;
+
     public DenseVectorSet(String key, Basis base) {
         this(key, base, 0.01f, 4096);
     }
@@ -39,6 +43,10 @@ public class DenseVectorSet implements VectorSet {
         this.base = base;
         this.accumuFactor = accumuFactor;
         this.sparseFactor = sparseFactor;
+
+        this.fReuseList = new float[this.base.size()];
+        this.iReuseList = new int[this.base.size() * 2];
+        this.base.addListener(this);
     }
 
     @Override
@@ -236,13 +244,12 @@ public class DenseVectorSet implements VectorSet {
     public void rescore(String key, int vecid, float[] vector, Recommendation rec) {
         rec.create(vecid);
         TIntIntIterator iter = indexer.iterator();
-        float[] target = new float[this.base.size()];
         if (this == rec.source) {
             while (iter.hasNext()) {
                 iter.advance();
                 int tgtId = iter.key();
-                get(tgtId, target);
-                float score = rec.scoring.score(key, vecid, vector, this.key, tgtId, target);
+                get(tgtId, fReuseList);
+                float score = rec.scoring.score(key, vecid, vector, this.key, tgtId, fReuseList);
                 rec.add(vecid, tgtId, score);
                 rec.add(tgtId, vecid, score);
             }
@@ -251,8 +258,8 @@ public class DenseVectorSet implements VectorSet {
             while (iter.hasNext()) {
                 iter.advance();
                 int tgtId = iter.key();
-                get(tgtId, target);
-                float score = rec.scoring.score(key, vecid, vector, this.key, tgtId, target);
+                get(tgtId, fReuseList);
+                float score = rec.scoring.score(key, vecid, vector, this.key, tgtId, fReuseList);
                 rec.add(vecid, tgtId, score);
             }
         }
@@ -263,13 +270,12 @@ public class DenseVectorSet implements VectorSet {
         rec.create(vecid);
         TIntIntIterator iter = indexer.iterator();
         float[] input = new float[this.base.size()];
-        int[] target = new int[this.base.size() * 2];
         if (this == rec.source) {
             while (iter.hasNext()) {
                 iter.advance();
                 int tgtId = iter.key();
-                _get(tgtId, input, target);
-                float score = rec.scoring.score(key, vecid, vector, vector.length, this.key, tgtId, target,
+                _get(tgtId, input, iReuseList);
+                float score = rec.scoring.score(key, vecid, vector, vector.length, this.key, tgtId, iReuseList,
                         length(tgtId));
                 rec.add(vecid, tgtId, score);
                 rec.add(tgtId, vecid, score);
@@ -279,11 +285,17 @@ public class DenseVectorSet implements VectorSet {
             while (iter.hasNext()) {
                 iter.advance();
                 int tgtId = iter.key();
-                _get(tgtId, input, target);
-                float score = rec.scoring.score(key, vecid, vector, vector.length, this.key, tgtId, target,
+                _get(tgtId, input, iReuseList);
+                float score = rec.scoring.score(key, vecid, vector, vector.length, this.key, tgtId, iReuseList,
                         length(tgtId));
                 rec.add(vecid, tgtId, score);
             }
         }
+    }
+
+    @Override
+    public void onBasisRevised(Basis evtSrc, String[] oldSchema, String[] newSchema) {
+        this.fReuseList = new float[this.base.size()];
+        this.iReuseList = new int[this.base.size() * 2];
     }
 }
