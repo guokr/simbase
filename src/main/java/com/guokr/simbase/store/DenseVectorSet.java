@@ -56,7 +56,7 @@ public class DenseVectorSet implements VectorSet {
         TFloatList olddata = data;
         TIntIntMap oldindexer = indexer;
         data = new TFloatArrayList(olddata.size());
-        indexer = new TIntIntHashMap();
+        indexer = new TIntIntHashMap(oldindexer.size());
 
         int pos = 0;
         TIntIntIterator iter = oldindexer.iterator();
@@ -95,6 +95,7 @@ public class DenseVectorSet implements VectorSet {
         }
     }
 
+    @Override
     public int length(int vecid) {
         return lengths.get(vecid);
     }

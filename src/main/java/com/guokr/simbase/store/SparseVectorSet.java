@@ -22,7 +22,7 @@ public class SparseVectorSet implements VectorSet {
 
     String                          key;
 
-    TFloatList                      probs   = new TFloatArrayList();
+    TFloatList                      data   = new TFloatArrayList();
     TIntIntMap                      lengths = new TIntIntHashMap();
     TIntIntMap                      indexer = new TIntIntHashMap();
 
@@ -48,18 +48,9 @@ public class SparseVectorSet implements VectorSet {
     }
 
     private void validateParams(int vecid, int[] pairs) {
-        if (vecid < 0) {
-            throw new IllegalArgumentException("the vector id must be a positive number!");
-        }
         if (pairs.length % 2 != 0) {
             throw new IllegalArgumentException("the size of the input array must be a even number!");
         }
-        for (int val : pairs) {
-            if (val < 0) {
-                throw new IllegalArgumentException("the elements in the input array must be greater than zero!");
-            }
-        }
-
     }
 
     @Override
@@ -74,63 +65,37 @@ public class SparseVectorSet implements VectorSet {
 
     @Override
     public void clean() {
-        TFloatList tmp = probs;
-        probs = new TFloatArrayList();
-        lengths = new TIntIntHashMap();
-        indexer = new TIntIntHashMap();
-        int end = tmp.size();
-        int curbegin = -1, curdim = 0;
-        int vecid;
-        for (int offset = 0; offset < end; offset++) {
-            float val = tmp.get(offset);
-            if (curbegin == -1) {
-                curbegin = offset;
-            }
-            if (val != -1) {
-                if (val < -1) {
-                    vecid = -(int) val - 1;
-                    indexer.put(vecid, curbegin);
-                    lengths.put(vecid, curdim);
-                    curbegin = -1;
-                    curdim = 0;
-                }
-                probs.add(val);
-                curdim++;
-            }
+        TFloatList olddata = data;
+        TIntIntMap oldindexer = indexer;
+        data = new TFloatArrayList(olddata.size());
+        indexer = new TIntIntHashMap(oldindexer.size());
 
+        int pos = 0;
+        TIntIntIterator iter = oldindexer.iterator();
+        while (iter.hasNext()) {
+            iter.advance();
+            int vecid = iter.key();
+            int start = iter.value();
+            int length = lengths.get(vecid);
+
+            int cursor = 0;
+            indexer.put(vecid, pos);
+            while (cursor < length) {
+                data.add(olddata.get(start + cursor));
+                pos++;
+                cursor++;
+            }
         }
     }
 
     @Override
     public int[] ids() {
-        int[] result = new int[indexer.size()];
-        int end = probs.size();
-        int pos = 0;
-        for (int offset = 0; offset < end;) {
-            float value = probs.get(offset);
-            if (value < -1) {
-                result[pos] = -(int) value - 1;
-                pos++;
-            }
-            offset += 1;
-        }
-        return result;
+        return indexer.keys();
     }
 
     @Override
     public void remove(int vecid) {
         if (indexer.containsKey(vecid)) {
-            int cursor = indexer.get(vecid);
-            while (true) {
-                float val = probs.get(cursor);
-                if (val < 0) {
-                    probs.set(cursor, -1);
-                    break;
-                }
-                probs.set(cursor, -1);
-                cursor++;
-            }
-
             indexer.remove(vecid);
             lengths.remove(vecid);
 
@@ -140,6 +105,11 @@ public class SparseVectorSet implements VectorSet {
                 }
             }
         }
+    }
+
+    @Override
+    public int length(int vecid) {
+        return lengths.get(vecid);
     }
 
     public float[] get(int vecid, int[] input, float[] result) {
@@ -170,16 +140,12 @@ public class SparseVectorSet implements VectorSet {
         _accumulate(vecid, Basis.sparsify(sparseFactor, vector));
     }
 
-    public int length(int vecid) {
-        return lengths.get(vecid);
-    }
-
     protected void _get(int vecid, int[] result) {
         int length = lengths.get(vecid);
         int cursor = indexer.get(vecid), i = 0;
         while (length > 0) {
-            int pos = (int) probs.get(cursor++);
-            int val = Math.round(probs.get(cursor++));
+            int pos = (int) data.get(cursor++);
+            int val = Math.round(data.get(cursor++));
             result[i++] = pos;
             result[i++] = val;
             length -= 2;
@@ -197,13 +163,12 @@ public class SparseVectorSet implements VectorSet {
     public void _add(int vecid, int[] pairs) {
         validateParams(vecid, pairs);
         if (!indexer.containsKey(vecid)) {
-            int start = probs.size();
+            int start = data.size();
             indexer.put(vecid, start);
             lengths.put(vecid, pairs.length);
             for (int val : pairs) {
-                probs.add(val);
+                data.add(val);
             }
-            probs.add(-(vecid + 1));
 
             if (listening) {
                 for (VectorSetListener l : listeners) {
@@ -244,16 +209,13 @@ public class SparseVectorSet implements VectorSet {
             TIntFloatMap results = new TIntFloatHashMap();
 
             int cursor = indexer.get(vecid);
-            while (true) {
-                int pos = (int) probs.get(cursor++);
-                probs.set(cursor - 1, -1);
-                if (pos < 0) {
-                    break;
-                }
-                float val = probs.get(cursor++) * (1f - accumuFactor);
-                probs.set(cursor - 1, -1);
+            int length = lengths.get(vecid);
+            while (length > 0) {
+                int pos = (int) data.get(cursor++);
+                float val = data.get(cursor++) * (1f - accumuFactor);
                 results.put(pos, val);
                 indexes.add(pos);
+                length -= 2;
             }
 
             cursor = 0;
@@ -269,16 +231,16 @@ public class SparseVectorSet implements VectorSet {
             }
             indexes.sort();
 
-            int start = probs.size();
+            int start = data.size();
             indexer.put(vecid, start);
+            lengths.put(vecid,  indexes.size() * 2);
             TIntIterator iter = indexes.iterator();
             while (iter.hasNext()) {
                 int key = iter.next();
                 float value = results.get(key);
-                probs.add(key);
-                probs.add(value);
+                data.add(key);
+                data.add(value);
             }
-            probs.add(-(vecid + 1));
 
             if (listening) {
                 int[] accumulated = _get(vecid);
