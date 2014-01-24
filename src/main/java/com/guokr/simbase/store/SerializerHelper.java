@@ -1,6 +1,8 @@
 package com.guokr.simbase.store;
 
+import gnu.trove.iterator.TIntIntIterator;
 import gnu.trove.iterator.TIntObjectIterator;
+import gnu.trove.map.TIntIntMap;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -47,25 +49,25 @@ public class SerializerHelper {
             int sparseFactor = kryo.readObject(input, int.class);
             DenseVectorSet vectorSet = new DenseVectorSet(key, basis, accumuFactor, sparseFactor);
             int sizeVector = kryo.readObject(input, int.class);
-            int offset = -1;
-            int vecid, length;
-            float value;
+            int vecid, start, length;
             while (sizeVector > 0) {
-                value = kryo.readObject(input, float.class);
-                offset++;
-                length = 0;
-                while (value <= 1) {
-                    vectorSet.probs.add(value);
-                    value = kryo.readObject(input, float.class);
-                    offset++;
-                    length++;
-                }
-                vectorSet.probs.add(value);
-                vecid = (int) value - 1;
-                vectorSet.indexer.put(vecid, offset - length);
+                vecid = kryo.readObject(input, int.class);
+                start = kryo.readObject(input, int.class);
+                length = kryo.readObject(input, int.class);
+
+                vectorSet.indexer.put(vecid, start);
                 vectorSet.lengths.put(vecid, length);
                 sizeVector--;
             }
+
+            int sizeData = kryo.readObject(input, int.class);
+            while (sizeData > 0) {
+                float val = kryo.readObject(input, float.class);
+
+                vectorSet.data.add(val);
+                sizeData--;
+            }
+
             return vectorSet;
         }
 
@@ -74,10 +76,24 @@ public class SerializerHelper {
             output.writeString(vectorSet.key());
             kryo.writeObject(output, vectorSet.accumuFactor);
             kryo.writeObject(output, vectorSet.sparseFactor);
-            kryo.writeObject(output, vectorSet.indexer.size());
-            int end = vectorSet.probs.size();
-            for (int offset = 0; offset < end; offset++) {
-                float val = vectorSet.probs.get(offset);
+
+            TIntIntMap indexer = vectorSet.indexer;
+            TIntIntIterator iter = indexer.iterator();
+            kryo.writeObject(output, indexer.size());
+            while (iter.hasNext()) {
+                iter.advance();
+                int vecid = iter.key();
+                int start = iter.value();
+                int length = vectorSet.length(vecid);
+                kryo.writeObject(output, vecid);
+                kryo.writeObject(output, start);
+                kryo.writeObject(output, length);
+            }
+
+            int size = vectorSet.data.size();
+            kryo.writeObject(output, size);
+            for (int offset = 0; offset < size; offset++) {
+                float val = vectorSet.data.get(offset);
                 kryo.writeObject(output, val);
             }
         }

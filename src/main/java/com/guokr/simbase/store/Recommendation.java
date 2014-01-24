@@ -1,7 +1,6 @@
 package com.guokr.simbase.store;
 
 import gnu.trove.iterator.TIntIterator;
-import gnu.trove.iterator.TIntObjectIterator;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.TIntObjectMap;
@@ -208,17 +207,5 @@ public class Recommendation implements VectorSetListener {
             this.sorters.remove(vecid);
             this.sorterKeys.remove(vecid);
         }
-    }
-
-    public void printReverseIndexer() {
-        int sum = 0, max = 0;
-        TIntObjectIterator<TIntSet> iter = this.reverseIndexer.iterator();
-        while (iter.hasNext()) {
-            iter.advance();
-            int size = iter.value().size();
-            sum += size;
-            max = max > size ? max : size;
-        }
-        System.out.println("reverseIndexer:" + sum + ", " + max);
     }
 }

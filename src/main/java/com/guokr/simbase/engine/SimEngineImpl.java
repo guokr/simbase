@@ -160,14 +160,6 @@ public class SimEngineImpl implements SimEngine, SimBasisListener {
         }
     }
 
-    private void validateProbs(float[] toCheck) throws SimEngineException {
-        for (float prob : toCheck) {
-            if (prob < 0 || prob > 1) {
-                throw new SimEngineException(String.format("Invaid prob '%s', should be between 0 and 1", prob));
-            }
-        }
-    }
-
     private void validatePairs(int maxIndex, int[] toCheck) throws SimEngineException {
         int len = toCheck.length;
         if (len % 2 != 0) {
@@ -502,7 +494,6 @@ public class SimEngineImpl implements SimEngine, SimBasisListener {
     public void vadd(final SimCallback callback, final String vkey, final int vecid, final float[] vector) {
         validateKind("vadd", vkey, Kind.VECTORS);
         validateId(vecid);
-        validateProbs(vector);
         final String bkey = basisOf.get(vkey);
         writerExecs.get(bkey).execute(new AsyncSafeRunner("vadd") {
             @Override
@@ -528,7 +519,6 @@ public class SimEngineImpl implements SimEngine, SimBasisListener {
     public void vset(final SimCallback callback, final String vkey, final int vecid, final float[] vector) {
         validateKind("vset", vkey, Kind.VECTORS);
         validateId(vecid);
-        validateProbs(vector);
         final String bkey = basisOf.get(vkey);
         writerExecs.get(bkey).execute(new AsyncSafeRunner("vset") {
             @Override
@@ -554,7 +544,6 @@ public class SimEngineImpl implements SimEngine, SimBasisListener {
     public void vacc(final SimCallback callback, final String vkey, final int vecid, final float[] vector) {
         validateKind("vacc", vkey, Kind.VECTORS);
         validateId(vecid);
-        validateProbs(vector);
         final String bkey = basisOf.get(vkey);
         writerExecs.get(bkey).execute(new AsyncSafeRunner("vacc") {
             @Override

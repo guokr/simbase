@@ -229,16 +229,6 @@ public class DenseCosGeneralTests {
         testVecs.waitForFinish();
         testVecs.validate();
 
-        TestableCallback testIds = new TestableCallback() {
-            @Override
-            public void excepted() {
-                isIntegerList(new int[] { 2, 5, 11, 13 });
-            }
-        };
-        engine.vids(testIds, "vtest");
-        testIds.waitForFinish();
-        testIds.validate();
-
         TestableCallback testRlist = new TestableCallback() {
             @Override
             public void excepted() {

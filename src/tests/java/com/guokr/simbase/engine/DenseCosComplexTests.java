@@ -194,10 +194,6 @@ public class DenseCosComplexTests {
             }
         };
 
-        engine.vids(testRrec2, "vtest2");
-        testRrec2.waitForFinish();
-        testRrec2.validate();
-
         engine.rrec(testRrec2, "vtest", 2, "vtest2");
         testRrec2.waitForFinish();
         testRrec2.validate();
@@ -263,16 +259,6 @@ public class DenseCosComplexTests {
         engine.vlist(testVecs, "btest");
         testVecs.waitForFinish();
         testVecs.validate();
-
-        TestableCallback testIds = new TestableCallback() {
-            @Override
-            public void excepted() {
-                isIntegerList(new int[] { 2, 5, 11, 13 });
-            }
-        };
-        engine.vids(testIds, "vtest");
-        testIds.waitForFinish();
-        testIds.validate();
 
         TestableCallback testRlist = new TestableCallback() {
             @Override

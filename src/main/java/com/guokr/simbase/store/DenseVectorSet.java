@@ -18,7 +18,7 @@ public class DenseVectorSet implements VectorSet {
 
     String                          key;
 
-    TFloatList                      probs     = new TFloatArrayList();
+    TFloatList                      data      = new TFloatArrayList();
     TIntIntMap                      lengths   = new TIntIntHashMap();
     TIntIntMap                      indexer   = new TIntIntHashMap();
 
@@ -53,65 +53,37 @@ public class DenseVectorSet implements VectorSet {
 
     @Override
     public void clean() {
-        TFloatList tmp = probs;
-        probs = new TFloatArrayList();
-        lengths = new TIntIntHashMap();
+        TFloatList olddata = data;
+        TIntIntMap oldindexer = indexer;
+        data = new TFloatArrayList(olddata.size());
         indexer = new TIntIntHashMap();
-        int end = tmp.size();
-        int curbegin = -1, curlen = 0;
-        int vecid;
-        for (int offset = 0; offset < end; offset++) {
-            float val = tmp.get(offset);
-            if (val >= 0) {
-                if (curbegin == -1) {
-                    curbegin = offset;
-                }
-                if (val > 1) {
-                    vecid = (int) val - 1;
-                    indexer.put(vecid, curbegin);
-                    lengths.put(vecid, curlen);
-                    curbegin = -1;
-                    curlen = 0;
-                }
-                probs.add(val);
-                curlen++;
+
+        int pos = 0;
+        TIntIntIterator iter = oldindexer.iterator();
+        while (iter.hasNext()) {
+            iter.advance();
+            int vecid = iter.key();
+            int start = iter.value();
+            int length = lengths.get(vecid);
+
+            int cursor = 0;
+            indexer.put(vecid, pos);
+            while (cursor < length) {
+                data.add(olddata.get(start + cursor));
+                pos++;
+                cursor++;
             }
         }
     }
 
     @Override
     public int[] ids() {
-        int[] result = new int[indexer.size()];
-        int end = probs.size();
-        int pos = 0;
-        for (int offset = 0; offset < end; offset++) {
-            float val = probs.get(offset);
-            if (val > 1) {
-                result[pos] = (int) val - 1;
-                offset++;
-                pos++;
-            }
-        }
-        return result;
+        return indexer.keys();
     }
 
     @Override
     public void remove(int vecid) {
         if (indexer.containsKey(vecid)) {
-            int cursor = indexer.get(vecid);
-            while (true) {
-                float val = probs.get(cursor);
-                if (val < 0f) {
-                    break;
-                } else if (val <= 1) {
-                    probs.set(cursor, -1);
-                    cursor++;
-                } else {
-                    probs.set(cursor, -1);
-                    break;
-                }
-            }
-
             indexer.remove(vecid);
             lengths.remove(vecid);
 
@@ -130,7 +102,7 @@ public class DenseVectorSet implements VectorSet {
     protected void get(int vecid, float[] result) {
         int len = lengths.get(vecid);
         int start = indexer.get(vecid);
-        probs.toArray(result, start, len);
+        data.toArray(result, start, len);
         Arrays.fill(result, len, result.length, 0);
     }
 
@@ -149,12 +121,11 @@ public class DenseVectorSet implements VectorSet {
     @Override
     public void add(int vecid, float[] vector) {
         if (!indexer.containsKey(vecid)) {
-            int start = probs.size();
+            int start = data.size();
             indexer.put(vecid, start);
             for (float val : vector) {
-                probs.add(val);
+                data.add(val);
             }
-            probs.add((float) (vecid + 1));
             lengths.put(vecid, vector.length);
 
             if (listening) {
@@ -176,10 +147,9 @@ public class DenseVectorSet implements VectorSet {
             } else {
                 int cursor = indexer.get(vecid);
                 for (float val : vector) {
-                    probs.set(cursor, val);
+                    data.set(cursor, val);
                     cursor++;
                 }
-                probs.set(cursor++, (float) (vecid + 1));
             }
             if (listening) {
                 for (VectorSetListener l : listeners) {
@@ -196,14 +166,28 @@ public class DenseVectorSet implements VectorSet {
         if (!indexer.containsKey(vecid)) {
             add(vecid, vector);
         } else {
-            int cursor = indexer.get(vecid);
-            for (float newval : vector) {
-                float oldval = probs.get(cursor);
-                float val = (1f - accumuFactor) * oldval + accumuFactor * newval;
-                probs.set(cursor, val);
-                cursor++;
+            if (lengths.get(vecid) != vector.length) {
+                float[] oldvec = get(vecid);
+                remove(vecid);
+                indexer.put(vecid, data.size());
+                lengths.put(vecid, vector.length);
+
+                int cursor = 0;
+                for (float newval : vector) {
+                    float oldval = oldvec[cursor];
+                    float val = (1f - accumuFactor) * oldval + accumuFactor * newval;
+                    data.add(val);
+                    cursor++;
+                }
+            } else {
+                int cursor = indexer.get(vecid);
+                for (float newval : vector) {
+                    float oldval = data.get(cursor);
+                    float val = (1f - accumuFactor) * oldval + accumuFactor * newval;
+                    data.set(cursor, val);
+                    cursor++;
+                }
             }
-            probs.set(cursor++, (float) (vecid + 1));
 
             if (listening) {
                 float[] accumulated = get(vecid);
