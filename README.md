@@ -8,7 +8,7 @@ set or between two vector sets.
 Release
 --------
 
-Current version is [v0.1.0-alpha2](https://github.com/guokr/simbase/releases/tag/v0.1.0-alpha2).
+Current version is [v0.1.0-alpha3](https://github.com/guokr/simbase/releases/tag/v0.1.0-alpha3).
 
 Concepts
 --------
@@ -58,12 +58,13 @@ probability distribution, i.e. the sum of all components equals to one.
 The write operation is handled in a single thread per basis, and comparison between any two vectors is needed,
 so the write operation is scaled at O(n).
 
-We had a non-final performance test on an i7-cpu Macbook, it can easily handle 300k 1k-dimensional vectors
-with each write operation in under 1 sec.
+We had a non-final performance test for the dense vectors on an i7-cpu Macbook, it can easily handle 100k
+1k-dimensional vectors with each write operation in under 0.14 sec; and if the linear scale ratio can hold, 
+it means Simbase can handle 700k dense vectors with each write operation in under 1 sec.
 
 Since the data is all in memory, the read operation is pretty fast.
 
-We are still in the process of tuning the performance.
+We are still in the process of tuning the performance of the sparse vectors.
 
 How to build and start
 -----------------------
@@ -123,6 +124,12 @@ Vector set related
     > vget article 12345678
     
     Get the vector for the article with id 12345678
+
+*   vadd vecsetname vecid components...
+
+    > vadd article 12345678 0.1 0.12 0.123 0.1234 0.12345 0.123456...
+    
+    add the value for the article vector with id 12345678
 
 *   vset vecsetname vecid components...
 
