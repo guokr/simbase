@@ -25,22 +25,41 @@ public class JensenShannonDivergence implements SimScore {
         }
     }
 
-    private static float finfo(float[] prob) {
+    private static float finfo(float[] prob, float sum) {
         float info = 0f;
         for (float p : prob) {
+            p = p / sum;
             info += p * lb(p);
         }
         return info;
     }
 
-    private static float iinfo(int[] freq) {
+    private static float iinfo(int[] freq, float sum) {
         float info = 0f;
         int len = freq.length;
         for (int i = 0; i < len; i += 2) {
             int p = freq[i + 1];
-            info += p * lb(p);
+            info += p / sum * lb(p / sum);
         }
         return info;
+    }
+
+    private static float fsum(float[] prob) {
+        float sum = 0f;
+        for (float p : prob) {
+            sum += p;
+        }
+        return sum;
+    }
+
+    private static float isum(int[] freq) {
+        float sum = 0f;
+        int len = freq.length;
+        for (int i = 0; i < len; i += 2) {
+            int p = freq[i + 1];
+            sum += p;
+        }
+        return sum;
     }
 
     @Override
@@ -55,18 +74,23 @@ public class JensenShannonDivergence implements SimScore {
 
     @Override
     public float score(String srcVKey, int srcId, float[] source, String tgtVKey, int tgtId, float[] target) {
-        TIntFloatMap sourceCache = caches.get(srcVKey);
-        TIntFloatMap targetCache = caches.get(tgtVKey);
+        TIntFloatMap sourceInfoCache = caches.get(srcVKey);
+        TIntFloatMap targetInfoCache = caches.get(tgtVKey);
+        
+        TIntFloatMap sourceSumCache = caches.get("length:" + srcVKey);
+        TIntFloatMap targetSumCache = caches.get("length:" + tgtVKey);
+        float srcSum = sourceSumCache.get(srcId);
+        float tgtSum = targetSumCache.get(tgtId);
 
         float scoring = 0f;
         int len = source.length;
         for (int i = 0; i < len; i++) {
-            float p = source[i];
-            float q = target[i];
+            float p = source[i] / srcSum;
+            float q = target[i] / tgtSum;
             float m = (p + q) / 2;
             scoring += (-m * lb(m));
         }
-        scoring += sourceCache.get(srcId) / 2f + targetCache.get(tgtId) / 2f;
+        scoring += sourceInfoCache.get(srcId) / 2f + targetInfoCache.get(tgtId) / 2f;
 
         return scoring;
     }
@@ -74,8 +98,13 @@ public class JensenShannonDivergence implements SimScore {
     @Override
     public float score(String srcVKey, int srcId, int[] source, int srclen, String tgtVKey, int tgtId, int[] target,
             int tgtlen) {
-        TIntFloatMap sourceCache = caches.get(srcVKey);
-        TIntFloatMap targetCache = caches.get(tgtVKey);
+        TIntFloatMap sourceInfoCache = caches.get(srcVKey);
+        TIntFloatMap targetInfoCache = caches.get(tgtVKey);
+        
+        TIntFloatMap sourceSumCache = caches.get("length:" + srcVKey);
+        TIntFloatMap targetSumCache = caches.get("length:" + tgtVKey);
+        float srcSum = sourceSumCache.get(srcId);
+        float tgtSum = targetSumCache.get(tgtId);
 
         float scoring = 0f;
         int idx1 = 0, idx2 = 0;
@@ -83,26 +112,26 @@ public class JensenShannonDivergence implements SimScore {
             if (source[idx1] < 0 || target[idx2] < 0) {
                 break;
             } else if (source[idx1] == target[idx2]) {
-                float p = source[idx1 + 1];
-                float q = target[idx2 + 1];
+                float p = source[idx1 + 1] / srcSum;
+                float q = target[idx2 + 1] / tgtSum;
                 float m = (p + q) / 2;
                 scoring += (-m * lb(m));
                 idx1 += 2;
                 idx2 += 2;
             } else if (source[idx1] < target[idx2]) {
-                float p = source[idx1 + 1];
+                float p = source[idx1 + 1] / srcSum;
                 float m = p / 2;
                 scoring += (-m * lb(m));
                 idx1 += 2;
             } else {
-                float q = target[idx2 + 1];
+                float q = target[idx2 + 1] / tgtSum;
                 float m = q / 2;
                 scoring += (-m * lb(m));
                 idx2 += 2;
             }
         }
-        float srcScore = sourceCache.get(srcId);
-        float tgtScore = targetCache.get(tgtId);
+        float srcScore = sourceInfoCache.get(srcId);
+        float tgtScore = targetInfoCache.get(tgtId);
         scoring += srcScore / 2f + tgtScore / 2f;
 
         return scoring;
@@ -110,18 +139,24 @@ public class JensenShannonDivergence implements SimScore {
 
     public void onAttached(String vkey) {
         caches.put(vkey, new TIntFloatHashMap());
+        caches.put("length:" + vkey, new TIntFloatHashMap());
     }
 
     public void onUpdated(String vkey, int vid, float[] vector) {
-        caches.get(vkey).put(vid, finfo(vector));
+        float sum = fsum(vector);
+        caches.get("length:" + vkey).put(vid, sum);
+        caches.get(vkey).put(vid, finfo(vector, sum));
     }
 
     public void onUpdated(String vkey, int vid, int[] vector) {
-        caches.get(vkey).put(vid, iinfo(vector));
+        float sum = isum(vector);
+        caches.get("length:" + vkey).put(vid, sum);
+        caches.get(vkey).put(vid, iinfo(vector, sum));
     }
 
     public void onRemoved(String vkey, int vid) {
         caches.get(vkey).remove(vid);
+        caches.get("length:" + vkey).remove(vid);
     }
 
     @Override

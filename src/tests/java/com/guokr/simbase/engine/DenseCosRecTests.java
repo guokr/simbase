@@ -21,7 +21,7 @@ public class DenseCosRecTests {
         Map<String, Object> basis = new HashMap<String, Object>();
         Map<String, Object> dense = new HashMap<String, Object>();
         Map<String, Object> econf = new HashMap<String, Object>();
-        dense.put("accumuFactor", 0.5);
+        dense.put("accumuFactor", 10.0);
         dense.put("sparseFactor", 2048);
         basis.put("vectorSetType", "dense");
         econf.put("savepath", "data");

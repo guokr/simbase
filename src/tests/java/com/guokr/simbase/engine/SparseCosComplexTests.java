@@ -22,7 +22,7 @@ public class SparseCosComplexTests {
         Map<String, Object> basis = new HashMap<String, Object>();
         Map<String, Object> sparse = new HashMap<String, Object>();
         Map<String, Object> econf = new HashMap<String, Object>();
-        sparse.put("accumuFactor", 0.5);
+        sparse.put("accumuFactor", 10.0);
         sparse.put("sparseFactor", 2048);
         basis.put("vectorSetType", "sparse");
         econf.put("savepath", "data");
@@ -332,7 +332,7 @@ public class SparseCosComplexTests {
         TestableCallback testRrec = new TestableCallback() {
             @Override
             public void excepted() {
-                isFloatList(new float[] { 11, 7, 3, 5, 13 });
+                isFloatList(new float[] { 11, 3, 7, 5, 13 });
             }
         };
         engine.rrec(testRrec, "vtest", 2, "vtest");

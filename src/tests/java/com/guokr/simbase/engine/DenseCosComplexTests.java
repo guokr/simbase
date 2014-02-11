@@ -22,7 +22,7 @@ public class DenseCosComplexTests {
         Map<String, Object> basis = new HashMap<String, Object>();
         Map<String, Object> dense = new HashMap<String, Object>();
         Map<String, Object> econf = new HashMap<String, Object>();
-        dense.put("accumuFactor", 0.5);
+        dense.put("accumuFactor", 10.0);
         dense.put("sparseFactor", 2048);
         basis.put("vectorSetType", "dense");
         econf.put("savepath", "data");
@@ -332,7 +332,7 @@ public class DenseCosComplexTests {
         TestableCallback testRrec = new TestableCallback() {
             @Override
             public void excepted() {
-                isFloatList(new float[] { 11, 7, 3, 5, 13 });
+                isFloatList(new float[] { 11, 3, 7, 5, 13 });
             }
         };
         engine.rrec(testRrec, "vtest", 2, "vtest");

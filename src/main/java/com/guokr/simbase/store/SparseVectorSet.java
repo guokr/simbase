@@ -216,12 +216,16 @@ public class SparseVectorSet implements VectorSet, BasisListener {
             TIntList indexes = new TIntArrayList();
             TIntFloatMap results = new TIntFloatHashMap();
 
+            float max = Float.NEGATIVE_INFINITY;
             int cursor = indexer.get(vecid);
             int length = lengths.get(vecid);
             while (length > 0) {
                 int pos = (int) data.get(cursor++);
-                float val = data.get(cursor++) * (1f - accumuFactor);
+                float val = data.get(cursor++);
                 results.put(pos, val);
+                if (val > max) {
+                    max = val;
+                }
                 indexes.add(pos);
                 length -= 2;
             }
@@ -229,9 +233,13 @@ public class SparseVectorSet implements VectorSet, BasisListener {
             cursor = 0;
             while (cursor < pairs.length) {
                 int pos = pairs[cursor++];
-                float val = (float) pairs[cursor++] * accumuFactor;
+                float val = (float) pairs[cursor++];
                 if (results.containsKey(pos)) {
-                    results.put(pos, results.get(pos) + val);
+                    val = results.get(pos) + val;
+                    results.put(pos, val);
+                    if (val > max) {
+                        max = val;
+                    }
                 } else {
                     results.put(pos, val);
                     indexes.add(pos);
@@ -243,11 +251,20 @@ public class SparseVectorSet implements VectorSet, BasisListener {
             indexer.put(vecid, start);
             lengths.put(vecid, indexes.size() * 2);
             TIntIterator iter = indexes.iterator();
-            while (iter.hasNext()) {
-                int key = iter.next();
-                float value = results.get(key);
-                data.add(key);
-                data.add(value);
+            if (max < accumuFactor * sparseFactor) {
+                while (iter.hasNext()) {
+                    int key = iter.next();
+                    float value = results.get(key);
+                    data.add(key);
+                    data.add(value);
+                }
+            } else {
+                while (iter.hasNext()) {
+                    int key = iter.next();
+                    float value = results.get(key) * accumuFactor / max;
+                    data.add(key);
+                    data.add(value);
+                }
             }
 
             if (listening) {

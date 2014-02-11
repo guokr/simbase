@@ -17,8 +17,8 @@ defaults:
   basis:
     vectorSetType: dense
   dense:
-    accumuFactor: 0.01
+    accumuFactor: 10.0
     sparseFactor: 4096
   sparse:
-    accumuFactor: 0.01
+    accumuFactor: 10.0
     sparseFactor: 4096
