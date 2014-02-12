@@ -695,7 +695,9 @@ public class SimEngineImpl implements SimEngine, SimBasisListener {
 
     @Override
     public void rmk(final SimCallback callback, final String vkeySource, final String vkeyTarget, final String funcscore) {
-        mngmExec.execute(new SafeRunner("rmk", callback) {
+        validateSameBasis(vkeySource, vkeyTarget);
+        final String bkey = basisOf.get(vkeySource);
+        writerExecs.get(bkey).execute(new SafeRunner("rmk", callback) {
             @Override
             public void invoke() {
                 validateKind("rmk", vkeySource, Kind.VECTORS);
