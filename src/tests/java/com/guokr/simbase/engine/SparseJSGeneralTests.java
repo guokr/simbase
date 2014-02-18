@@ -158,7 +158,7 @@ public class SparseJSGeneralTests {
     }
 
     @Test
-    public void testSaveLoad() throws Exception {
+    public void testSaveLoad() throws Throwable {
         TestableCallback testRrec = new TestableCallback() {
             @Override
             public void excepted() {
