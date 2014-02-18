@@ -758,7 +758,32 @@ public class SimEngineImpl implements SimEngine, SimBasisListener {
     }
 
     @Override
-    public void xacc(SimCallback callback, String vkeyTarget, int vecidTarget, String vkeyOperand, int vecidOperand) {
+    public void xacc(SimCallback callback, final String vkeyTarget, final int vecidTarget, final String vkeyOperand, final int vecidOperand) {
+        validateKind("xacc", vkeyTarget, Kind.VECTORS);
+        validateId(vecidTarget);
+        validateKind("xacc", vkeyOperand, Kind.VECTORS);
+        validateId(vecidOperand);
+        final String bkey = basisOf.get(vkeyTarget);
+        writerExecs.get(bkey).execute(new AsyncSafeRunner("vacc") {
+            @Override
+            public void invoke() {
+                SimBasis base = bases.get(bkey);
+                float[] vector = base.vget(vkeyOperand, vecidOperand);
+                base.vacc(vkeyTarget, vecidTarget, vector);
+
+                if (!counters.containsKey(vkeyTarget)) {
+                    counters.put(vkeyTarget, 0);
+                }
+                int counter = counters.get(vkeyTarget) + 1;
+                counters.put(vkeyTarget, counter);
+                if (counter % bycount == 0) {
+                    logger.info(String.format("acculmulating dense vectors %d to %s", counter, vkeyTarget));
+                }
+            }
+        });
+
+        callback.ok();
+        callback.response();
     }
 
     @Override
