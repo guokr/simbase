@@ -54,9 +54,9 @@ public interface SimEngine {
 
     public void rget(SimCallback callback, String vkeySource, int vecid, String vkeyTarget);
 
-    public void listen(String bkey, BasisListener listener);
-
     public void rrec(SimCallback callback, String vkeySource, int vecid, String vkeyTarget);
+
+    public void listen(String bkey, BasisListener listener);
 
     public void listen(String vkey, VectorSetListener listener);
 
