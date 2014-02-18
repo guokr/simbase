@@ -56,6 +56,10 @@ public interface SimEngine {
 
     public void rrec(SimCallback callback, String vkeySource, int vecid, String vkeyTarget);
 
+    public void xacc(SimCallback callback, String vkeyTarget, int vecidTarget, String vkeyOperand, int vecidOperand);
+
+    public void xprd(SimCallback callback, String vkeyTarget, int vecidTarget, String vkeyOperand, int[] vecidOperands);
+
     public void listen(String bkey, BasisListener listener);
 
     public void listen(String vkey, VectorSetListener listener);

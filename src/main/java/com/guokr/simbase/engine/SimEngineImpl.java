@@ -758,6 +758,14 @@ public class SimEngineImpl implements SimEngine, SimBasisListener {
     }
 
     @Override
+    public void xacc(SimCallback callback, String vkeyTarget, int vecidTarget, String vkeyOperand, int vecidOperand) {
+    }
+
+    @Override
+    public void xprd(SimCallback callback, String vkeyTarget, int vecidTarget, String vkeyOperand, int[] vecidOperands) {
+    }
+
+    @Override
     public void listen(final String bkey, final BasisListener listener) {
         writerExecs.get(bkey).execute(new Runnable() {
             @Override
