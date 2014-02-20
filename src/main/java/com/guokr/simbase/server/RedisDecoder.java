@@ -85,6 +85,9 @@ public class RedisDecoder {
             line = last.line;
             lineReader = last.lineReader;
             requests = last;
+            if (state == null) {
+                state = State.INITIAL;
+            }
         }
 
         while (buffer.hasRemaining()) {
@@ -95,7 +98,9 @@ public class RedisDecoder {
                 lineReader = new LineReader();
                 line = lineReader.readLine(buffer);
                 if (line != null && line.length() != 0) {
-                    requests = new RedisRequests();
+                    if (last == null) {
+                        requests = new RedisRequests();
+                    }
                     state = State.READ_BEGIN;
                 }
                 break;
