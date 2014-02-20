@@ -112,4 +112,39 @@ public class DenseJSRecTests {
         test2.validate();
     }
 
+    @Test
+    public void testSetRec() throws Exception {
+        engine.vset(TestableCallback.noop(), "vtest", 13, new float[] { 0.9f, 0.09f, 0.01f });
+        Thread.sleep(100);
+        engine.rmk(TestableCallback.noop(), "vtest", "vtest", "cosinesq");
+        Thread.sleep(100);
+        engine.rmk(TestableCallback.noop(), "vtest", "vtest2", "cosinesq");
+        Thread.sleep(100);
+        engine.vset(TestableCallback.noop(), "vtest2", 7, new float[] { 0.1f, 8f, 0.1f });
+        Thread.sleep(100);
+        engine.vset(TestableCallback.noop(), "vtest", 13, new float[] { 0f, 0.09f, 0.91f });
+        Thread.sleep(100);
+        engine.vset(TestableCallback.noop(), "vtest2", 7, new float[] { 0.09f, 0f, 0.91f });
+        Thread.sleep(100);
+
+        TestableCallback test = new TestableCallback() {
+            @Override
+            public void excepted() {
+                isIntegerList(new int[] { 7, 11, 3, 5, 2 });
+            }
+        };
+        engine.rrec(test, "vtest", 13, "vtest");
+        test.waitForFinish();
+        test.validate();
+        TestableCallback test2 = new TestableCallback() {
+            @Override
+            public void excepted() {
+                isIntegerList(new int[] { 7, 13, 3, 11, 2, 5 });
+            }
+        };
+        engine.rrec(test2, "vtest", 7, "vtest2");
+        test2.waitForFinish();
+        test2.validate();
+    }
+
 }
