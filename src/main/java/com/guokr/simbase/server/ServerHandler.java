@@ -99,6 +99,14 @@ public class ServerHandler implements IHandler {
                                     command.invoke(engine, request.args(1), request.argf(2), request.argI(3), callback);
                                 }
                                 break;
+                            case 4:
+                                sig = sig.substring(1);
+                                if (sig.equals("sisi")) {
+                                    command.invoke(engine, request.args(1), request.argi(2), request.args(3), request.argi(4), callback);
+                                } else if (sig.equals("sisI")) {
+                                    command.invoke(engine, request.args(1), request.argi(2), request.args(3), request.argI(4), callback);
+                                }
+                                break;
                             }
                         } catch (Exception e) {
                             if (e instanceof IndexOutOfBoundsException) {

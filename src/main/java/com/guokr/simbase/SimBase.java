@@ -33,6 +33,8 @@ import com.guokr.simbase.command.VList;
 import com.guokr.simbase.command.VMk;
 import com.guokr.simbase.command.VRem;
 import com.guokr.simbase.command.VSet;
+import com.guokr.simbase.command.XAcc;
+import com.guokr.simbase.command.XPrd;
 import com.guokr.simbase.engine.SimEngineImpl;
 import com.guokr.simbase.server.ServerHandler;
 import com.guokr.simbase.server.SimServer;
@@ -74,6 +76,9 @@ public class SimBase {
         registry.add("rmk", new RMk());
         registry.add("rget", new RGet());
         registry.add("rrec", new RRec());
+
+        registry.add("xacc", new XAcc());
+        registry.add("xprd", new XPrd());
 
         server = new SimServer(conf.getSub("server", "server"), new ServerHandler(32, "simbase", 100, registry, engine));
 

@@ -110,4 +110,12 @@ public abstract class SimCommand {
         throw new SimCommandException("Wrong parameters passed in");
     }
 
+    public void invoke(SimEngine engine, String arg1, int arg2, String arg3, int arg4, SimCallback callback) {
+        throw new SimCommandException("Wrong parameters passed in");
+    }
+
+    public void invoke(SimEngine engine, String arg1, int arg2, String arg3, int[] arg4, SimCallback callback) {
+        throw new SimCommandException("Wrong parameters passed in");
+    }
+
 }

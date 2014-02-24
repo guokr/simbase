@@ -758,13 +758,14 @@ public class SimEngineImpl implements SimEngine, SimBasisListener {
     }
 
     @Override
-    public void xacc(SimCallback callback, final String vkeyTarget, final int vecidTarget, final String vkeyOperand, final int vecidOperand) {
+    public void xacc(SimCallback callback, final String vkeyTarget, final int vecidTarget, final String vkeyOperand,
+            final int vecidOperand) {
         validateKind("xacc", vkeyTarget, Kind.VECTORS);
         validateId(vecidTarget);
         validateKind("xacc", vkeyOperand, Kind.VECTORS);
         validateId(vecidOperand);
         final String bkey = basisOf.get(vkeyTarget);
-        writerExecs.get(bkey).execute(new AsyncSafeRunner("vacc") {
+        writerExecs.get(bkey).execute(new AsyncSafeRunner("xacc") {
             @Override
             public void invoke() {
                 SimBasis base = bases.get(bkey);
@@ -787,7 +788,50 @@ public class SimEngineImpl implements SimEngine, SimBasisListener {
     }
 
     @Override
-    public void xprd(SimCallback callback, String vkeyTarget, int vecidTarget, String vkeyOperand, int[] vecidOperands) {
+    public void xprd(final SimCallback callback, final String vkeyTarget, final int vecidTarget,
+            final String vkeyOperand, final int[] vecidOperands) {
+        validateKind("xacc", vkeyTarget, Kind.VECTORS);
+        validateId(vecidTarget);
+        validateKind("xacc", vkeyOperand, Kind.VECTORS);
+        for (int vecidOperand : vecidOperands) {
+            validateId(vecidOperand);
+        }
+        final String bkey = basisOf.get(vkeyTarget);
+        writerExecs.get(bkey).execute(new AsyncSafeRunner("xprd") {
+            @Override
+            public void invoke() {
+                SimBasis base = bases.get(bkey);
+
+                int size = vecidOperands.length;
+                float[] scores = new float[size];
+                float[] target = base.vget(vkeyTarget, vecidTarget);
+                for (int i = 0; i < size; i++) {
+                    int vecidOperand = vecidOperands[i];
+                    float[] operand = base.vget(vkeyOperand, vecidOperand);
+
+                    int len = target.length;
+                    float score = 0f, lensq1 = 0f, lensq2 = 0f;
+                    for (int j = 0; j < len; j++) {
+                        score += target[j] * operand[j];
+                    }
+                    for (int j = 0; j < len; j++) {
+                        lensq1 += target[j] * target[j];
+                    }
+                    for (int j = 0; j < len; j++) {
+                        lensq2 += operand[j] * operand[j];
+                    }
+
+                    if (lensq1 > 0 && lensq2 > 0) {
+                        scores[i] = (float) (score / Math.sqrt(lensq1) / Math.sqrt(lensq2));
+                    } else {
+                        scores[i] = 0f;
+                    }
+                }
+
+                callback.floatList(scores);
+                callback.response();
+            }
+        });
     }
 
     @Override
