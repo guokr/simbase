@@ -175,21 +175,33 @@ public class Recommendation implements VectorSetListener {
 
     @Override
     public void onVectorSetted(VectorSet evtSrc, int vecid, float[] old, float[] vector) {
+        if (evtSrc == this.source && sorters.containsKey(vecid)) {
+            sorters.get(vecid).reset();
+        }
         processDenseChangedEvt(evtSrc, vecid, vector);
     }
 
     @Override
     public void onVectorSetted(VectorSet evtSrc, int vecid, int[] old, int[] vector) {
+        if (evtSrc == this.source && sorters.containsKey(vecid)) {
+            sorters.get(vecid).reset();
+        }
         processSparseChangedEvt(evtSrc, vecid, vector);
     }
 
     @Override
     public void onVectorAccumulated(VectorSet evtSrc, int vecid, float[] vector, float[] accumulated) {
+        if (evtSrc == this.source && sorters.containsKey(vecid)) {
+            sorters.get(vecid).reset();
+        }
         processDenseChangedEvt(evtSrc, vecid, accumulated);
     }
 
     @Override
     public void onVectorAccumulated(VectorSet evtSrc, int vecid, int[] vector, int[] accumulated) {
+        if (evtSrc == this.source && sorters.containsKey(vecid)) {
+            sorters.get(vecid).reset();
+        }
         processSparseChangedEvt(evtSrc, vecid, accumulated);
     }
 

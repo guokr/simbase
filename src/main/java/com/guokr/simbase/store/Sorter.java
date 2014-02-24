@@ -22,7 +22,13 @@ public class Sorter {
         this.order = order;
         this.limits = limits;
 
+        reset();
+    }
+
+    public void reset() {
         int maxlen = 1 + limits;
+
+        this.size = 0;
         this.vecids = new int[maxlen];
         this.scores = new float[maxlen];
 
