@@ -241,21 +241,23 @@ public class SimEngineImpl implements SimEngine, SimBasisListener {
                 Kind kind = kindOf.get(toDel);
                 switch (kind) {
                 case BASIS:
-                    for (String vec : vectorsOf.get(key)) {
-                        for (String source : rtargetsOf.keySet()) {
-                            if (source.equals(vec)) {
-                                for (String target : rtargetsOf.get(vec)) {
-                                    String recKey = rkey(vec, target);
-                                    basisOf.remove(recKey);
-                                    kindOf.remove(recKey);
+                    if (vectorsOf.containsKey(toDel)) {
+                        for (String vec : vectorsOf.get(toDel)) {
+                            for (String source : rtargetsOf.keySet()) {
+                                if (source.equals(vec)) {
+                                    for (String target : rtargetsOf.get(vec)) {
+                                        String recKey = rkey(vec, target);
+                                        basisOf.remove(recKey);
+                                        kindOf.remove(recKey);
+                                    }
+                                    rtargetsOf.remove(vec);
+                                } else {
+                                    rtargetsOf.get(source).remove(vec);
                                 }
-                                rtargetsOf.remove(vec);
-                            } else {
-                                rtargetsOf.get(source).remove(vec);
                             }
+                            kindOf.remove(vec);
+                            basisOf.remove(vec);
                         }
-                        kindOf.remove(vec);
-                        basisOf.remove(vec);
                     }
                     vectorsOf.remove(toDel);
                     kindOf.remove(toDel);
