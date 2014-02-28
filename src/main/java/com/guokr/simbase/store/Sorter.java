@@ -1,20 +1,25 @@
 package com.guokr.simbase.store;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.guokr.simbase.SimScore.SortOrder;
 
 public class Sorter {
 
-    SortOrder      order;
-    int            limits    = 20;
+    private static final Logger logger    = LoggerFactory.getLogger(Sorter.class);
 
-    int            size      = 0;
-    float          waterline = 0f;
+    SortOrder                   order;
+    int                         limits    = 20;
 
-    int[]          vecids;
-    float[]        scores;
+    int                         size      = 0;
+    float                       waterline = 0f;
 
-    int            id;
-    Recommendation container;
+    int[]                       vecids;
+    float[]                     scores;
+
+    int                         id;
+    Recommendation              container;
 
     public Sorter(Recommendation container, int vecid, SortOrder order, int limits) {
         this.id = vecid;
@@ -59,15 +64,21 @@ public class Sorter {
         int pos = -1;
         if (this.size == 0) {
             pos = 0;
-        } else if (this.size > 0 && score <= this.scores[0]) {
-            pos = 0;
-        } else if (this.size > 0 && this.size < this.limits && score > this.scores[this.size - 1]) {
-            pos = this.size;
         } else {
-            for (int cur = 0; cur < this.size - 1; cur++) {
-                if (score > this.scores[cur] && score <= this.scores[cur + 1]) {
-                    pos = cur + 1;
-                    break;
+            if (score > this.scores[this.size - 1]) {
+                if (this.size < this.limits) {
+                    pos = this.size;
+                } else {
+                    pos = -1;
+                }
+            } else if (score <= this.scores[0]) {
+                pos = 0;
+            } else {
+                for (int cur = 0; cur < this.size - 1; cur++) {
+                    if (score > this.scores[cur] && score <= this.scores[cur + 1]) {
+                        pos = cur + 1;
+                        break;
+                    }
                 }
             }
         }
@@ -78,15 +89,21 @@ public class Sorter {
         int pos = -1;
         if (this.size == 0) {
             pos = 0;
-        } else if (this.size > 0 && score >= this.scores[0]) {
-            pos = 0;
-        } else if (this.size > 0 && this.size < this.limits && score < this.scores[this.size - 1]) {
-            pos = this.size;
         } else {
-            for (int cur = 0; cur < this.size - 1; cur++) {
-                if (score < this.scores[cur] && score >= this.scores[cur + 1]) {
-                    pos = cur + 1;
-                    break;
+            if (score < this.scores[this.size - 1]) {
+                if (this.size < this.limits) {
+                    pos = this.size;
+                } else {
+                    pos = -1;
+                }
+            } else if (score >= this.scores[0]) {
+                pos = 0;
+            } else {
+                for (int cur = 0; cur < this.size - 1; cur++) {
+                    if (score < this.scores[cur] && score >= this.scores[cur + 1]) {
+                        pos = cur + 1;
+                        break;
+                    }
                 }
             }
         }
@@ -184,10 +201,17 @@ public class Sorter {
     }
 
     public float removeLast() {
-        container.deleteReverseIndex(id, vecids[this.size - 1]);
-        this.scores[this.size - 1] = -1.0f;
-        this.size = this.size - 1;
+        try {
+            container.deleteReverseIndex(id, vecids[this.size - 1]);
+        } catch (NullPointerException ex) {
+            logger.error(String.format("ReverseIndex %d to %d doesn't not exist, current sorter size is %d", id,
+                    vecids[this.size - 1], this.size), ex);
+        } finally {
+            this.scores[this.size - 1] = -1.0f;
+            this.size = this.size - 1;
+        }
         return this.scores[this.size - 1];
+
     }
 
     public String[] pickle() {

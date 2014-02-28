@@ -54,8 +54,7 @@ public class SimEngineImpl implements SimEngine, SimBasisListener {
             try {
                 invoke();
             } catch (Throwable ex) {
-                int code = SimErrors.lookup(scope, ex);
-                logger.error(SimErrors.info(code), ex);
+                logger.error(ex.getMessage(), ex);
             }
         }
     }
