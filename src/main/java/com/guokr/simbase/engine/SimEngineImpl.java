@@ -24,7 +24,6 @@ import com.guokr.simbase.SimCallback;
 import com.guokr.simbase.SimContext;
 import com.guokr.simbase.SimEngine;
 import com.guokr.simbase.errors.SimEngineException;
-import com.guokr.simbase.errors.SimErrors;
 import com.guokr.simbase.events.BasisListener;
 import com.guokr.simbase.events.RecommendationListener;
 import com.guokr.simbase.events.SimBasisListener;
