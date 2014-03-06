@@ -32,5 +32,5 @@
 
     :uberjar-name "simbase-standalone.jar"
 
-    :aot [simbase]
+    :aot :all
     :main simbase.main)
