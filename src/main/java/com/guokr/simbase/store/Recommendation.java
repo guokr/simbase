@@ -62,7 +62,7 @@ public class Recommendation implements VectorSetListener {
             target.addListener(scoring);
 
             if (target.type().equals("dense")) {
-                for (int id : source.ids()) {
+                for (int id : target.ids()) {
                     scoring.onVectorAdded(target, id, target.get(id));
                 }
             } else {
