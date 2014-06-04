@@ -76,7 +76,7 @@ public class JensenShannonDivergence implements SimScore {
     public float score(String srcVKey, int srcId, float[] source, String tgtVKey, int tgtId, float[] target) {
         TIntFloatMap sourceInfoCache = caches.get(srcVKey);
         TIntFloatMap targetInfoCache = caches.get(tgtVKey);
-        
+
         TIntFloatMap sourceSumCache = caches.get("length:" + srcVKey);
         TIntFloatMap targetSumCache = caches.get("length:" + tgtVKey);
         float srcSum = sourceSumCache.get(srcId);
@@ -100,7 +100,7 @@ public class JensenShannonDivergence implements SimScore {
             int tgtlen) {
         TIntFloatMap sourceInfoCache = caches.get(srcVKey);
         TIntFloatMap targetInfoCache = caches.get(tgtVKey);
-        
+
         TIntFloatMap sourceSumCache = caches.get("length:" + srcVKey);
         TIntFloatMap targetSumCache = caches.get("length:" + tgtVKey);
         float srcSum = sourceSumCache.get(srcId);

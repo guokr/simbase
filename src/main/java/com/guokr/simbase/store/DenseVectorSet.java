@@ -38,8 +38,7 @@ public class DenseVectorSet implements VectorSet, BasisListener {
         this(key, base, 0.01f, 4096);
     }
 
-    public DenseVectorSet(String key, Basis base, float accumuFactor,
-            int sparseFactor) {
+    public DenseVectorSet(String key, Basis base, float accumuFactor, int sparseFactor) {
         this.key = key;
         this.base = base;
         this.accumuFactor = accumuFactor;
@@ -220,8 +219,7 @@ public class DenseVectorSet implements VectorSet, BasisListener {
                 int cursor = indexer.get(vecid);
                 int len = lengths.get(vecid);
                 for (int i = 0; i < len; i++) {
-                    data.set(cursor + i, data.get(cursor + i) * accumuFactor
-                            / max);
+                    data.set(cursor + i, data.get(cursor + i) * accumuFactor / max);
                 }
             }
 
@@ -268,8 +266,7 @@ public class DenseVectorSet implements VectorSet, BasisListener {
     }
 
     @Override
-    public void rescore(String key, int vecid, float[] vector,
-            Recommendation rec) {
+    public void rescore(String key, int vecid, float[] vector, Recommendation rec) {
         rec.create(vecid);
         TIntIntIterator iter = indexer.iterator();
         if (this == rec.source) {
@@ -277,8 +274,7 @@ public class DenseVectorSet implements VectorSet, BasisListener {
                 iter.advance();
                 int tgtId = iter.key();
                 get(tgtId, fReuseList);
-                float score = rec.scoring.score(key, vecid, vector, this.key,
-                        tgtId, fReuseList);
+                float score = rec.scoring.score(key, vecid, vector, this.key, tgtId, fReuseList);
                 rec.add(vecid, tgtId, score);
                 rec.add(tgtId, vecid, score);
             }
@@ -288,8 +284,7 @@ public class DenseVectorSet implements VectorSet, BasisListener {
                 iter.advance();
                 int tgtId = iter.key();
                 get(tgtId, fReuseList);
-                float score = rec.scoring.score(key, vecid, vector, this.key,
-                        tgtId, fReuseList);
+                float score = rec.scoring.score(key, vecid, vector, this.key, tgtId, fReuseList);
                 rec.add(vecid, tgtId, score);
             }
         }
@@ -305,8 +300,7 @@ public class DenseVectorSet implements VectorSet, BasisListener {
                 iter.advance();
                 int tgtId = iter.key();
                 _get(tgtId, input, iReuseList);
-                float score = rec.scoring.score(key, vecid, vector,
-                        vector.length, this.key, tgtId, iReuseList,
+                float score = rec.scoring.score(key, vecid, vector, vector.length, this.key, tgtId, iReuseList,
                         length(tgtId));
                 rec.add(vecid, tgtId, score);
                 rec.add(tgtId, vecid, score);
@@ -317,8 +311,7 @@ public class DenseVectorSet implements VectorSet, BasisListener {
                 iter.advance();
                 int tgtId = iter.key();
                 _get(tgtId, input, iReuseList);
-                float score = rec.scoring.score(key, vecid, vector,
-                        vector.length, this.key, tgtId, iReuseList,
+                float score = rec.scoring.score(key, vecid, vector, vector.length, this.key, tgtId, iReuseList,
                         length(tgtId));
                 rec.add(vecid, tgtId, score);
             }
@@ -326,8 +319,7 @@ public class DenseVectorSet implements VectorSet, BasisListener {
     }
 
     @Override
-    public void onBasisRevised(Basis evtSrc, String[] oldSchema,
-            String[] newSchema) {
+    public void onBasisRevised(Basis evtSrc, String[] oldSchema, String[] newSchema) {
         this.fReuseList = new float[this.base.size()];
         this.iReuseList = new int[this.base.size() * 2];
     }
