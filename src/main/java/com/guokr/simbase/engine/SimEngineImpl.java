@@ -796,9 +796,9 @@ public class SimEngineImpl implements SimEngine, SimBasisListener {
     @Override
     public void xprd(final SimCallback callback, final String vkeyTarget, final int vecidTarget,
             final String vkeyOperand, final int[] vecidOperands) {
-        validateKind("xacc", vkeyTarget, Kind.VECTORS);
+        validateKind("xprd", vkeyTarget, Kind.VECTORS);
         validateId(vecidTarget);
-        validateKind("xacc", vkeyOperand, Kind.VECTORS);
+        validateKind("xprd", vkeyOperand, Kind.VECTORS);
         for (int vecidOperand : vecidOperands) {
             validateId(vecidOperand);
         }
