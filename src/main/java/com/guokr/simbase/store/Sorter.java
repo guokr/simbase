@@ -7,8 +7,7 @@ import com.guokr.simbase.SimScore.SortOrder;
 
 public class Sorter {
 
-    private static final Logger logger    = LoggerFactory
-                                                  .getLogger(Sorter.class);
+    private static final Logger logger    = LoggerFactory.getLogger(Sorter.class);
 
     SortOrder                   order;
     int                         limits    = 20;
@@ -22,8 +21,7 @@ public class Sorter {
     int                         id;
     Recommendation              container;
 
-    public Sorter(Recommendation container, int vecid, SortOrder order,
-            int limits) {
+    public Sorter(Recommendation container, int vecid, SortOrder order, int limits) {
         this.id = vecid;
         this.container = container;
         this.order = order;
@@ -77,8 +75,7 @@ public class Sorter {
                 pos = 0;
             } else {
                 for (int cur = 0; cur < this.size - 1; cur++) {
-                    if (score > this.scores[cur]
-                            && score <= this.scores[cur + 1]) {
+                    if (score > this.scores[cur] && score <= this.scores[cur + 1]) {
                         pos = cur + 1;
                         break;
                     }
@@ -103,8 +100,7 @@ public class Sorter {
                 pos = 0;
             } else {
                 for (int cur = 0; cur < this.size - 1; cur++) {
-                    if (score < this.scores[cur]
-                            && score >= this.scores[cur + 1]) {
+                    if (score < this.scores[cur] && score >= this.scores[cur + 1]) {
                         pos = cur + 1;
                         break;
                     }
@@ -127,11 +123,9 @@ public class Sorter {
             this.scores = new float[this.size];
 
             System.arraycopy(tvecids, 0, this.vecids, 0, pos);
-            System.arraycopy(tvecids, pos, this.vecids, pos + 1, this.size
-                    - pos - 1);
+            System.arraycopy(tvecids, pos, this.vecids, pos + 1, this.size - pos - 1);
             System.arraycopy(tscores, 0, this.scores, 0, pos);
-            System.arraycopy(tscores, pos, this.scores, pos + 1, this.size
-                    - pos - 1);
+            System.arraycopy(tscores, pos, this.scores, pos + 1, this.size - pos - 1);
 
             this.vecids[pos] = vecid;
             this.scores[pos] = score;
@@ -201,11 +195,9 @@ public class Sorter {
             this.scores = new float[this.size];
 
             System.arraycopy(tvecids, 0, this.vecids, 0, pos);
-            System.arraycopy(tvecids, pos + 1, this.vecids, pos, this.size
-                    - pos);
+            System.arraycopy(tvecids, pos + 1, this.vecids, pos, this.size - pos);
             System.arraycopy(tscores, 0, this.scores, 0, pos);
-            System.arraycopy(tscores, pos + 1, this.scores, pos, this.size
-                    - pos);
+            System.arraycopy(tscores, pos + 1, this.scores, pos, this.size - pos);
         }
     }
 
@@ -213,10 +205,8 @@ public class Sorter {
         try {
             container.deleteReverseIndex(id, vecids[this.size - 1]);
         } catch (NullPointerException ex) {
-            logger.error(
-                    String.format(
-                            "ReverseIndex %d to %d doesn't not exist, current sorter size is %d",
-                            id, vecids[this.size - 1], this.size), ex);
+            logger.error(String.format("ReverseIndex %d to %d doesn't not exist, current sorter size is %d", id,
+                    vecids[this.size - 1], this.size), ex);
         } finally {
             this.scores[this.size - 1] = -1.0f;
             this.size = this.size - 1;

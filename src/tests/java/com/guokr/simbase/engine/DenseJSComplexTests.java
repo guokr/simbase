@@ -173,7 +173,7 @@ public class DenseJSComplexTests {
     }
 
     /**
-     * @throws Throwable 
+     * @throws Throwable
      */
     @Test
     public void testSaveLoad() throws Throwable {

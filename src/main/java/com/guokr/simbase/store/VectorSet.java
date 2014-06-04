@@ -38,8 +38,7 @@ public interface VectorSet {
 
     public void addListener(VectorSetListener listener);
 
-    public void rescore(String key, int vecid, float[] vector,
-            Recommendation rec);
+    public void rescore(String key, int vecid, float[] vector, Recommendation rec);
 
     public void rescore(String key, int vecid, int[] vector, Recommendation rec);
 

@@ -465,6 +465,18 @@ public class SimEngineImpl implements SimEngine, SimBasisListener {
     }
 
     @Override
+    public void vlen(final SimCallback callback, final String vkey) {
+        validateKind("vget", vkey, Kind.VECTORS);
+        final String bkey = basisOf.get(vkey);
+        readerPool.submit(new SafeRunner("vids", callback) {
+            @Override
+            public void invoke() {
+                callback.integerValue(bases.get(bkey).vlen(vkey));
+            }
+        });
+    }
+
+    @Override
     public void vids(final SimCallback callback, final String vkey) {
         validateKind("vget", vkey, Kind.VECTORS);
         final String bkey = basisOf.get(vkey);

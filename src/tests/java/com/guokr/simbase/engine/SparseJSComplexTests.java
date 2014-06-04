@@ -173,7 +173,7 @@ public class SparseJSComplexTests {
     }
 
     /**
-     * @throws Throwable 
+     * @throws Throwable
      */
     @Test
     public void testSaveLoad() throws Throwable {

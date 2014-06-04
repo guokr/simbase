@@ -173,7 +173,7 @@ public class SparseCosComplexTests {
     }
 
     /**
-     * @throws Throwable 
+     * @throws Throwable
      */
     @Test
     public void testSaveLoad() throws Throwable {

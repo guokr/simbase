@@ -137,6 +137,10 @@ public class SimBasis {
         this.vectorSets.remove(vkey);
     }
 
+    public int vlen(String vkey) {
+        return this.vectorSets.get(vkey).size();
+    }
+
     public int[] vids(String vkey) {
         return this.vectorSets.get(vkey).ids();
     }

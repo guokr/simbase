@@ -28,6 +28,8 @@ public interface SimEngine {
 
     public void vmk(SimCallback callback, String bkey, String vkey);
 
+    public void vlen(SimCallback callback, String vkey);
+
     public void vids(SimCallback callback, String vkey);
 
     public void vget(SimCallback callback, String vkey, int vecid);
@@ -65,4 +67,5 @@ public interface SimEngine {
     public void listen(String vkey, VectorSetListener listener);
 
     public void listen(String srcVkey, String tgtVkey, RecommendationListener listener);
+
 }

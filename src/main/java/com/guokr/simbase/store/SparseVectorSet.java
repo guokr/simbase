@@ -42,8 +42,7 @@ public class SparseVectorSet implements VectorSet, BasisListener {
         this(key, base, 0.01f, 4096);
     }
 
-    public SparseVectorSet(String key, Basis base, float accumuFactor,
-            int sparseFactor) {
+    public SparseVectorSet(String key, Basis base, float accumuFactor, int sparseFactor) {
         this.key = key;
         this.base = base;
         this.accumuFactor = accumuFactor;
@@ -58,8 +57,7 @@ public class SparseVectorSet implements VectorSet, BasisListener {
 
     private void validateParams(int vecid, int[] pairs) {
         if (pairs.length % 2 != 0) {
-            throw new IllegalArgumentException(
-                    "the size of the input array must be a even number!");
+            throw new IllegalArgumentException("the size of the input array must be a even number!");
         }
     }
 
@@ -294,8 +292,7 @@ public class SparseVectorSet implements VectorSet, BasisListener {
     }
 
     @Override
-    public void rescore(String key, int vecid, float[] vector,
-            Recommendation rec) {
+    public void rescore(String key, int vecid, float[] vector, Recommendation rec) {
         rec.create(vecid);
         TIntIntIterator iter = indexer.iterator();
         int[] input = new int[this.base.size() * 2];
@@ -304,8 +301,7 @@ public class SparseVectorSet implements VectorSet, BasisListener {
                 iter.advance();
                 int tgtId = iter.key();
                 get(tgtId, input, fReuseList);
-                float score = rec.scoring.score(key, vecid, vector, this.key,
-                        tgtId, fReuseList);
+                float score = rec.scoring.score(key, vecid, vector, this.key, tgtId, fReuseList);
                 rec.add(vecid, tgtId, score);
                 rec.add(tgtId, vecid, score);
             }
@@ -315,8 +311,7 @@ public class SparseVectorSet implements VectorSet, BasisListener {
                 iter.advance();
                 int tgtId = iter.key();
                 get(tgtId, input, fReuseList);
-                float score = rec.scoring.score(key, vecid, vector, this.key,
-                        tgtId, fReuseList);
+                float score = rec.scoring.score(key, vecid, vector, this.key, tgtId, fReuseList);
                 rec.add(vecid, tgtId, score);
             }
         }
@@ -331,8 +326,7 @@ public class SparseVectorSet implements VectorSet, BasisListener {
                 iter.advance();
                 int tgtId = iter.key();
                 _get(tgtId, iReuseList);
-                float score = rec.scoring.score(key, vecid, vector,
-                        vector.length, this.key, tgtId, iReuseList,
+                float score = rec.scoring.score(key, vecid, vector, vector.length, this.key, tgtId, iReuseList,
                         length(tgtId));
                 rec.add(vecid, tgtId, score);
                 rec.add(tgtId, vecid, score);
@@ -343,8 +337,7 @@ public class SparseVectorSet implements VectorSet, BasisListener {
                 iter.advance();
                 int tgtId = iter.key();
                 _get(tgtId, iReuseList);
-                float score = rec.scoring.score(key, vecid, vector,
-                        vector.length, this.key, tgtId, iReuseList,
+                float score = rec.scoring.score(key, vecid, vector, vector.length, this.key, tgtId, iReuseList,
                         length(tgtId));
                 rec.add(vecid, tgtId, score);
             }
@@ -352,8 +345,7 @@ public class SparseVectorSet implements VectorSet, BasisListener {
     }
 
     @Override
-    public void onBasisRevised(Basis evtSrc, String[] oldSchema,
-            String[] newSchema) {
+    public void onBasisRevised(Basis evtSrc, String[] oldSchema, String[] newSchema) {
         fReuseList = new float[this.base.size()];
         iReuseList = new int[this.base.size() * 2];
     }
