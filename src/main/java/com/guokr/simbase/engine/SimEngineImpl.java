@@ -508,6 +508,7 @@ public class SimEngineImpl implements SimEngine, SimBasisListener {
                 if (counter % bycount == 0) {
                     logger.info(String.format("adding dense vectors %d to %s", counter, vkey));
                 }
+                logger.info(String.format("vector[%s] added to vectorset[%s]", vecid, vkey));
             }
         });
 
@@ -533,6 +534,7 @@ public class SimEngineImpl implements SimEngine, SimBasisListener {
                 if (counter % bycount == 0) {
                     logger.info(String.format("setting dense vectors %d to %s", counter, vkey));
                 }
+                logger.info(String.format("vector[%s] setted to vectorset[%s]", vecid, vkey));
             }
         });
 
@@ -558,6 +560,7 @@ public class SimEngineImpl implements SimEngine, SimBasisListener {
                 if (counter % bycount == 0) {
                     logger.info(String.format("acculmulating dense vectors %d to %s", counter, vkey));
                 }
+                logger.info(String.format("vector[%s] accumulated to vectorset[%s]", vecid, vkey));
             }
         });
 
@@ -615,6 +618,7 @@ public class SimEngineImpl implements SimEngine, SimBasisListener {
                 if (counter % bycount == 0) {
                     logger.info(String.format("adding sparse vectors %d to %s", counter, vkey));
                 }
+                logger.info(String.format("sparse vector[%s] added to vectorset[%s]", vecid, vkey));
             }
         });
 
@@ -642,6 +646,7 @@ public class SimEngineImpl implements SimEngine, SimBasisListener {
                 if (counter % bycount == 0) {
                     logger.info(String.format("setting sparse vectors %d to %s", counter, vkey));
                 }
+                logger.info(String.format("sparse vector[%s] setted to vectorset[%s]", vecid, vkey));
             }
         });
 
@@ -669,6 +674,7 @@ public class SimEngineImpl implements SimEngine, SimBasisListener {
                 if (counter % bycount == 0) {
                     logger.info(String.format("accumulating sparse vectors %d to %s", counter, vkey));
                 }
+                logger.info(String.format("sparse vector[%s] accumulated to vectorset[%s]", vecid, vkey));
             }
         });
 

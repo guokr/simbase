@@ -8,9 +8,13 @@ public interface VectorSet {
 
     public String key();
 
+    public int size();
+
     public void clean();
 
     public int[] ids();
+
+    public boolean contains(int vecid);
 
     public void remove(int vecid);
 
@@ -34,7 +38,8 @@ public interface VectorSet {
 
     public void addListener(VectorSetListener listener);
 
-    public void rescore(String key, int vecid, float[] vector, Recommendation rec);
+    public void rescore(String key, int vecid, float[] vector,
+            Recommendation rec);
 
     public void rescore(String key, int vecid, int[] vector, Recommendation rec);
 

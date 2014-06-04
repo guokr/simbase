@@ -9,7 +9,11 @@ import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.guokr.simbase.SimScore;
 import com.guokr.simbase.events.RecommendationListener;
@@ -17,6 +21,9 @@ import com.guokr.simbase.events.VectorSetListener;
 import com.guokr.simbase.score.CosineSquareSimilarity;
 
 public class Recommendation implements VectorSetListener {
+
+    private static final Logger          logger         = LoggerFactory
+                                                                .getLogger(Recommendation.class);
 
     public VectorSet                     source;
     public VectorSet                     target;
@@ -38,7 +45,8 @@ public class Recommendation implements VectorSetListener {
         this(source, target, scoring, 20);
     }
 
-    public Recommendation(VectorSet source, VectorSet target, SimScore scoring, int limits) {
+    public Recommendation(VectorSet source, VectorSet target, SimScore scoring,
+            int limits) {
         this.source = source;
         this.target = target;
         this.limit = limits;
@@ -73,6 +81,44 @@ public class Recommendation implements VectorSetListener {
         }
     }
 
+    public void clean() {
+        TIntObjectMap<Sorter> oldSorters = sorters;
+        TIntList oldSorterKeys = sorterKeys;
+        sorterKeys = new TIntArrayList();
+        sorters = new TIntObjectHashMap<Sorter>();
+        reverseIndexer = new TIntObjectHashMap<TIntSet>();
+
+        TIntIterator iter = oldSorterKeys.iterator();
+        while (iter.hasNext()) {
+            int srcId = iter.next();
+            if (this.source.contains(srcId)) {
+                sorterKeys.add(srcId);
+                Sorter oldSorter = oldSorters.get(srcId);
+                Sorter sorter = new Sorter(this, srcId, oldSorter.order,
+                        oldSorter.limits);
+                sorters.put(srcId, sorter);
+                for (int tgtId : oldSorter.vecids()) {
+                    if (this.target.contains(tgtId)) {
+                        sorter.add(tgtId, oldSorter.get(tgtId));
+                        if (!reverseIndexer.containsKey(tgtId)) {
+                            reverseIndexer.put(tgtId, new TIntHashSet());
+                        }
+                        reverseIndexer.get(tgtId).add(srcId);
+                    } else {
+                        logger.warn(String
+                                .format("target vector[%d] not in sorter[%d] of rec[%s][%s]",
+                                        tgtId, srcId, this.source.key(),
+                                        this.target.key()));
+                    }
+                }
+            } else {
+                logger.warn(String.format(
+                        "source vector[%d] not in rec[%s][%s]", srcId,
+                        this.source.key(), this.target.key()));
+            }
+        }
+    }
+
     public void addReverseIndex(int srcVecId, int tgtVecId) {
         if (!this.reverseIndexer.containsKey(tgtVecId)) {
             this.reverseIndexer.put(tgtVecId, new TIntHashSet());
@@ -84,7 +130,8 @@ public class Recommendation implements VectorSetListener {
         reverseIndexer.get(tgtVecId).remove(srcVecId);
     }
 
-    private void processDenseChangedEvt(VectorSet evtSrc, int vecid, float[] vector) {
+    private void processDenseChangedEvt(VectorSet evtSrc, int vecid,
+            float[] vector) {
         if (evtSrc == this.source) {
             target.rescore(source.key(), vecid, vector, this);
         } else if (evtSrc == this.target) {
@@ -92,14 +139,15 @@ public class Recommendation implements VectorSetListener {
             TIntIterator iter = sorterKeys.iterator();
             while (iter.hasNext()) {
                 int srcVecId = iter.next();
-                float score = scoring.score(source.key(), srcVecId, source.get(srcVecId), target.key(), tgtVecId,
-                        vector);
+                float score = scoring.score(source.key(), srcVecId,
+                        source.get(srcVecId), target.key(), tgtVecId, vector);
                 add(srcVecId, tgtVecId, score);
             }
         }
     }
 
-    private void processSparseChangedEvt(VectorSet evtSrc, int vecid, int[] vector) {
+    private void processSparseChangedEvt(VectorSet evtSrc, int vecid,
+            int[] vector) {
         if (evtSrc == this.source) {
             target.rescore(source.key(), vecid, vector, this);
         } else if (evtSrc == this.target) {
@@ -107,7 +155,8 @@ public class Recommendation implements VectorSetListener {
             TIntIterator iter = sorterKeys.iterator();
             while (iter.hasNext()) {
                 int srcVecId = iter.next();
-                float score = scoring.score(source.key(), srcVecId, source._get(srcVecId), source.length(srcVecId),
+                float score = scoring.score(source.key(), srcVecId,
+                        source._get(srcVecId), source.length(srcVecId),
                         target.key(), tgtVecId, vector, vector.length);
                 add(srcVecId, tgtVecId, score);
             }
@@ -174,7 +223,8 @@ public class Recommendation implements VectorSetListener {
     }
 
     @Override
-    public void onVectorSetted(VectorSet evtSrc, int vecid, float[] old, float[] vector) {
+    public void onVectorSetted(VectorSet evtSrc, int vecid, float[] old,
+            float[] vector) {
         if (evtSrc == this.source && sorters.containsKey(vecid)) {
             sorters.get(vecid).reset();
         }
@@ -182,7 +232,8 @@ public class Recommendation implements VectorSetListener {
     }
 
     @Override
-    public void onVectorSetted(VectorSet evtSrc, int vecid, int[] old, int[] vector) {
+    public void onVectorSetted(VectorSet evtSrc, int vecid, int[] old,
+            int[] vector) {
         if (evtSrc == this.source && sorters.containsKey(vecid)) {
             sorters.get(vecid).reset();
         }
@@ -190,7 +241,8 @@ public class Recommendation implements VectorSetListener {
     }
 
     @Override
-    public void onVectorAccumulated(VectorSet evtSrc, int vecid, float[] vector, float[] accumulated) {
+    public void onVectorAccumulated(VectorSet evtSrc, int vecid,
+            float[] vector, float[] accumulated) {
         if (evtSrc == this.source && sorters.containsKey(vecid)) {
             sorters.get(vecid).reset();
         }
@@ -198,7 +250,8 @@ public class Recommendation implements VectorSetListener {
     }
 
     @Override
-    public void onVectorAccumulated(VectorSet evtSrc, int vecid, int[] vector, int[] accumulated) {
+    public void onVectorAccumulated(VectorSet evtSrc, int vecid, int[] vector,
+            int[] accumulated) {
         if (evtSrc == this.source && sorters.containsKey(vecid)) {
             sorters.get(vecid).reset();
         }

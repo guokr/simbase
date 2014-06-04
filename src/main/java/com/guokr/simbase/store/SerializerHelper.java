@@ -7,15 +7,22 @@ import gnu.trove.map.TIntIntMap;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.Serializer;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
 import com.guokr.simbase.SimScore;
+import com.guokr.simbase.engine.SimEngineImpl;
 import com.guokr.simbase.score.CosineSquareSimilarity;
 import com.guokr.simbase.score.JensenShannonDivergence;
 
 public class SerializerHelper {
+
+    private static final Logger logger = LoggerFactory
+                                               .getLogger(SerializerHelper.class);
 
     public static class BasisSerializer extends Serializer<Basis> {
 
@@ -34,7 +41,8 @@ public class SerializerHelper {
 
     }
 
-    public static class DenseVectorSetSerializer extends Serializer<DenseVectorSet> {
+    public static class DenseVectorSetSerializer extends
+            Serializer<DenseVectorSet> {
 
         private Basis basis;
 
@@ -43,11 +51,13 @@ public class SerializerHelper {
         }
 
         @Override
-        public DenseVectorSet read(Kryo kryo, Input input, Class<DenseVectorSet> type) {
+        public DenseVectorSet read(Kryo kryo, Input input,
+                Class<DenseVectorSet> type) {
             String key = kryo.readObject(input, String.class);
             float accumuFactor = kryo.readObject(input, float.class);
             int sparseFactor = kryo.readObject(input, int.class);
-            DenseVectorSet vectorSet = new DenseVectorSet(key, basis, accumuFactor, sparseFactor);
+            DenseVectorSet vectorSet = new DenseVectorSet(key, basis,
+                    accumuFactor, sparseFactor);
             int sizeVector = kryo.readObject(input, int.class);
             int vecid, start, length;
             while (sizeVector > 0) {
@@ -100,7 +110,8 @@ public class SerializerHelper {
 
     }
 
-    public static class SparseVectorSetSerializer extends Serializer<SparseVectorSet> {
+    public static class SparseVectorSetSerializer extends
+            Serializer<SparseVectorSet> {
 
         private Basis basis;
 
@@ -109,11 +120,13 @@ public class SerializerHelper {
         }
 
         @Override
-        public SparseVectorSet read(Kryo kryo, Input input, Class<SparseVectorSet> type) {
+        public SparseVectorSet read(Kryo kryo, Input input,
+                Class<SparseVectorSet> type) {
             String key = kryo.readObject(input, String.class);
             float accumuFactor = kryo.readObject(input, float.class);
             int sparseFactor = kryo.readObject(input, int.class);
-            SparseVectorSet vectorSet = new SparseVectorSet(key, basis, accumuFactor, sparseFactor);
+            SparseVectorSet vectorSet = new SparseVectorSet(key, basis,
+                    accumuFactor, sparseFactor);
 
             int sizeVector = kryo.readObject(input, int.class);
             int vecid, start, length;
@@ -166,7 +179,8 @@ public class SerializerHelper {
         }
     }
 
-    public static class RecommendationSerializer extends Serializer<Recommendation> {
+    public static class RecommendationSerializer extends
+            Serializer<Recommendation> {
 
         private VectorSet source;
         private VectorSet target;
@@ -180,7 +194,8 @@ public class SerializerHelper {
         }
 
         @Override
-        public Recommendation read(Kryo kryo, Input input, Class<Recommendation> type) {
+        public Recommendation read(Kryo kryo, Input input,
+                Class<Recommendation> type) {
             String scoringName = kryo.readObject(input, String.class);
             SimScore scoring;
             if (scoringName.equals("cosinesq")) {
@@ -194,7 +209,8 @@ public class SerializerHelper {
             int limits = kryo.readObject(input, int.class);
             int sortersSize = kryo.readObject(input, int.class);
 
-            Recommendation rec = new Recommendation(source, target, scoring, limits);
+            Recommendation rec = new Recommendation(source, target, scoring,
+                    limits);
 
             while (sortersSize > 0) {
                 int size = kryo.readObject(input, int.class);
@@ -206,7 +222,12 @@ public class SerializerHelper {
                     rec.add(srcId, tgtId, score);
                     size--;
                 }
-                rec.sorters.get(srcId).waterline = waterline;
+                if (rec.sorters.containsKey(srcId)) {
+                    rec.sorters.get(srcId).waterline = waterline;
+                } else {
+                    logger.warn(String
+                            .format("vecid[%d] not in sorters", srcId));
+                }
                 sortersSize--;
             }
             return rec;
@@ -318,7 +339,8 @@ public class SerializerHelper {
         }
     }
 
-    public Map<String, Recommendation> readRecommendations(Input input, Map<String, VectorSet> vectorSets) {
+    public Map<String, Recommendation> readRecommendations(Input input,
+            Map<String, VectorSet> vectorSets) {
         Map<String, Recommendation> recs = new HashMap<String, Recommendation>();
         int size = kryo.readObject(input, int.class);
         while (size > 0) {
@@ -337,10 +359,12 @@ public class SerializerHelper {
         return recs;
     }
 
-    public void writeRecommendations(Output output, Map<String, Recommendation> recommendations) {
+    public void writeRecommendations(Output output,
+            Map<String, Recommendation> recommendations) {
         kryo.writeObject(output, recommendations.size());
         for (String key : recommendations.keySet()) {
             Recommendation rec = recommendations.get(key);
+            rec.clean();
             kryo.writeObject(output, rec.source.key());
             kryo.writeObject(output, rec.target.key());
             kryo.writeObject(output, rec);
