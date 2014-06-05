@@ -87,8 +87,8 @@ client.send_command('vmk', ['ba', 'va'])
 client.send_command('rmk', ['va', 'va', 'cosinesq'])
 ```
 
-A simple example
------------------
+A general application case
+---------------------------
 
 For example, we need to recommend articles to users, we may follow below steps:
 
