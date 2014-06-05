@@ -196,7 +196,9 @@ public class Recommendation implements VectorSetListener {
 
     public void remove(int srcVecId, int tgtVecId) {
         this.sorters.get(srcVecId).remove(tgtVecId);
-        this.reverseIndexer.get(tgtVecId).remove(srcVecId);
+        if (reverseIndexer.containsKey(tgtVecId)) {
+            reverseIndexer.get(tgtVecId).remove(srcVecId);
+        }
     }
 
     public void addListener(RecommendationListener listener) {

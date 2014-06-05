@@ -10,12 +10,12 @@ defaults:
     savepath: data
     saveinterval: 7200000
     savethrottle: 1800000
-    maxlimits: 20
     loadfactor: 0.75
     debug: true
     bycount: 100
   basis:
     vectorSetType: dense
+    maxlimits: 20
   dense:
     accumuFactor: 10.0
     sparseFactor: 4096

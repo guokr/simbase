@@ -24,9 +24,9 @@ public class DenseCosRecTests {
         dense.put("accumuFactor", 10.0);
         dense.put("sparseFactor", 2048);
         basis.put("vectorSetType", "dense");
+        basis.put("maxlimits", 20);
         econf.put("savepath", "data");
         econf.put("saveinterval", 7200000);
-        econf.put("maxlimits", 20);
         econf.put("loadfactor", 0.75);
         econf.put("bycount", 100);
         defaults.put("dense", dense);

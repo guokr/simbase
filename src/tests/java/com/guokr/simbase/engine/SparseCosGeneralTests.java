@@ -25,9 +25,9 @@ public class SparseCosGeneralTests {
         sparse.put("accumuFactor", 10.0);
         sparse.put("sparseFactor", 2048);
         basis.put("vectorSetType", "sparse");
+        basis.put("maxlimits", 20);
         econf.put("savepath", "data");
         econf.put("saveinterval", 7200000);
-        econf.put("maxlimits", 20);
         econf.put("loadfactor", 0.75);
         econf.put("bycount", 100);
         defaults.put("sparse", sparse);

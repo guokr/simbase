@@ -192,7 +192,7 @@ public class SimBasis {
 
         VectorSet source = vectorSets.get(vkeySource);
         VectorSet target = vectorSets.get(vkeyTarget);
-        Recommendation rec = new Recommendation(source, target, scoring, 20);
+        Recommendation rec = new Recommendation(source, target, scoring, context.getInt("maxlimits"));
 
         String rkey = rkey(vkeySource, vkeyTarget);
         this.recommendations.put(rkey, rec);
