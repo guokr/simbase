@@ -1,5 +1,4 @@
 language: java
-script: mvn test
 branches:
   only:
     - master
