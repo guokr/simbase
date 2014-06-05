@@ -1,0 +1,9 @@
+language: java
+script: mvn test
+branches:
+  only:
+    - master
+jdk:
+  - openjdk6
+  - openjdk7
+  - oraclejdk7

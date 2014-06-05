@@ -16,12 +16,12 @@
                    [org.slf4j/slf4j-log4j12 "1.7.5"]
                    [log4j/log4j "1.2.17"]
                    [com.esotericsoftware.kryo/kryo "2.22"]
-                   [junit "4.0" :scope "test"]]
+                   [junit "4.11" :scope "test"]]
     :source-paths ["src/main/clojure"]
     :java-source-paths ["src/main/java"]
     :resource-paths ["src/main/resources"]
 
-    :test-paths ["src/test/java/"]
+    :test-paths ["src/tests/java/"]
     :test-selectors {:default (complement :integration)
                      :integration :integration
                      :all (constantly true)}
