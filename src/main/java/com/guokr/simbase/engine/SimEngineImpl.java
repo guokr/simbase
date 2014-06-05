@@ -185,6 +185,10 @@ public class SimEngineImpl implements SimEngine, SimBasisListener {
         return new StringBuilder().append(vkeySource).append("_").append(vkeyTarget).toString();
     }
 
+    public String[] info() {
+        return new String[] { "version:" + version };
+    }
+
     public void startCron() {
         final int saveInterval = this.context.getInt("saveinterval");
 

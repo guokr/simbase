@@ -80,7 +80,7 @@ dest.execute_command('rmk', 'va', 'va', 'cosinesq')
 Node.js example
 
 ``` javascript
-var redis = require("redis"), client = redis.createClient();
+var redis = require("redis"), client = redis.createClient(7654, 'localhost');
 
 client.send_command('bmk', ['ba', 'a', 'b', 'c'])
 client.send_command('vmk', ['ba', 'va'])

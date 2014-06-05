@@ -6,6 +6,10 @@ import com.guokr.simbase.events.VectorSetListener;
 
 public interface SimEngine {
 
+    public String version = "v0.1.0-beta2";
+
+    public String[] info();
+
     public void load(SimCallback callback);
 
     public void save(SimCallback callback);

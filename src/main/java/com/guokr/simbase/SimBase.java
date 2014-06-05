@@ -18,6 +18,7 @@ import com.guokr.simbase.command.IAcc;
 import com.guokr.simbase.command.IAdd;
 import com.guokr.simbase.command.IGet;
 import com.guokr.simbase.command.ISet;
+import com.guokr.simbase.command.Info;
 import com.guokr.simbase.command.Load;
 import com.guokr.simbase.command.Ping;
 import com.guokr.simbase.command.RGet;
@@ -49,6 +50,7 @@ public class SimBase {
         SimRegistry registry = new SimRegistry();
 
         registry.add("ping", new Ping());
+        registry.add("info", new Info());
         registry.add("save", new Save());
         registry.add("load", new Load());
         registry.add("del", new Del());
