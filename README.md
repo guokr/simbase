@@ -8,7 +8,7 @@ set or between two vector sets.
 Release
 --------
 
-Current version is [v0.1.0-alpha3](https://github.com/guokr/simbase/releases/tag/v0.1.0-alpha3).
+Current version is [v0.1.0-beta1](https://github.com/guokr/simbase/releases/tag/v0.1.0-beta1).
 
 Concepts
 --------
@@ -80,6 +80,34 @@ After the uberjar is created, you can start the system
   > cd SIMBASE_HOME
   
   > bin/start
+
+A simple example
+-----------------
+
+For example, we need to recommend articles to users, we may follow below steps:
+
+Setup
+
+    > bmk b2048 t1 t2 t3 ... t2047 t2048
+    > vmk b2048 article
+    > vmk b2048 userprofile
+    > rmk userprofile article cosinesq
+
+Fill data
+
+    > vadd article 1 0.11 0.112 0.1123...
+    > vadd article 2 0.21 0.212 0.2123...
+    ...    
+
+    > vadd userprofile 1 0.11 0.112 0.1123...
+    > vadd userprofile 2 0.21 0.212 0.2123...
+    ...
+
+Query
+
+    > rrec userprofile 2 article
+
+All commands are explained in next section.
 
 Core commands
 --------------
