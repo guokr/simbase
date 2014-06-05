@@ -43,29 +43,6 @@ This graph shows
 * recommend article by article (recommend from article to article)
 * recommend article by user profile (recommend from user profile to article)
 
-Limitations
-------------
-
-### Assumptions on vectors
-
-Although Simbase can store arbitrary vectors, but score functions may apply some constraints on vectors.
-
-For example, if you adopt "jensenshannon" as your score function, you should assure your vector is a
-probability distribution, i.e. the sum of all components equals to one.
-
-### Performance consideration
-
-The write operation is handled in a single thread per basis, and comparison between any two vectors is needed,
-so the write operation is scaled at O(n).
-
-We had a non-final performance test for the dense vectors on an i7-cpu Macbook, it can easily handle 100k
-1k-dimensional vectors with each write operation in under 0.14 sec; and if the linear scale ratio can hold, 
-it means Simbase can handle 700k dense vectors with each write operation in under 1 sec.
-
-Since the data is all in memory, the read operation is pretty fast.
-
-We are still in the process of tuning the performance of the sparse vectors.
-
 How to build and start
 -----------------------
 
@@ -80,6 +57,23 @@ After the uberjar is created, you can start the system
   > cd SIMBASE_HOME
   
   > bin/start
+
+How to connect to Simbase
+--------------------------
+
+You can use redis-cli directly for administration tasks.
+
+Or you can use redis client bindings in different language directly in a programming way.
+For example:
+
+``` python
+dest = redis.Redis(host='localhost', port=7654)
+schema = ['a', 'b', 'c']
+dest.execute_command('bmk', 'ba', *schema)
+dest.execute_command('vmk', 'ba', kind)
+dest.execute_command('rmk', kind, kind, 'cosinesq')
+
+```
 
 A simple example
 -----------------
@@ -197,6 +191,29 @@ Recommendation related
     > rrec userprofile 87654321 article
     
     Recommend articles for user 87654321
+
+Limitations
+------------
+
+### Assumptions on vectors
+
+Although Simbase can store arbitrary vectors, but score functions may apply some constraints on vectors.
+
+For example, if you adopt "jensenshannon" as your score function, you should assure your vector is a
+probability distribution, i.e. the sum of all components equals to one.
+
+### Performance consideration
+
+The write operation is handled in a single thread per basis, and comparison between any two vectors is needed,
+so the write operation is scaled at O(n).
+
+We had a non-final performance test for the dense vectors on an i7-cpu Macbook, it can easily handle 100k
+1k-dimensional vectors with each write operation in under 0.14 sec; and if the linear scale ratio can hold, 
+it means Simbase can handle 700k dense vectors with each write operation in under 1 sec.
+
+Since the data is all in memory, the read operation is pretty fast.
+
+We are still in the process of tuning the performance of the sparse vectors.
 
 Licenses
 ---------
