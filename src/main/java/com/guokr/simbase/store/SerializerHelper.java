@@ -15,7 +15,6 @@ import com.esotericsoftware.kryo.Serializer;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
 import com.guokr.simbase.SimScore;
-import com.guokr.simbase.engine.SimEngineImpl;
 import com.guokr.simbase.score.CosineSquareSimilarity;
 import com.guokr.simbase.score.JensenShannonDivergence;
 

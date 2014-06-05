@@ -270,13 +270,6 @@ public class DenseCosComplexTests {
         testRlist.waitForFinish();
         testRlist.validate();
 
-        TestableCallback testIds = new TestableCallback() {
-            @Override
-            public void excepted() {
-                isFloatList(new float[] { 2, 5, 11, 13 });
-            }
-        };
-
         engine.vadd(TestableCallback.noop(), "vtest", 3, new float[] { 0.89f, 0f, 0.11f });
         engine.vadd(TestableCallback.noop(), "vtest2", 3, new float[] { 0.89f, 0f, 0.11f });
         Thread.sleep(100);
