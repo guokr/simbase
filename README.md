@@ -64,15 +64,27 @@ How to connect to Simbase
 You can use redis-cli directly for administration tasks.
 
 Or you can use redis client bindings in different language directly in a programming way.
-For example:
+
+Python example
 
 ``` python
+import redis
+
 dest = redis.Redis(host='localhost', port=7654)
 schema = ['a', 'b', 'c']
 dest.execute_command('bmk', 'ba', *schema)
-dest.execute_command('vmk', 'ba', kind)
-dest.execute_command('rmk', kind, kind, 'cosinesq')
+dest.execute_command('vmk', 'ba', 'va')
+dest.execute_command('rmk', 'va', 'va', 'cosinesq')
+```
 
+Node.js example
+
+``` javascript
+var redis = require("redis"), client = redis.createClient();
+
+client.send_command('bmk', ['ba', 'a', 'b', 'c'])
+client.send_command('vmk', ['ba', 'va'])
+client.send_command('rmk', ['va', 'va', 'cosinesq'])
 ```
 
 A simple example
