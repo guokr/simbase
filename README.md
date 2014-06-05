@@ -12,7 +12,7 @@ Current version is [v0.1.0-beta1](https://github.com/guokr/simbase/releases/tag/
 
 Build status
 -------------
-Master: [![Build Status](https://secure.travis-ci.org/guokr/simbase.png)](http://travis-ci.org/guokr/simbase)
+[![Build Status](https://secure.travis-ci.org/guokr/simbase.png)](http://travis-ci.org/guokr/simbase)
 
 Concepts
 --------
