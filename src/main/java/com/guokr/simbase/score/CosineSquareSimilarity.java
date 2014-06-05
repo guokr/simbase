@@ -67,17 +67,23 @@ public class CosineSquareSimilarity implements SimScore {
 
         float scoring = 0f;
         int idx1 = 0, idx2 = 0;
-        while (idx1 < srclen && idx2 < tgtlen) {
-            if (source[idx1] < 0 || target[idx2] < 0) {
-                break;
-            } else if (source[idx1] == target[idx2]) {
-                scoring += source[idx1 + 1] * target[idx2 + 1];
-                idx1 += 2;
-                idx2 += 2;
-            } else if (source[idx1] < target[idx2]) {
-                idx1 += 2;
-            } else {
-                idx2 += 2;
+        if (idx1 < srclen && idx2 < tgtlen) {
+            while (true) {
+                if (source[idx1] < target[idx2]) {
+                    idx1 += 2;
+                    if (idx1 >= srclen)
+                        break;
+                } else if (source[idx1] > target[idx2]) {
+                    idx2 += 2;
+                    if (idx2 >= tgtlen)
+                        break;
+                } else {
+                    scoring += source[idx1 + 1] * target[idx2 + 1];
+                    idx1 += 2;
+                    idx2 += 2;
+                    if (idx1 >= srclen || idx2 >= tgtlen)
+                        break;
+                }
             }
         }
 

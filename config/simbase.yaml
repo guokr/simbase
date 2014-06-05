@@ -18,7 +18,7 @@ defaults:
     maxlimits: 20
   dense:
     accumuFactor: 10.0
-    sparseFactor: 4096
+    sparseFactor: 1024
   sparse:
     accumuFactor: 10.0
-    sparseFactor: 4096
+    sparseFactor: 1024
