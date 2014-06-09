@@ -1,5 +1,12 @@
 package com.guokr.simbase.engine;
 
+import static com.guokr.simbase.TestEngine.del;
+import static com.guokr.simbase.TestEngine.execCases;
+import static com.guokr.simbase.TestEngine.ok;
+import static com.guokr.simbase.TestEngine.rmk;
+import static com.guokr.simbase.TestEngine.vadd;
+import static com.guokr.simbase.TestEngine.vmk;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -48,28 +55,23 @@ public class DenseCosBasicTests {
 
     @Before
     public void testUp() throws Exception {
-        engine.vmk(TestableCallback.noop(), "btest", "vtest");
-        Thread.sleep(100);
-        engine.rmk(TestableCallback.noop(), "vtest", "vtest", "cosinesq");
-        Thread.sleep(100);
-        engine.vadd(TestableCallback.noop(), "vtest", 2, new float[] { 0.9f, 0.09f, 0.01f });
-        Thread.sleep(100);
-        engine.vadd(TestableCallback.noop(), "vtest", 3, new float[] { 0.89f, 0f, 0.11f });
-        Thread.sleep(100);
-        engine.vadd(TestableCallback.noop(), "vtest", 5, new float[] { 0.1f, 0.89f, 0.01f });
-        Thread.sleep(100);
-        engine.vadd(TestableCallback.noop(), "vtest", 7, new float[] { 0.09f, 0f, 0.91f });
-        Thread.sleep(100);
-        engine.vadd(TestableCallback.noop(), "vtest", 11, new float[] { 0f, 0.89f, 0.11f });
-        Thread.sleep(100);
-        engine.vadd(TestableCallback.noop(), "vtest", 13, new float[] { 0f, 0.09f, 0.91f });
-        Thread.sleep(100);
+        execCases(//
+                vmk("btest", "vtest"), ok(), //
+                rmk("vtest", "vtest", "cosinesq"), ok(), //
+                vadd("vtest", 2, 0.9f, 0.09f, 0.01f), ok(), //
+                vadd("vtest", 3, 0.89f, 0f, 0.11f), ok(), //
+                vadd("vtest", 5, 0.1f, 0.89f, 0.01f), ok(), //
+                vadd("vtest", 7, 0.09f, 0f, 0.91f), ok(), //
+                vadd("vtest", 11, 0f, 0.89f, 0.11f), ok(), //
+                vadd("vtest", 13, 0f, 0.09f, 0.91f), ok() //
+        );
     }
 
     @After
     public void testDown() throws Exception {
-        engine.del(TestableCallback.noop(), "vtest");
-        Thread.sleep(1000);
+        execCases(//
+                del("vtest"), ok() //
+        );
     }
 
     @Test
