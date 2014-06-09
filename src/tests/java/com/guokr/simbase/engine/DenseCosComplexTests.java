@@ -327,7 +327,7 @@ public class DenseCosComplexTests {
         engine.vacc(TestableCallback.noop(), "vtest", 11, tmp11);
         engine.vacc(TestableCallback.noop(), "vtest2", 7, tmp7);
         engine.vacc(TestableCallback.noop(), "vtest2", 7, tmp7);
-        Thread.sleep(200);
+        Thread.sleep(1000);
 
         TestableCallback testRrec = new TestableCallback() {
             @Override
