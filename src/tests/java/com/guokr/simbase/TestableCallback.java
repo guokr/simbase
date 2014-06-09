@@ -140,7 +140,7 @@ public abstract class TestableCallback extends SimCallback {
 
     public void waitForFinish() {
         try {
-            Thread.sleep(200);
+            Thread.sleep(250);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
