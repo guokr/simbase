@@ -121,13 +121,14 @@ public class DenseCosBasicTests {
 
     @Test
     public void testVset() throws Exception {
-        execCmd(// replace 2 with 7 ,and 7 with 2
-        vset("vtest", 2, 0.09f, 0f, 0.91f), ok(), vset("vtest", 7, 0.9f, 0.09f, 0.01f), ok(),
-                rrec("vtest", 13, "vtest"),
-                integerList(2, 11, 5, 3, 7),//
-                // Restored to the original
-                vset("vtest", 7, 0.09f, 0f, 0.91f), ok(), vset("vtest", 2, 0.9f, 0.09f, 0.01f), ok(),
-                rrec("vtest", 13, "vtest"), integerList(7, 11, 5, 3, 2)//
+        // replace 2 with 7 and 7 with 2
+        // and then restore the original
+        execCmd(vset("vtest", 2, 0.09f, 0f, 0.91f), ok(), //
+                vset("vtest", 7, 0.9f, 0.09f, 0.01f), ok(), //
+                rrec("vtest", 13, "vtest"), integerList(2, 11, 5, 3, 7), //
+                vset("vtest", 7, 0.09f, 0f, 0.91f), ok(), //
+                vset("vtest", 2, 0.9f, 0.09f, 0.01f), ok(), //
+                rrec("vtest", 13, "vtest"), integerList(7, 11, 5, 3, 2) //
         );
     }
 
