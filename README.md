@@ -75,8 +75,7 @@ Python example
 import redis
 
 dest = redis.Redis(host='localhost', port=7654)
-schema = ['a', 'b', 'c']
-dest.execute_command('bmk', 'ba', *schema)
+dest.execute_command('bmk', 'ba', 'a', 'b', 'c')
 dest.execute_command('vmk', 'ba', 'va')
 dest.execute_command('rmk', 'va', 'va', 'cosinesq')
 ```
