@@ -1,9 +1,15 @@
 package com.guokr.simbase.engine;
 
+import static com.guokr.simbase.TestEngine.blist;
+import static com.guokr.simbase.TestEngine.bmk;
 import static com.guokr.simbase.TestEngine.del;
-import static com.guokr.simbase.TestEngine.execCases;
+import static com.guokr.simbase.TestEngine.execCmd;
+import static com.guokr.simbase.TestEngine.integerList;
 import static com.guokr.simbase.TestEngine.ok;
+import static com.guokr.simbase.TestEngine.rlist;
 import static com.guokr.simbase.TestEngine.rmk;
+import static com.guokr.simbase.TestEngine.rrec;
+import static com.guokr.simbase.TestEngine.stringList;
 import static com.guokr.simbase.TestEngine.vadd;
 import static com.guokr.simbase.TestEngine.vmk;
 
@@ -16,6 +22,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.guokr.simbase.SimConfig;
+import com.guokr.simbase.TestEngine;
 import com.guokr.simbase.TestableCallback;
 
 public class DenseCosBasicTests {
@@ -43,20 +50,19 @@ public class DenseCosBasicTests {
         SimConfig config = new SimConfig(settings);
 
         engine = new SimEngineImpl(config.getSub("engine"));
+        TestEngine.engine = engine;
 
         String[] components = new String[3];
         for (int i = 0; i < components.length; i++) {
             components[i] = "B" + String.valueOf(i);
         }
 
-        engine.bmk(TestableCallback.noop(), "btest", components);
-        Thread.sleep(100);
+        execCmd(bmk("btest", components), ok());
     }
 
     @Before
     public void testUp() throws Exception {
-        execCases(//
-                vmk("btest", "vtest"), ok(), //
+        execCmd(vmk("btest", "vtest"), ok(), //
                 rmk("vtest", "vtest", "cosinesq"), ok(), //
                 vadd("vtest", 2, 0.9f, 0.09f, 0.01f), ok(), //
                 vadd("vtest", 3, 0.89f, 0f, 0.11f), ok(), //
@@ -69,31 +75,13 @@ public class DenseCosBasicTests {
 
     @After
     public void testDown() throws Exception {
-        execCases(//
-                del("vtest"), ok() //
-        );
+        execCmd(del("vtest"), ok());
     }
 
     @Test
-    public void testRec() {
-        TestableCallback test = new TestableCallback() {
-            @Override
-            public void excepted() {
-                isIntegerList(new int[] { 7, 11, 3, 5, 2 });
-            }
-        };
-        engine.rrec(test, "vtest", 13, "vtest");
-        test.waitForFinish();
-        test.validate();
-        TestableCallback test2 = new TestableCallback() {
-            @Override
-            public void excepted() {
-                isIntegerList(new int[] { 13, 3, 11, 2, 5 });
-            }
-        };
-        engine.rrec(test2, "vtest", 7, "vtest");
-        test2.waitForFinish();
-        test2.validate();
+    public void testRec() throws Exception {
+        execCmd(rrec("vtest", 13, "vtest"), integerList(7, 11, 3, 5, 2), //
+                rrec("vtest", 7, "vtest"), integerList(13, 3, 11, 2, 5));
     }
 
     @Test
@@ -160,16 +148,8 @@ public class DenseCosBasicTests {
     }
 
     @Test
-    public void testRlist() {
-        TestableCallback test = new TestableCallback() {
-            @Override
-            public void excepted() {
-                isStringList(new String[] { "vtest" });
-            }
-        };
-        engine.rlist(test, "vtest");
-        test.waitForFinish();
-        test.validate();
+    public void testRlist() throws Exception {
+        execCmd(rlist("vtest"), stringList("vtest"));
     }
 
     @Test
@@ -270,16 +250,8 @@ public class DenseCosBasicTests {
     }
 
     @Test
-    public void testBlist() {
-        TestableCallback test = new TestableCallback() {
-            @Override
-            public void excepted() {
-                isStringList(new String[] { "btest" });
-            }
-        };
-        engine.blist(test);
-        test.waitForFinish();
-        test.validate();
+    public void testBlist() throws Exception {
+        execCmd(blist(), stringList("btest"));
     }
 
     @Test
