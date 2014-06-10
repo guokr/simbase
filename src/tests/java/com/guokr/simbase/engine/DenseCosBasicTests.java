@@ -2,6 +2,7 @@ package com.guokr.simbase.engine;
 
 import static com.guokr.simbase.TestEngine.blist;
 import static com.guokr.simbase.TestEngine.bmk;
+import static com.guokr.simbase.TestEngine.brev;
 import static com.guokr.simbase.TestEngine.del;
 import static com.guokr.simbase.TestEngine.execCmd;
 import static com.guokr.simbase.TestEngine.integerList;
@@ -12,6 +13,7 @@ import static com.guokr.simbase.TestEngine.rrec;
 import static com.guokr.simbase.TestEngine.stringList;
 import static com.guokr.simbase.TestEngine.vadd;
 import static com.guokr.simbase.TestEngine.vmk;
+import static com.guokr.simbase.TestEngine.vlist;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -255,16 +257,8 @@ public class DenseCosBasicTests {
     }
 
     @Test
-    public void testVlist() {
-        TestableCallback test = new TestableCallback() {
-            @Override
-            public void excepted() {
-                isStringList(new String[] { "vtest" });
-            }
-        };
-        engine.vlist(test, "btest");
-        test.waitForFinish();
-        test.validate();
+    public void testVlist() throws Exception {
+        execCmd(vlist("btest"), stringList("vtest"));
     }
 
     @Test
@@ -290,15 +284,7 @@ public class DenseCosBasicTests {
     }
 
     @Test
-    public void testBrev() {
-        TestableCallback testbrev = new TestableCallback() {
-            @Override
-            public void excepted() {
-                isOk();
-            }
-        };
-        engine.brev(testbrev, "btest", new String[] { "B2", "B1", "B0" });
-        testbrev.waitForFinish();
-        testbrev.validate();
+    public void testBrev() throws Exception {
+        execCmd(brev("btest", "B2", "B1", "B0"), ok());
     }
 }

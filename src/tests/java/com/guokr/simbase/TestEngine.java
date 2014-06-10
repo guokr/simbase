@@ -31,7 +31,7 @@ public class TestEngine {
                 try {
                     validate();
                 } catch (Exception e) {
-                    throw e;
+                    throw new RuntimeException(e);
                 } finally {
                     latch.countDown();
                 }
