@@ -5,15 +5,20 @@ import static com.guokr.simbase.TestEngine.bmk;
 import static com.guokr.simbase.TestEngine.brev;
 import static com.guokr.simbase.TestEngine.del;
 import static com.guokr.simbase.TestEngine.execCmd;
+import static com.guokr.simbase.TestEngine.floatList;
 import static com.guokr.simbase.TestEngine.integerList;
 import static com.guokr.simbase.TestEngine.ok;
 import static com.guokr.simbase.TestEngine.rlist;
 import static com.guokr.simbase.TestEngine.rmk;
 import static com.guokr.simbase.TestEngine.rrec;
 import static com.guokr.simbase.TestEngine.stringList;
+import static com.guokr.simbase.TestEngine.vacc;
 import static com.guokr.simbase.TestEngine.vadd;
-import static com.guokr.simbase.TestEngine.vmk;
+import static com.guokr.simbase.TestEngine.vget;
 import static com.guokr.simbase.TestEngine.vlist;
+import static com.guokr.simbase.TestEngine.vmk;
+import static com.guokr.simbase.TestEngine.vrem;
+import static com.guokr.simbase.TestEngine.vset;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -25,7 +30,6 @@ import org.junit.Test;
 
 import com.guokr.simbase.SimConfig;
 import com.guokr.simbase.TestEngine;
-import com.guokr.simbase.TestableCallback;
 
 public class DenseCosBasicTests {
     public static SimEngineImpl engine;
@@ -87,66 +91,14 @@ public class DenseCosBasicTests {
     }
 
     @Test
-    public void testVget() {
-        TestableCallback test2 = new TestableCallback() {
-            @Override
-            public void excepted() {
-                isFloatList(new float[] { 0.9f, 0.09f, 0.01f });
-            }
-        };
-        engine.vget(test2, "vtest", 2);
-        test2.waitForFinish();
-        test2.validate();
-
-        TestableCallback test3 = new TestableCallback() {
-            @Override
-            public void excepted() {
-                isFloatList(new float[] { 0.89f, 0f, 0.11f });
-            }
-        };
-        engine.vget(test3, "vtest", 3);
-        test3.waitForFinish();
-        test3.validate();
-
-        TestableCallback test5 = new TestableCallback() {
-            @Override
-            public void excepted() {
-                isFloatList(new float[] { 0.1f, 0.89f, 0.01f });
-            }
-        };
-        engine.vget(test5, "vtest", 5);
-        test5.waitForFinish();
-        test5.validate();
-
-        TestableCallback test7 = new TestableCallback() {
-            @Override
-            public void excepted() {
-                isFloatList(new float[] { 0.09f, 0f, 0.91f });
-            }
-        };
-        engine.vget(test7, "vtest", 7);
-        test7.waitForFinish();
-        test7.validate();
-
-        TestableCallback test11 = new TestableCallback() {
-            @Override
-            public void excepted() {
-                isFloatList(new float[] { 0f, 0.89f, 0.11f });
-            }
-        };
-        engine.vget(test11, "vtest", 11);
-        test11.waitForFinish();
-        test11.validate();
-
-        TestableCallback test13 = new TestableCallback() {
-            @Override
-            public void excepted() {
-                isFloatList(new float[] { 0f, 0.09f, 0.91f });
-            }
-        };
-        engine.vget(test13, "vtest", 13);
-        test13.waitForFinish();
-        test13.validate();
+    public void testVget() throws Exception {
+        execCmd(vget("vtest", 2), floatList(0.9f, 0.09f, 0.01f), //
+                vget("vtest", 3), floatList(0.89f, 0f, 0.11f), //
+                vget("vtest", 5), floatList(0.1f, 0.89f, 0.01f), //
+                vget("vtest", 7), floatList(0.09f, 0f, 0.91f),//
+                vget("vtest", 11), floatList(0f, 0.89f, 0.11f),//
+                vget("vtest", 13), floatList(0f, 0.09f, 0.91f)//
+        );
     }
 
     @Test
@@ -156,99 +108,27 @@ public class DenseCosBasicTests {
 
     @Test
     public void testVrem() throws Exception {
-        TestableCallback testok = new TestableCallback() {
-            @Override
-            public void excepted() {
-                isOk();
-            }
-        };
-
-        TestableCallback testRrec = new TestableCallback() {
-            @Override
-            public void excepted() {
-                isIntegerList(new int[] { 3, 5, 7, 11, 13 });
-            }
-        };
-        engine.rrec(testRrec, "vtest", 2, "vtest");
-        testRrec.waitForFinish();
-        testRrec.validate();
-
-        engine.vrem(testok, "vtest", 5);
-        engine.vrem(testok, "vtest", 7);
-        testok.waitForFinish();
-        testok.validate();
-        TestableCallback test = new TestableCallback() {
-            @Override
-            public void excepted() {
-                isIntegerList(new int[] { 11, 3, 2 });
-            }
-        };
-        engine.rrec(test, "vtest", 13, "vtest");
-        test.waitForFinish();
-        test.validate();
-        engine.vadd(TestableCallback.noop(), "vtest", 5, new float[] { 0.1f, 0.89f, 0.01f });
-        Thread.sleep(100);
-        TestableCallback test2 = new TestableCallback() {
-            @Override
-            public void excepted() {
-                isIntegerList(new int[] { 11, 3, 5, 2 });
-            }
-        };
-        engine.rrec(test2, "vtest", 13, "vtest");
-        test2.waitForFinish();
-        test2.validate();
-
-        engine.vadd(TestableCallback.noop(), "vtest", 7, new float[] { 0.09f, 0f, 0.91f });
-        Thread.sleep(100);
-
-        engine.rrec(testRrec, "vtest", 2, "vtest");
-        testRrec.waitForFinish();
-        testRrec.validate();
-
+        execCmd(rrec("vtest", 2, "vtest"), integerList(3, 5, 7, 11, 13), //
+                vrem("vtest", 5), ok(), //
+                vrem("vtest", 7), ok(), //
+                rrec("vtest", 13, "vtest"), integerList(11, 3, 2),//
+                vadd("vtest", 5, 0.1f, 0.89f, 0.01f), ok(), //
+                rrec("vtest", 13, "vtest"), integerList(11, 3, 5, 2),//
+                vadd("vtest", 7, 0.09f, 0f, 0.91f), ok(), //
+                rrec("vtest", 13, "vtest"), integerList(3, 5, 7, 11, 13)//
+        );
     }
 
-    // @Test
-    public void testVset() {
-        // replace 2 with 7 ,and 7 with 2
-        TestableCallback testok = new TestableCallback() {
-            @Override
-            public void excepted() {
-                isOk();
-            }
-        };
-        engine.vset(testok, "vtest", 2, new float[] { 0.1f, 0f, 0.9f });
-        testok.waitForFinish();
-        testok.validate();
-        engine.vset(testok, "vtest", 7, new float[] { 0.9f, 0.1f, 0f });
-        testok.waitForFinish();
-        testok.validate();
-        TestableCallback test1 = new TestableCallback() {
-            @Override
-            public void excepted() {
-                isIntegerList(new int[] { 2, 11, 5, 3, 7 });
-            }
-        };
-        engine.rrec(test1, "vtest", 13, "vtest");
-        // Restored to their original
-        test1.waitForFinish();
-        test1.validate();
-        engine.vset(testok, "vtest", 2, new float[] { 0.9f, 0.1f, 0f });
-        testok.waitForFinish();
-        testok.validate();
-        engine.vset(testok, "vtest", 7, new float[] { 0.1f, 0f, 0.9f });
-        testok.waitForFinish();
-        testok.validate();
-
-        // so recommander restored
-        TestableCallback test2 = new TestableCallback() {
-            @Override
-            public void excepted() {
-                isIntegerList(new int[] { 7, 11, 5, 3, 2 });
-            }
-        };
-        engine.rrec(test2, "vtest", 13, "vtest");
-        test2.waitForFinish();
-        test2.validate();
+    @Test
+    public void testVset() throws Exception {
+        execCmd(// replace 2 with 7 ,and 7 with 2
+        vset("vtest", 2, 0.09f, 0f, 0.91f), ok(), vset("vtest", 7, 0.9f, 0.09f, 0.01f), ok(),
+                rrec("vtest", 13, "vtest"),
+                integerList(2, 11, 5, 3, 7),//
+                // Restored to the original
+                vset("vtest", 7, 0.09f, 0f, 0.91f), ok(), vset("vtest", 2, 0.9f, 0.09f, 0.01f), ok(),
+                rrec("vtest", 13, "vtest"), integerList(7, 11, 5, 3, 2)//
+        );
     }
 
     @Test
@@ -262,25 +142,10 @@ public class DenseCosBasicTests {
     }
 
     @Test
-    public void testVacc() {
-        TestableCallback testok = new TestableCallback() {
-            @Override
-            public void excepted() {
-                isOk();
-            }
-        };
-        engine.vacc(testok, "vtest", 5, new float[] { 0.1f, 0.9f, 0f });
-        testok.waitForFinish();
-        testok.validate();
-        TestableCallback testget = new TestableCallback() {
-            @Override
-            public void excepted() {
-                isFloatList(new float[] { 0.2f, 1.79f, 0.01f });
-            }
-        };
-        engine.vget(testget, "vtest", 5);
-        testget.waitForFinish();
-        testget.validate();
+    public void testVacc() throws Exception {
+        execCmd(vacc("vtest", 5, 0.1f, 0.9f, 0f), ok(), //
+                vget("vtest", 5), floatList(0.2f, 1.79f, 0.01f) //
+        );
     }
 
     @Test
