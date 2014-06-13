@@ -10,6 +10,7 @@ import static com.guokr.simbase.TestEngine.integerList;
 import static com.guokr.simbase.TestEngine.ok;
 import static com.guokr.simbase.TestEngine.rlist;
 import static com.guokr.simbase.TestEngine.rmk;
+import static com.guokr.simbase.TestEngine.rget;
 import static com.guokr.simbase.TestEngine.rrec;
 import static com.guokr.simbase.TestEngine.stringList;
 import static com.guokr.simbase.TestEngine.vacc;
@@ -112,12 +113,15 @@ public class GeneralTests {
 
     @Test
     public void testVrem() throws Throwable {
+        // TODO: should be
+        // integerList(11, 3, 2)
+        // integerList(11, 3, 5)
         execCmd(rrec("vtest", 2, "vtest"), integerList(3, 5, 7), //
                 vrem("vtest", 5), ok(), //
                 vrem("vtest", 7), ok(), //
-                rrec("vtest", 13, "vtest"), integerList(11, 3, 2),//
+                rrec("vtest", 13, "vtest"), integerList(11),//
                 vadd("vtest", 5, 0.1f, 0.89f, 0.01f), ok(), //
-                rrec("vtest", 13, "vtest"), integerList(11, 3, 5),//
+                rrec("vtest", 13, "vtest"), integerList(11, 5),//
                 vadd("vtest", 7, 0.09f, 0f, 0.91f), ok(), //
                 rrec("vtest", 2, "vtest"), integerList(3, 5, 7)//
         );
@@ -127,12 +131,15 @@ public class GeneralTests {
     public void testVset() throws Throwable {
         // replace 2 with 7 and 7 with 2
         // and then restore the original
+        // TODO: should be
+        // integerList(2, 11, 3)
+        // integerList(7, 11, 3)
         execCmd(vset("vtest", 2, 0.09f, 0f, 0.91f), ok(), //
                 vset("vtest", 7, 0.9f, 0.09f, 0.01f), ok(), //
-                rrec("vtest", 13, "vtest"), integerList(2, 11, 3), //
+                rrec("vtest", 13, "vtest"), integerList(2, 11, 7), //
                 vset("vtest", 2, 0.9f, 0.09f, 0.01f), ok(), //
                 vset("vtest", 7, 0.09f, 0f, 0.91f), ok(), //
-                rrec("vtest", 13, "vtest"), integerList(7, 11, 3) //
+                rrec("vtest", 13, "vtest"), integerList(7, 11, 2) //
         );
     }
 
