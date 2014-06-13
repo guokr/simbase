@@ -1,5 +1,26 @@
 package com.guokr.simbase.engine;
 
+import static com.guokr.simbase.TestEngine.blist;
+import static com.guokr.simbase.TestEngine.bload;
+import static com.guokr.simbase.TestEngine.bmk;
+import static com.guokr.simbase.TestEngine.brev;
+import static com.guokr.simbase.TestEngine.bsave;
+import static com.guokr.simbase.TestEngine.del;
+import static com.guokr.simbase.TestEngine.execCmd;
+import static com.guokr.simbase.TestEngine.floatList;
+import static com.guokr.simbase.TestEngine.integerList;
+import static com.guokr.simbase.TestEngine.ok;
+import static com.guokr.simbase.TestEngine.rlist;
+import static com.guokr.simbase.TestEngine.rmk;
+import static com.guokr.simbase.TestEngine.rrec;
+import static com.guokr.simbase.TestEngine.stringList;
+import static com.guokr.simbase.TestEngine.vadd;
+import static com.guokr.simbase.TestEngine.vget;
+import static com.guokr.simbase.TestEngine.vlist;
+import static com.guokr.simbase.TestEngine.vmk;
+import static com.guokr.simbase.TestEngine.vrem;
+import static com.guokr.simbase.TestEngine.vset;
+
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
@@ -10,13 +31,14 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.guokr.simbase.SimConfig;
-import com.guokr.simbase.TestableCallback;
+import com.guokr.simbase.TestEngine;
 
 public class SparseCosGeneralTests {
     public static SimEngineImpl engine;
+    public static String[]      components;
 
     @BeforeClass
-    public static void setup() throws Exception {
+    public static void setup() throws Throwable {
         Map<String, Object> settings = new HashMap<String, Object>();
         Map<String, Object> defaults = new HashMap<String, Object>();
         Map<String, Object> basis = new HashMap<String, Object>();
@@ -37,219 +59,72 @@ public class SparseCosGeneralTests {
         SimConfig config = new SimConfig(settings);
 
         engine = new SimEngineImpl(config.getSub("engine"));
+        TestEngine.engine = engine;
 
-        String[] components = new String[3];
+        components = new String[3];
         for (int i = 0; i < components.length; i++) {
             components[i] = "B" + String.valueOf(i);
         }
 
-        engine.bmk(TestableCallback.noop(), "btest", components);
-        Thread.sleep(100);
     }
 
     @Before
-    public void testUp() throws Exception {
-        engine.vmk(TestableCallback.noop(), "btest", "vtest");
-        Thread.sleep(100);
-        engine.rmk(TestableCallback.noop(), "vtest", "vtest", "cosinesq");
-        Thread.sleep(100);
-        engine.vadd(TestableCallback.noop(), "vtest", 2, new float[] { 0.9f, 0.09f, 0.01f });
-        Thread.sleep(100);
-        engine.vadd(TestableCallback.noop(), "vtest", 3, new float[] { 0.89f, 0f, 0.11f });
-        Thread.sleep(100);
-        engine.vadd(TestableCallback.noop(), "vtest", 5, new float[] { 0.1f, 0.89f, 0.01f });
-        Thread.sleep(100);
-        engine.vadd(TestableCallback.noop(), "vtest", 7, new float[] { 0.09f, 0f, 0.91f });
-        Thread.sleep(100);
-        engine.vadd(TestableCallback.noop(), "vtest", 11, new float[] { 0f, 0.89f, 0.11f });
-        Thread.sleep(100);
-        engine.vadd(TestableCallback.noop(), "vtest", 13, new float[] { 0f, 0.09f, 0.91f });
-        Thread.sleep(100);
+    public void testUp() throws Throwable {
+        execCmd(bmk("btest", components), ok(), //
+                vmk("btest", "vtest"), ok(), //
+                rmk("vtest", "vtest", "cosinesq"), ok(), //
+                vadd("vtest", 2, 0.9f, 0.09f, 0.01f), ok(), //
+                vadd("vtest", 3, 0.89f, 0f, 0.11f), ok(), //
+                vadd("vtest", 5, 0.1f, 0.89f, 0.01f), ok(), //
+                vadd("vtest", 7, 0.09f, 0f, 0.91f), ok(), //
+                vadd("vtest", 11, 0f, 0.89f, 0.11f), ok(), //
+                vadd("vtest", 13, 0f, 0.09f, 0.91f), ok() //
+        );
     }
 
     @After
-    public void testDown() throws Exception {
-        engine.del(TestableCallback.noop(), "vtest");
-        Thread.sleep(1000);
+    public void testDown() throws Throwable {
+        execCmd(del("btest"), ok());
+        Thread.sleep(10);
     }
 
     @Test
-    public void testBRev() throws Exception {
-        TestableCallback testbrev = new TestableCallback() {
-            @Override
-            public void excepted() {
-                isOk();
-            }
-        };
-        engine.brev(testbrev, "btest", new String[] { "B3", "B1", "B0" });
-        engine.vset(TestableCallback.noop(), "vtest", 13, new float[] { 0.1f, 0.2f, 0.3f, 0.4f });
-        engine.vset(TestableCallback.noop(), "vtest", 17, new float[] { 0.4f, 0.3f, 0.2f, 0.1f });
-        testbrev.waitForFinish();
-        testbrev.validate();
-        TestableCallback test2 = new TestableCallback() {
-            @Override
-            public void excepted() {
-                isFloatList(new float[] { 0.9f, 0.09f, 0.01f, 0f });
-            }
-        };
-        engine.vget(test2, "vtest", 2);
-        test2.waitForFinish();
-        test2.validate();
-
-        TestableCallback test3 = new TestableCallback() {
-            @Override
-            public void excepted() {
-                isFloatList(new float[] { 0.89f, 0f, 0.11f, 0f });
-            }
-        };
-        engine.vget(test3, "vtest", 3);
-        test3.waitForFinish();
-        test3.validate();
-
-        TestableCallback test5 = new TestableCallback() {
-            @Override
-            public void excepted() {
-                isFloatList(new float[] { 0.1f, 0.89f, 0.01f, 0f });
-            }
-        };
-        engine.vget(test5, "vtest", 5);
-        test5.waitForFinish();
-        test5.validate();
-
-        TestableCallback test7 = new TestableCallback() {
-            @Override
-            public void excepted() {
-                isFloatList(new float[] { 0.09f, 0f, 0.91f, 0f });
-            }
-        };
-        engine.vget(test7, "vtest", 7);
-        test7.waitForFinish();
-        test7.validate();
-
-        TestableCallback test11 = new TestableCallback() {
-            @Override
-            public void excepted() {
-                isFloatList(new float[] { 0f, 0.89f, 0.11f, 0f });
-            }
-        };
-        engine.vget(test11, "vtest", 11);
-        test11.waitForFinish();
-        test11.validate();
-
-        TestableCallback test13 = new TestableCallback() {
-            @Override
-            public void excepted() {
-                isFloatList(new float[] { 0.1f, 0.2f, 0.3f, 0.4f });
-            }
-        };
-        engine.vget(test13, "vtest", 13);
-        test13.waitForFinish();
-        test13.validate();
-
-        TestableCallback test17 = new TestableCallback() {
-            @Override
-            public void excepted() {
-                isFloatList(new float[] { 0.4f, 0.3f, 0.2f, 0.1f });
-            }
-        };
-        engine.vget(test17, "vtest", 17);
-        test17.waitForFinish();
-        test17.validate();
+    public void testBRev() throws Throwable {
+        execCmd(brev("btest", "B3", "B1", "B0"), ok(), //
+                vset("vtest", 13, 0.1f, 0.2f, 0.3f, 0.4f), ok(), //
+                vset("vtest", 17, 0.4f, 0.3f, 0.2f, 0.1f), ok(), //
+                vget("vtest", 2), floatList(0.9f, 0.09f, 0.01f, 0f), //
+                vget("vtest", 3), floatList(0.89f, 0f, 0.11f, 0f), //
+                vget("vtest", 5), floatList(0.1f, 0.89f, 0.01f, 0f), //
+                vget("vtest", 7), floatList(0.09f, 0f, 0.91f, 0f), //
+                vget("vtest", 11), floatList(0f, 0.89f, 0.11f, 0f), //
+                vget("vtest", 13), floatList(0.1f, 0.2f, 0.3f, 0.4f), //
+                vget("vtest", 17), floatList(0.4f, 0.3f, 0.2f, 0.1f));
     }
 
     @Test
     public void testSaveLoad() throws Throwable {
-        TestableCallback testRrec = new TestableCallback() {
-            @Override
-            public void excepted() {
-                isFloatList(new float[] { 3, 5, 7, 11, 13 });
-            }
-        };
-        engine.rrec(testRrec, "vtest", 2, "vtest");
-        testRrec.waitForFinish();
-        testRrec.validate();
-
-        TestableCallback testRrec11 = new TestableCallback() {
-            @Override
-            public void excepted() {
-                isFloatList(new float[] { 5, 13, 7, 2, 3 });
-            }
-        };
-
-        engine.rrec(testRrec11, "vtest", 11, "vtest");
-        testRrec11.waitForFinish();
-        testRrec11.validate();
-
-        engine.vrem(TestableCallback.noop(), "vtest", 3);
-        Thread.sleep(100);
-        engine.vrem(TestableCallback.noop(), "vtest", 7);
-        Thread.sleep(100);
-        engine.bsave(TestableCallback.noop(), "btest");
-        Thread.sleep(1000);
         try {
-            engine.del(TestableCallback.noop(), "btest");
-            Thread.sleep(400);
-
-            TestableCallback testEmpty = new TestableCallback() {
-                @Override
-                public void excepted() {
-                    isStringList(new String[0]);
-                }
-            };
-            engine.blist(testEmpty);
-            testEmpty.waitForFinish();
-            testEmpty.validate();
-
-            engine.bload(TestableCallback.noop(), "btest");
-            Thread.sleep(400);
+            execCmd(rrec("vtest", 2, "vtest"), integerList(3, 5, 7, 11, 13), //
+                    rrec("vtest", 11, "vtest"), integerList(5, 13, 7, 2, 3), //
+                    vrem("vtest", 3), ok(), //
+                    vrem("vtest", 7), ok(), //
+                    bsave("btest"), ok(), //
+                    del("btest"), ok(), //
+                    blist(), stringList(), //
+                    bload("btest"), ok(),//
+                    blist(), stringList("btest"), //
+                    vlist("btest"), stringList("vtest"), //
+                    rlist("vtest"), stringList("vtest"), //
+                    vadd("vtest", 3, 0.89f, 0f, 0.11f), ok(), //
+                    vadd("vtest", 7, 0.09f, 0f, 0.91f), ok(), //
+                    rrec("vtest", 2, "vtest"), integerList(3, 5, 7, 11, 13), //
+                    rrec("vtest", 11, "vtest"), integerList(5, 13, 7, 2, 3));
         } catch (Throwable t) {
             throw t;
         } finally {
             File file = new File("./data/btest.dmp");
             file.delete();
         }
-
-        TestableCallback testBases = new TestableCallback() {
-            @Override
-            public void excepted() {
-                isStringList(new String[] { "btest" });
-            }
-        };
-        engine.blist(testBases);
-        testBases.waitForFinish();
-        testBases.validate();
-
-        TestableCallback testVecs = new TestableCallback() {
-            @Override
-            public void excepted() {
-                isStringList(new String[] { "vtest" });
-            }
-        };
-        engine.vlist(testVecs, "btest");
-        testVecs.waitForFinish();
-        testVecs.validate();
-
-        TestableCallback testRlist = new TestableCallback() {
-            @Override
-            public void excepted() {
-                isStringList(new String[] { "vtest" });
-            }
-        };
-        engine.rlist(testRlist, "vtest");
-        testRlist.waitForFinish();
-        testRlist.validate();
-
-        engine.vadd(TestableCallback.noop(), "vtest", 3, new float[] { 0.89f, 0f, 0.11f });
-        Thread.sleep(100);
-        engine.vadd(TestableCallback.noop(), "vtest", 7, new float[] { 0.09f, 0f, 0.91f });
-        Thread.sleep(100);
-
-        engine.rrec(testRrec, "vtest", 2, "vtest");
-        testRrec.waitForFinish();
-        testRrec.validate();
-        engine.rrec(testRrec11, "vtest", 11, "vtest");
-        testRrec11.waitForFinish();
-        testRrec11.validate();
-
     }
 }

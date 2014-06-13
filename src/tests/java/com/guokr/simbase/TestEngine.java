@@ -1,5 +1,7 @@
 package com.guokr.simbase;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 
 import org.slf4j.Logger;
@@ -9,11 +11,13 @@ import com.guokr.simbase.engine.SimEngineImpl;
 
 public class TestEngine {
 
-    private static final Logger logger = LoggerFactory.getLogger(TestEngine.class);
+    private static final Logger                   logger = LoggerFactory.getLogger(TestEngine.class);
 
-    public static SimEngineImpl engine;
+    private static final Map<Testable, Throwable> errMap = new HashMap<Testable, Throwable>();
 
-    public static void execCmd(Object... cmds) throws Exception {
+    public static SimEngineImpl                   engine;
+
+    public static void execCmd(Object... cmds) throws Throwable {
         for (int i = 0; i < cmds.length; i = i + 2) {
             Testable test = (Testable) cmds[i];
             TestableCallback cb = (TestableCallback) cmds[i + 1];
@@ -21,7 +25,7 @@ public class TestEngine {
         }
     }
 
-    public static void exec(final Testable t, final TestableCallback cb) throws Exception {
+    public static void exec(final Testable t, final TestableCallback cb) throws Throwable {
         final CountDownLatch latch = new CountDownLatch(1);
         final TestableCallback ncb = new TestableCallback() {
             @Override
@@ -30,7 +34,8 @@ public class TestEngine {
                 this.excepted = cb.excepted;
                 try {
                     validate();
-                } catch (Exception e) {
+                } catch (Throwable e) {
+                    errMap.put(t, e);
                     throw new RuntimeException(e);
                 } finally {
                     latch.countDown();
@@ -39,6 +44,11 @@ public class TestEngine {
         };
         t.test(ncb);
         latch.await();
+        Throwable e = errMap.get(t);
+        errMap.clear();
+        if (e != null) {
+            throw e;
+        }
     }
 
     public static TestableCallback error(final String msg) {
@@ -153,6 +163,11 @@ public class TestEngine {
             @Override
             public void test(TestableCallback cb) {
                 engine.del(cb, key);
+                try {
+                    Thread.sleep(20);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
         };
     }
@@ -171,6 +186,11 @@ public class TestEngine {
             @Override
             public void test(TestableCallback cb) {
                 engine.bsave(cb, key);
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
         };
     }
@@ -271,6 +291,11 @@ public class TestEngine {
             public void test(TestableCallback cb) {
                 logger.info(String.format("%s %s %s %s", "vadd", vkey, vecid, vector));
                 engine.vadd(cb, vkey, vecid, vector);
+                try {
+                    Thread.sleep(10);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
         };
     }
@@ -281,6 +306,11 @@ public class TestEngine {
             public void test(TestableCallback cb) {
                 logger.info(String.format("%s %s %s %s", "vset", vkey, vecid, vector));
                 engine.vset(cb, vkey, vecid, vector);
+                try {
+                    Thread.sleep(10);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
         };
     }
@@ -291,6 +321,11 @@ public class TestEngine {
             public void test(TestableCallback cb) {
                 logger.info(String.format("%s %s %s %s", "vacc", vkey, vecid, vector));
                 engine.vacc(cb, vkey, vecid, vector);
+                try {
+                    Thread.sleep(10);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
         };
     }
@@ -301,6 +336,11 @@ public class TestEngine {
             public void test(TestableCallback cb) {
                 logger.info(String.format("%s %s %s", "vrem", vkey, vecid));
                 engine.vrem(cb, vkey, vecid);
+                try {
+                    Thread.sleep(10);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
         };
     }
@@ -321,6 +361,11 @@ public class TestEngine {
             public void test(TestableCallback cb) {
                 logger.info(String.format("%s %s %s %s", "iset", vkey, vecid, pairs));
                 engine.iset(cb, vkey, vecid, pairs);
+                try {
+                    Thread.sleep(10);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
         };
     }
@@ -331,6 +376,11 @@ public class TestEngine {
             public void test(TestableCallback cb) {
                 logger.info(String.format("%s %s %s %s", "iadd", vkey, vecid, pairs));
                 engine.iadd(cb, vkey, vecid, pairs);
+                try {
+                    Thread.sleep(10);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
         };
     }
@@ -341,6 +391,11 @@ public class TestEngine {
             public void test(TestableCallback cb) {
                 logger.info(String.format("%s %s %s %s", "iacc", vkey, vecid, pairs));
                 engine.iacc(cb, vkey, vecid, pairs);
+                try {
+                    Thread.sleep(10);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
         };
     }
@@ -361,6 +416,11 @@ public class TestEngine {
             public void test(TestableCallback cb) {
                 logger.info(String.format("%s %s %s %s", "rmk", vkeySource, vkeyTarget, funcscore));
                 engine.rmk(cb, vkeySource, vkeyTarget, funcscore);
+                try {
+                    Thread.sleep(10);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
         };
     }
@@ -392,6 +452,11 @@ public class TestEngine {
             public void test(TestableCallback cb) {
                 logger.info(String.format("%s %s %s %s %s", "xacc", vkeyTarget, vecidTarget, vkeyOperand, vecidOperand));
                 engine.xacc(cb, vkeyTarget, vecidTarget, vkeyOperand, vecidOperand);
+                try {
+                    Thread.sleep(10);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
         };
     }

@@ -1,5 +1,16 @@
 package com.guokr.simbase.engine;
 
+import static com.guokr.simbase.TestEngine.bmk;
+import static com.guokr.simbase.TestEngine.del;
+import static com.guokr.simbase.TestEngine.execCmd;
+import static com.guokr.simbase.TestEngine.integerList;
+import static com.guokr.simbase.TestEngine.ok;
+import static com.guokr.simbase.TestEngine.rmk;
+import static com.guokr.simbase.TestEngine.rrec;
+import static com.guokr.simbase.TestEngine.vadd;
+import static com.guokr.simbase.TestEngine.vmk;
+import static com.guokr.simbase.TestEngine.vset;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -9,13 +20,14 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.guokr.simbase.SimConfig;
-import com.guokr.simbase.TestableCallback;
+import com.guokr.simbase.TestEngine;
 
 public class SparseCosRecTests {
     public static SimEngineImpl engine;
+    public static String[]      components;
 
     @BeforeClass
-    public static void setup() throws Exception {
+    public static void setup() throws Throwable {
         Map<String, Object> settings = new HashMap<String, Object>();
         Map<String, Object> defaults = new HashMap<String, Object>();
         Map<String, Object> basis = new HashMap<String, Object>();
@@ -34,117 +46,61 @@ public class SparseCosRecTests {
         defaults.put("engine", econf);
         settings.put("defaults", defaults);
         SimConfig config = new SimConfig(settings);
-        engine = new SimEngineImpl(config.getSub("engine"));
-    }
 
-    @Before
-    public void testUp() throws Exception {
-        String[] components = new String[3];
+        engine = new SimEngineImpl(config.getSub("engine"));
+        TestEngine.engine = engine;
+
+        components = new String[3];
         for (int i = 0; i < components.length; i++) {
             components[i] = "B" + String.valueOf(i);
         }
-        engine.bmk(TestableCallback.noop(), "btest", components);
-        Thread.sleep(100);
-        engine.vmk(TestableCallback.noop(), "btest", "vtest");
-        Thread.sleep(100);
-        engine.vmk(TestableCallback.noop(), "btest", "vtest2");
-        Thread.sleep(100);
 
-        engine.vadd(TestableCallback.noop(), "vtest", 2, new float[] { 0.9f, 0.09f, 0.01f });
-        Thread.sleep(100);
-        engine.vadd(TestableCallback.noop(), "vtest", 3, new float[] { 0.89f, 0f, 0.11f });
-        Thread.sleep(100);
-        engine.vadd(TestableCallback.noop(), "vtest", 5, new float[] { 0.1f, 0.89f, 0.01f });
-        Thread.sleep(100);
-        engine.vadd(TestableCallback.noop(), "vtest", 7, new float[] { 0.09f, 0f, 0.91f });
-        Thread.sleep(100);
-        engine.vadd(TestableCallback.noop(), "vtest", 11, new float[] { 0f, 0.89f, 0.11f });
-        Thread.sleep(100);
-        engine.vadd(TestableCallback.noop(), "vtest", 13, new float[] { 0f, 0.09f, 0.91f });
-        Thread.sleep(100);
+    }
 
-        engine.vadd(TestableCallback.noop(), "vtest2", 2, new float[] { 0.9f, 0.09f, 0.01f });
-        Thread.sleep(100);
-        engine.vadd(TestableCallback.noop(), "vtest2", 3, new float[] { 0.89f, 0f, 0.11f });
-        Thread.sleep(100);
-        engine.vadd(TestableCallback.noop(), "vtest2", 5, new float[] { 0.1f, 0.89f, 0.01f });
-        Thread.sleep(100);
-        engine.vadd(TestableCallback.noop(), "vtest2", 7, new float[] { 0.09f, 0f, 0.91f });
-        Thread.sleep(100);
-        engine.vadd(TestableCallback.noop(), "vtest2", 11, new float[] { 0f, 0.89f, 0.11f });
-        Thread.sleep(100);
-        engine.vadd(TestableCallback.noop(), "vtest2", 13, new float[] { 0f, 0.09f, 0.91f });
-        Thread.sleep(100);
-
+    @Before
+    public void testUp() throws Throwable {
+        execCmd(bmk("btest", components), ok(), //
+                vmk("btest", "vtest"), ok(), //
+                vmk("btest", "vtest2"), ok(), //
+                vadd("vtest", 2, 0.9f, 0.09f, 0.01f), ok(), //
+                vadd("vtest", 3, 0.89f, 0f, 0.11f), ok(), //
+                vadd("vtest", 5, 0.1f, 0.89f, 0.01f), ok(), //
+                vadd("vtest", 7, 0.09f, 0f, 0.91f), ok(), //
+                vadd("vtest", 11, 0f, 0.89f, 0.11f), ok(), //
+                vadd("vtest", 13, 0f, 0.09f, 0.91f), ok(), //
+                vadd("vtest2", 2, 0.9f, 0.09f, 0.01f), ok(), //
+                vadd("vtest2", 3, 0.89f, 0f, 0.11f), ok(), //
+                vadd("vtest2", 5, 0.1f, 0.89f, 0.01f), ok(), //
+                vadd("vtest2", 7, 0.09f, 0f, 0.91f), ok(), //
+                vadd("vtest2", 11, 0f, 0.89f, 0.11f), ok(), //
+                vadd("vtest2", 13, 0f, 0.09f, 0.91f), ok() //
+        );
     }
 
     @After
-    public void testDown() throws Exception {
-        engine.del(TestableCallback.noop(), "btest");
-        Thread.sleep(2000);
+    public void testDown() throws Throwable {
+        execCmd(del("btest"), ok());
     }
 
     @Test
-    public void testRec() throws Exception {
-        Thread.sleep(100);
-        engine.rmk(TestableCallback.noop(), "vtest", "vtest", "cosinesq");
-        Thread.sleep(100);
-        engine.rmk(TestableCallback.noop(), "vtest", "vtest2", "cosinesq");
-        Thread.sleep(100);
-
-        TestableCallback test = new TestableCallback() {
-            @Override
-            public void excepted() {
-                isIntegerList(new int[] { 7, 11, 3, 5, 2 });
-            }
-        };
-        engine.rrec(test, "vtest", 13, "vtest");
-        test.waitForFinish();
-        test.validate();
-        TestableCallback test2 = new TestableCallback() {
-            @Override
-            public void excepted() {
-                isIntegerList(new int[] { 7, 13, 3, 11, 2, 5 });
-            }
-        };
-        engine.rrec(test2, "vtest", 7, "vtest2");
-        test2.waitForFinish();
-        test2.validate();
+    public void testRec() throws Throwable {
+        execCmd(rmk("vtest", "vtest", "cosinesq"), ok(), //
+                rmk("vtest", "vtest2", "cosinesq"), ok(), //
+                rrec("vtest", 13, "vtest"), integerList(7, 11, 3, 5, 2), //
+                rrec("vtest", 7, "vtest2"), integerList(7, 13, 3, 11, 2, 5));
     }
 
     @Test
-    public void testSetRec() throws Exception {
-        engine.vset(TestableCallback.noop(), "vtest", 13, new float[] { 0.9f, 0.09f, 0.01f });
-        Thread.sleep(100);
-        engine.rmk(TestableCallback.noop(), "vtest", "vtest", "cosinesq");
-        Thread.sleep(100);
-        engine.rmk(TestableCallback.noop(), "vtest", "vtest2", "cosinesq");
-        Thread.sleep(100);
-        engine.vset(TestableCallback.noop(), "vtest2", 7, new float[] { 0.1f, 8f, 0.1f });
-        Thread.sleep(100);
-        engine.vset(TestableCallback.noop(), "vtest", 13, new float[] { 0f, 0.09f, 0.91f });
-        Thread.sleep(100);
-        engine.vset(TestableCallback.noop(), "vtest2", 7, new float[] { 0.09f, 0f, 0.91f });
-        Thread.sleep(100);
-
-        TestableCallback test = new TestableCallback() {
-            @Override
-            public void excepted() {
-                isIntegerList(new int[] { 7, 11, 3, 5, 2 });
-            }
-        };
-        engine.rrec(test, "vtest", 13, "vtest");
-        test.waitForFinish();
-        test.validate();
-        TestableCallback test2 = new TestableCallback() {
-            @Override
-            public void excepted() {
-                isIntegerList(new int[] { 7, 13, 3, 11, 2, 5 });
-            }
-        };
-        engine.rrec(test2, "vtest", 7, "vtest2");
-        test2.waitForFinish();
-        test2.validate();
+    public void testSetRec() throws Throwable {
+        execCmd(vset("vtest", 13, 0.9f, 0.09f, 0.01f), ok(), //
+                rmk("vtest", "vtest", "cosinesq"), ok(), //
+                rmk("vtest", "vtest2", "cosinesq"), ok(), //
+                vset("vtest2", 7, 0.1f, 8f, 0.1f), ok(), //
+                vset("vtest", 13, 0f, 0.09f, 0.91f), ok(), //
+                vset("vtest2", 7, 0.09f, 0f, 0.91f), ok(), //
+                rrec("vtest", 13, "vtest"), integerList(7, 11, 3, 5, 2), //
+                rrec("vtest", 7, "vtest2"), integerList(7, 13, 3, 11, 2, 5), //
+                rrec("vtest", 13, "vtest"), integerList(7, 11, 3, 5, 2), //
+                rrec("vtest", 7, "vtest2"), integerList(7, 13, 3, 11, 2, 5));
     }
-
 }
