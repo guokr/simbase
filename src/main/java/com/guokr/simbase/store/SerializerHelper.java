@@ -16,7 +16,9 @@ import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
 import com.guokr.simbase.SimScore;
 import com.guokr.simbase.score.CosineSquareSimilarity;
+import com.guokr.simbase.score.EuclideanDistanceSquare;
 import com.guokr.simbase.score.JensenShannonDivergence;
+import com.guokr.simbase.score.ManhattanDistance;
 
 public class SerializerHelper {
 
@@ -188,7 +190,11 @@ public class SerializerHelper {
         public Recommendation read(Kryo kryo, Input input, Class<Recommendation> type) {
             String scoringName = kryo.readObject(input, String.class);
             SimScore scoring;
-            if (scoringName.equals("cosinesq")) {
+            if (scoringName.equals("euclideansq")) {
+                scoring = new EuclideanDistanceSquare();
+            } else if (scoringName.equals("manhattan")) {
+                scoring = new ManhattanDistance();
+            } else if (scoringName.equals("cosinesq")) {
                 scoring = new CosineSquareSimilarity();
             } else if (scoringName.equals("jensenshannon")) {
                 scoring = new JensenShannonDivergence();

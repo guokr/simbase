@@ -17,7 +17,9 @@ import com.guokr.simbase.events.RecommendationListener;
 import com.guokr.simbase.events.SimBasisListener;
 import com.guokr.simbase.events.VectorSetListener;
 import com.guokr.simbase.score.CosineSquareSimilarity;
+import com.guokr.simbase.score.EuclideanDistanceSquare;
 import com.guokr.simbase.score.JensenShannonDivergence;
+import com.guokr.simbase.score.ManhattanDistance;
 import com.guokr.simbase.store.Basis;
 import com.guokr.simbase.store.DenseVectorSet;
 import com.guokr.simbase.store.Recommendation;
@@ -183,11 +185,16 @@ public class SimBasis {
 
     public void rmk(String vkeySource, String vkeyTarget, String funcscore) {
         SimScore scoring = null;
-        if (funcscore.equals("cosinesq")) {
+        if (funcscore.equals("euclideansq")) {
+            scoring = new EuclideanDistanceSquare();
+        } else if (funcscore.equals("manhattan")) {
+            scoring = new ManhattanDistance();
+        } else if (funcscore.equals("cosinesq")) {
             scoring = new CosineSquareSimilarity();
-        }
-        if (funcscore.equals("jensenshannon")) {
+        } else if (funcscore.equals("jensenshannon")) {
             scoring = new JensenShannonDivergence();
+        } else {
+            scoring = new CosineSquareSimilarity();
         }
 
         VectorSet source = vectorSets.get(vkeySource);
