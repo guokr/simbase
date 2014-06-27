@@ -153,7 +153,7 @@ public class SimEngineImpl implements SimEngine, SimBasisListener {
         }
     }
 
-    private void validateId(int toCheck) throws SimEngineException {
+    private void validateId(long toCheck) throws SimEngineException {
         if (toCheck < 1) {
             throw new SimEngineException(String.format("Inviad id '%d', should be positive integer", toCheck));
         }
@@ -501,7 +501,7 @@ public class SimEngineImpl implements SimEngine, SimBasisListener {
         readerPool.submit(new SafeRunner("vids", callback) {
             @Override
             public void invoke() {
-                callback.integerList(bases.get(bkey).vids(vkey));
+                callback.longList(bases.get(bkey).vids(vkey));
             }
         });
     }
@@ -510,7 +510,7 @@ public class SimEngineImpl implements SimEngine, SimBasisListener {
 
     @Override
     @SimCall(callback = "F")
-    public void vget(final SimCallback callback, final String vkey, final int vecid) {
+    public void vget(final SimCallback callback, final String vkey, final long vecid) {
         validateKind("vget", vkey, Kind.VECTORS);
         final String bkey = basisOf.get(vkey);
         readerPool.submit(new SafeRunner("vget", callback) {
@@ -523,7 +523,7 @@ public class SimEngineImpl implements SimEngine, SimBasisListener {
 
     @Override
     @SimCall
-    public void vadd(final SimCallback callback, final String vkey, final int vecid, final float[] vector) {
+    public void vadd(final SimCallback callback, final String vkey, final long vecid, final float[] vector) {
         validateKind("vadd", vkey, Kind.VECTORS);
         validateId(vecid);
         final String bkey = basisOf.get(vkey);
@@ -550,7 +550,7 @@ public class SimEngineImpl implements SimEngine, SimBasisListener {
 
     @Override
     @SimCall
-    public void vset(final SimCallback callback, final String vkey, final int vecid, final float[] vector) {
+    public void vset(final SimCallback callback, final String vkey, final long vecid, final float[] vector) {
         validateKind("vset", vkey, Kind.VECTORS);
         validateId(vecid);
         final String bkey = basisOf.get(vkey);
@@ -577,7 +577,7 @@ public class SimEngineImpl implements SimEngine, SimBasisListener {
 
     @Override
     @SimCall
-    public void vacc(final SimCallback callback, final String vkey, final int vecid, final float[] vector) {
+    public void vacc(final SimCallback callback, final String vkey, final long vecid, final float[] vector) {
         validateKind("vacc", vkey, Kind.VECTORS);
         validateId(vecid);
         final String bkey = basisOf.get(vkey);
@@ -604,7 +604,7 @@ public class SimEngineImpl implements SimEngine, SimBasisListener {
 
     @Override
     @SimCall
-    public void vrem(final SimCallback callback, final String vkey, final int vecid) {
+    public void vrem(final SimCallback callback, final String vkey, final long vecid) {
         this.validateKind("vrem", vkey, Kind.VECTORS);
         final String bkey = basisOf.get(vkey);
         writerExecs.get(bkey).execute(new AsyncSafeRunner("vrem") {
@@ -623,7 +623,7 @@ public class SimEngineImpl implements SimEngine, SimBasisListener {
     // Internal use for client-side sparsification
     @Override
     @SimCall(callback = "I")
-    public void iget(final SimCallback callback, final String vkey, final int vecid) {
+    public void iget(final SimCallback callback, final String vkey, final long vecid) {
         validateExistence(vkey);
         final String bkey = basisOf.get(vkey);
         readerPool.submit(new SafeRunner("iget", callback) {
@@ -636,7 +636,7 @@ public class SimEngineImpl implements SimEngine, SimBasisListener {
 
     @Override
     @SimCall
-    public void iadd(SimCallback callback, final String vkey, final int vecid, final int[] pairs) {
+    public void iadd(SimCallback callback, final String vkey, final long vecid, final int[] pairs) {
         validateKind("iadd", vkey, Kind.VECTORS);
         validateId(vecid);
         final String bkey = basisOf.get(vkey);
@@ -665,7 +665,7 @@ public class SimEngineImpl implements SimEngine, SimBasisListener {
 
     @Override
     @SimCall
-    public void iset(final SimCallback callback, final String vkey, final int vecid, final int[] pairs) {
+    public void iset(final SimCallback callback, final String vkey, final long vecid, final int[] pairs) {
         validateKind("iset", vkey, Kind.VECTORS);
         validateId(vecid);
         final String bkey = basisOf.get(vkey);
@@ -694,7 +694,7 @@ public class SimEngineImpl implements SimEngine, SimBasisListener {
 
     @Override
     @SimCall
-    public void iacc(final SimCallback callback, final String vkey, final int vecid, final int[] pairs) {
+    public void iacc(final SimCallback callback, final String vkey, final long vecid, final int[] pairs) {
         this.validateKind("iacc", vkey, Kind.VECTORS);
         validateId(vecid);
         final String bkey = basisOf.get(vkey);
@@ -776,7 +776,7 @@ public class SimEngineImpl implements SimEngine, SimBasisListener {
 
     @Override
     @SimCall(callback = "S")
-    public void rget(final SimCallback callback, final String vkeySource, final int vecid, final String vkeyTarget) {
+    public void rget(final SimCallback callback, final String vkeySource, final long vecid, final String vkeyTarget) {
         validateKind("rget", vkeySource, Kind.VECTORS);
         validateKind("rget", vkeyTarget, Kind.VECTORS);
         String rkey = rkey(vkeySource, vkeyTarget);
@@ -792,7 +792,7 @@ public class SimEngineImpl implements SimEngine, SimBasisListener {
 
     @Override
     @SimCall(callback = "I")
-    public void rrec(final SimCallback callback, final String vkeySource, final int vecid, final String vkeyTarget) {
+    public void rrec(final SimCallback callback, final String vkeySource, final long vecid, final String vkeyTarget) {
         validateKind("rget", vkeySource, Kind.VECTORS);
         validateKind("rget", vkeyTarget, Kind.VECTORS);
         String rkey = rkey(vkeySource, vkeyTarget);
@@ -801,15 +801,15 @@ public class SimEngineImpl implements SimEngine, SimBasisListener {
         readerPool.submit(new SafeRunner("rrec", callback) {
             @Override
             public void invoke() {
-                callback.integerList(bases.get(bkey).rrec(vkeySource, vecid, vkeyTarget));
+                callback.longList(bases.get(bkey).rrec(vkeySource, vecid, vkeyTarget));
             }
         });
     }
 
     @Override
     @SimCall
-    public void xacc(SimCallback callback, final String vkeyTarget, final int vecidTarget, final String vkeyOperand,
-            final int vecidOperand) {
+    public void xacc(SimCallback callback, final String vkeyTarget, final long vecidTarget, final String vkeyOperand,
+            final long vecidOperand) {
         validateKind("xacc", vkeyTarget, Kind.VECTORS);
         validateId(vecidTarget);
         validateKind("xacc", vkeyOperand, Kind.VECTORS);
@@ -839,12 +839,12 @@ public class SimEngineImpl implements SimEngine, SimBasisListener {
 
     @Override
     @SimCall(callback = "F")
-    public void xprd(final SimCallback callback, final String vkeyTarget, final int vecidTarget,
-            final String vkeyOperand, final int[] vecidOperands) {
+    public void xprd(final SimCallback callback, final String vkeyTarget, final long vecidTarget,
+            final String vkeyOperand, final long[] vecidOperands) {
         validateKind("xprd", vkeyTarget, Kind.VECTORS);
         validateId(vecidTarget);
         validateKind("xprd", vkeyOperand, Kind.VECTORS);
-        for (int vecidOperand : vecidOperands) {
+        for (long vecidOperand : vecidOperands) {
             validateId(vecidOperand);
         }
         final String bkey = basisOf.get(vkeyTarget);
@@ -857,7 +857,7 @@ public class SimEngineImpl implements SimEngine, SimBasisListener {
                 float[] scores = new float[size];
                 float[] target = base.vget(vkeyTarget, vecidTarget);
                 for (int i = 0; i < size; i++) {
-                    int vecidOperand = vecidOperands[i];
+                    long vecidOperand = vecidOperands[i];
                     float[] operand = base.vget(vkeyOperand, vecidOperand);
 
                     int len = target.length;

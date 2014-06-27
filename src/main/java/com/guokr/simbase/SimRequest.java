@@ -34,6 +34,10 @@ public class SimRequest {
         return Integer.parseInt(content.get(idx));
     }
 
+    public long argl(int idx) {
+        return Long.parseLong(content.get(idx));
+    }
+
     public float argf(int idx) {
         return Float.parseFloat(content.get(idx));
     }
@@ -47,6 +51,15 @@ public class SimRequest {
         int[] results = new int[len - idx];
         for (int i = idx; i < len; i++) {
             results[i - idx] = Integer.parseInt(this.content.get(i));
+        }
+        return results;
+    }
+
+    public long[] argL(int idx) {
+        int len = this.content.size();
+        long[] results = new long[len - idx];
+        for (int i = idx; i < len; i++) {
+            results[i - idx] = Long.parseLong(this.content.get(i));
         }
         return results;
     }

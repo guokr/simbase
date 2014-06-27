@@ -6,7 +6,7 @@ import static com.guokr.simbase.TestEngine.brev;
 import static com.guokr.simbase.TestEngine.del;
 import static com.guokr.simbase.TestEngine.execCmd;
 import static com.guokr.simbase.TestEngine.floatList;
-import static com.guokr.simbase.TestEngine.integerList;
+import static com.guokr.simbase.TestEngine.longList;
 import static com.guokr.simbase.TestEngine.ok;
 import static com.guokr.simbase.TestEngine.rlist;
 import static com.guokr.simbase.TestEngine.rmk;
@@ -90,9 +90,9 @@ public class GeneralTests {
     @Test
     public void testRec() throws Throwable {
         // TODO: should be
-        // isIntegerList(new int[] { 7, 11, 3});
-        execCmd(rrec("vtest", 13, "vtest"), integerList(7, 11), //
-                rrec("vtest", 7, "vtest"), integerList(13, 3, 11));
+        // islongList(new int[] { 7, 11, 3});
+        execCmd(rrec("vtest", 13, "vtest"), longList(7, 11), //
+                rrec("vtest", 7, "vtest"), longList(13, 3, 11));
     }
 
     @Test
@@ -114,16 +114,16 @@ public class GeneralTests {
     @Test
     public void testVrem() throws Throwable {
         // TODO: should be
-        // integerList(11, 3, 2)
-        // integerList(11, 3, 5)
-        execCmd(rrec("vtest", 2, "vtest"), integerList(3, 5, 7), //
+        // longList(11, 3, 2)
+        // longList(11, 3, 5)
+        execCmd(rrec("vtest", 2, "vtest"), longList(3, 5, 7), //
                 vrem("vtest", 5), ok(), //
                 vrem("vtest", 7), ok(), //
-                rrec("vtest", 13, "vtest"), integerList(11),//
+                rrec("vtest", 13, "vtest"), longList(11),//
                 vadd("vtest", 5, 0.1f, 0.89f, 0.01f), ok(), //
-                rrec("vtest", 13, "vtest"), integerList(11, 5),//
+                rrec("vtest", 13, "vtest"), longList(11, 5),//
                 vadd("vtest", 7, 0.09f, 0f, 0.91f), ok(), //
-                rrec("vtest", 2, "vtest"), integerList(3, 5, 7)//
+                rrec("vtest", 2, "vtest"), longList(3, 5, 7)//
         );
     }
 
@@ -132,14 +132,14 @@ public class GeneralTests {
         // replace 2 with 7 and 7 with 2
         // and then restore the original
         // TODO: should be
-        // integerList(2, 11, 3)
-        // integerList(7, 11, 3)
+        // longList(2, 11, 3)
+        // longList(7, 11, 3)
         execCmd(vset("vtest", 2, 0.09f, 0f, 0.91f), ok(), //
                 vset("vtest", 7, 0.9f, 0.09f, 0.01f), ok(), //
-                rrec("vtest", 13, "vtest"), integerList(2, 11, 7), //
+                rrec("vtest", 13, "vtest"), longList(2, 11, 7), //
                 vset("vtest", 2, 0.9f, 0.09f, 0.01f), ok(), //
                 vset("vtest", 7, 0.09f, 0f, 0.91f), ok(), //
-                rrec("vtest", 13, "vtest"), integerList(7, 11, 2) //
+                rrec("vtest", 13, "vtest"), longList(7, 11, 2) //
         );
     }
 

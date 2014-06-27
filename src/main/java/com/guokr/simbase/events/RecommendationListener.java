@@ -2,8 +2,8 @@ package com.guokr.simbase.events;
 
 public interface RecommendationListener {
 
-    public void onItemAdded(int vecid, float score);
+    public void onItemAdded(long vecid, float score);
 
-    public void onItemRemoved(int vecid, float score);
+    public void onItemRemoved(long vecid, float score);
 
 }

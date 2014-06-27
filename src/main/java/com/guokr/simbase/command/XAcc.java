@@ -8,11 +8,11 @@ public class XAcc extends SimCommand {
 
     @Override
     public String signature() {
-        return "sisi";
+        return "slsl";
     }
 
     @Override
-    public void invoke(SimEngine engine, String vkeyTarget, int vecidTarget, String vkeyOperand, int vecidOperand,
+    public void invoke(SimEngine engine, String vkeyTarget, long vecidTarget, String vkeyOperand, long vecidOperand,
             SimCallback callback) {
         engine.xacc(callback, vkeyTarget, vecidTarget, vkeyOperand, vecidOperand);
     }

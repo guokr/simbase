@@ -8,11 +8,11 @@ public class VAdd extends SimCommand {
 
     @Override
     public String signature() {
-        return "siF";
+        return "slF";
     }
 
     @Override
-    public void invoke(SimEngine engine, String vkey, int vecid, float[] distr, SimCallback callback) {
+    public void invoke(SimEngine engine, String vkey, long vecid, float[] distr, SimCallback callback) {
         engine.vadd(callback, vkey, vecid, distr);
     }
 

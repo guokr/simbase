@@ -15,13 +15,13 @@ public class Sorter {
     int                         size      = 0;
     float                       waterline = 0f;
 
-    int[]                       vecids;
+    long[]                      vecids;
     float[]                     scores;
 
-    int                         id;
+    long                        id;
     Recommendation              container;
 
-    public Sorter(Recommendation container, int vecid, SortOrder order, int limits) {
+    public Sorter(Recommendation container, long vecid, SortOrder order, int limits) {
         this.id = vecid;
         this.container = container;
         this.order = order;
@@ -34,7 +34,7 @@ public class Sorter {
         int maxlen = 1 + limits;
 
         this.size = 0;
-        this.vecids = new int[maxlen];
+        this.vecids = new long[maxlen];
         this.scores = new float[maxlen];
 
         for (int i = 0; i < maxlen; i++) {
@@ -49,7 +49,7 @@ public class Sorter {
         }
     }
 
-    private int indexOf(int vecid) {
+    private int indexOf(long vecid) {
         int pos = -1;
         for (int i = 0; i < this.size; i++) {
             if (this.vecids[i] == vecid) {
@@ -114,12 +114,12 @@ public class Sorter {
         return this.size;
     }
 
-    protected void insert(int vecid, float score, int pos) {
+    protected void insert(long vecid, float score, int pos) {
         if (pos > -1) {
             this.size = this.size + 1;
-            int[] tvecids = this.vecids;
+            long[] tvecids = this.vecids;
             float[] tscores = this.scores;
-            this.vecids = new int[this.size];
+            this.vecids = new long[this.size];
             this.scores = new float[this.size];
 
             System.arraycopy(tvecids, 0, this.vecids, 0, pos);
@@ -141,9 +141,9 @@ public class Sorter {
         }
     }
 
-    public void add(int vecid, float score) {
+    public void add(long vecid, float score) {
         if (this.size == 0) {
-            this.vecids = new int[] { vecid };
+            this.vecids = new long[] { vecid };
             this.scores = new float[] { score };
             this.size = this.size + 1;
             container.addReverseIndex(id, vecid);
@@ -167,13 +167,13 @@ public class Sorter {
 
     }
 
-    public int[] vecids() {
-        int[] result = new int[size];
+    public long[] vecids() {
+        long[] result = new long[size];
         System.arraycopy(this.vecids, 0, result, 0, size);
         return result;
     }
 
-    public float get(int vecid) {
+    public float get(long vecid) {
         float result = -1.0f;
         int len = this.size > this.limits ? this.limits : this.size;
         for (int i = 0; i < len; i++) {
@@ -185,13 +185,13 @@ public class Sorter {
         return result;
     }
 
-    public void remove(int vecid) {
+    public void remove(long vecid) {
         int pos = indexOf(vecid);
         if (pos > -1) {
             this.size = this.size - 1;
-            int[] tvecids = this.vecids;
+            long[] tvecids = this.vecids;
             float[] tscores = this.scores;
-            this.vecids = new int[this.size];
+            this.vecids = new long[this.size];
             this.scores = new float[this.size];
 
             System.arraycopy(tvecids, 0, this.vecids, 0, pos);

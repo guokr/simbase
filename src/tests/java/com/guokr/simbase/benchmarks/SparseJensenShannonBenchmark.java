@@ -81,7 +81,7 @@ public class SparseJensenShannonBenchmark {
         private int counter = 0;
 
         @Override
-        public void onVectorAdded(VectorSet evtSrc, int vecid, float[] vector) {
+        public void onVectorAdded(VectorSet evtSrc, long vecid, float[] vector) {
             if (counter % 1000 == 0) {
                 long duration = new Date().getTime() - start;
                 System.out.println("vecid:" + counter + "\tmemory:" + Runtime.getRuntime().totalMemory() + "\ttime:"
@@ -92,27 +92,27 @@ public class SparseJensenShannonBenchmark {
         }
 
         @Override
-        public void onVectorAdded(VectorSet evtSrc, int vecid, int[] vector) {
+        public void onVectorAdded(VectorSet evtSrc, long vecid, int[] vector) {
         }
 
         @Override
-        public void onVectorSetted(VectorSet evtSrc, int vecid, float[] old, float[] vector) {
+        public void onVectorSetted(VectorSet evtSrc, long vecid, float[] old, float[] vector) {
         }
 
         @Override
-        public void onVectorSetted(VectorSet evtSrc, int vecid, int[] old, int[] vector) {
+        public void onVectorSetted(VectorSet evtSrc, long vecid, int[] old, int[] vector) {
         }
 
         @Override
-        public void onVectorAccumulated(VectorSet evtSrc, int vecid, float[] vector, float[] accumulated) {
+        public void onVectorAccumulated(VectorSet evtSrc, long vecid, float[] vector, float[] accumulated) {
         }
 
         @Override
-        public void onVectorAccumulated(VectorSet evtSrc, int vecid, int[] vector, int[] accumulated) {
+        public void onVectorAccumulated(VectorSet evtSrc, long vecid, int[] vector, int[] accumulated) {
         }
 
         @Override
-        public void onVectorRemoved(VectorSet evtSrc, int vecid) {
+        public void onVectorRemoved(VectorSet evtSrc, long vecid) {
         }
 
     }

@@ -18,7 +18,7 @@ public class EuclideanDistanceSquare implements SimScore {
     }
 
     @Override
-    public float score(String srcVKey, int srcId, float[] source, String tgtVKey, int tgtId, float[] target) {
+    public float score(String srcVKey, long srcId, float[] source, String tgtVKey, long tgtId, float[] target) {
 
         float scoring = 0;
         int len = source.length;
@@ -31,7 +31,7 @@ public class EuclideanDistanceSquare implements SimScore {
     }
 
     @Override
-    public float score(String srcVKey, int srcId, int[] source, int srclen, String tgtVKey, int tgtId, int[] target,
+    public float score(String srcVKey, long srcId, int[] source, int srclen, String tgtVKey, long tgtId, int[] target,
             int tgtlen) {
 
         float scoring = 0f;
@@ -63,47 +63,47 @@ public class EuclideanDistanceSquare implements SimScore {
     public void onAttached(String vkey) {
     }
 
-    public void onUpdated(String vkey, int vid, float[] vector) {
+    public void onUpdated(String vkey, long vecid, float[] vector) {
     }
 
-    public void onUpdated(String vkey, int vid, int[] vector) {
+    public void onUpdated(String vkey, long vecid, int[] vector) {
     }
 
-    public void onRemoved(String vkey, int vid) {
+    public void onRemoved(String vkey, long vecid) {
     }
 
     @Override
-    public void onVectorAdded(VectorSet evtSrc, int vecid, float[] vector) {
+    public void onVectorAdded(VectorSet evtSrc, long vecid, float[] vector) {
         onUpdated(evtSrc.key(), vecid, vector);
     }
 
     @Override
-    public void onVectorAdded(VectorSet evtSrc, int vecid, int[] vector) {
+    public void onVectorAdded(VectorSet evtSrc, long vecid, int[] vector) {
         onUpdated(evtSrc.key(), vecid, vector);
     }
 
     @Override
-    public void onVectorSetted(VectorSet evtSrc, int vecid, float[] old, float[] vector) {
+    public void onVectorSetted(VectorSet evtSrc, long vecid, float[] old, float[] vector) {
         onUpdated(evtSrc.key(), vecid, vector);
     }
 
     @Override
-    public void onVectorSetted(VectorSet evtSrc, int vecid, int[] old, int[] vector) {
+    public void onVectorSetted(VectorSet evtSrc, long vecid, int[] old, int[] vector) {
         onUpdated(evtSrc.key(), vecid, vector);
     }
 
     @Override
-    public void onVectorAccumulated(VectorSet evtSrc, int vecid, float[] vector, float[] accumulated) {
+    public void onVectorAccumulated(VectorSet evtSrc, long vecid, float[] vector, float[] accumulated) {
         onUpdated(evtSrc.key(), vecid, accumulated);
     }
 
     @Override
-    public void onVectorAccumulated(VectorSet evtSrc, int vecid, int[] vector, int[] accumulated) {
+    public void onVectorAccumulated(VectorSet evtSrc, long vecid, int[] vector, int[] accumulated) {
         onUpdated(evtSrc.key(), vecid, accumulated);
     }
 
     @Override
-    public void onVectorRemoved(VectorSet evtSrc, int vecid) {
+    public void onVectorRemoved(VectorSet evtSrc, long vecid) {
         onRemoved(evtSrc.key(), vecid);
     }
 

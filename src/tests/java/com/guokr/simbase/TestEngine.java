@@ -96,6 +96,24 @@ public class TestEngine {
         };
     }
 
+    public static TestableCallback longValue(final long l) {
+        return new TestableCallback() {
+            @Override
+            public void excepted() {
+                isLongValue(l);
+            }
+        };
+    }
+
+    public static TestableCallback longList(final long... args) {
+        return new TestableCallback() {
+            @Override
+            public void excepted() {
+                isLongList(args);
+            }
+        };
+    }
+
     public static TestableCallback floatValue(final float f) {
         return new TestableCallback() {
             @Override
@@ -275,7 +293,7 @@ public class TestEngine {
         };
     }
 
-    public static Testable vget(final String vkey, final int vecid) {
+    public static Testable vget(final String vkey, final long vecid) {
         return new Testable() {
             @Override
             public void test(TestableCallback cb) {
@@ -285,7 +303,7 @@ public class TestEngine {
         };
     }
 
-    public static Testable vadd(final String vkey, final int vecid, final float... vector) {
+    public static Testable vadd(final String vkey, final long vecid, final float... vector) {
         return new Testable() {
             @Override
             public void test(TestableCallback cb) {
@@ -300,7 +318,7 @@ public class TestEngine {
         };
     }
 
-    public static Testable vset(final String vkey, final int vecid, final float... vector) {
+    public static Testable vset(final String vkey, final long vecid, final float... vector) {
         return new Testable() {
             @Override
             public void test(TestableCallback cb) {
@@ -315,7 +333,7 @@ public class TestEngine {
         };
     }
 
-    public static Testable vacc(final String vkey, final int vecid, final float... vector) {
+    public static Testable vacc(final String vkey, final long vecid, final float... vector) {
         return new Testable() {
             @Override
             public void test(TestableCallback cb) {
@@ -330,7 +348,7 @@ public class TestEngine {
         };
     }
 
-    public static Testable vrem(final String vkey, final int vecid) {
+    public static Testable vrem(final String vkey, final long vecid) {
         return new Testable() {
             @Override
             public void test(TestableCallback cb) {
@@ -345,7 +363,7 @@ public class TestEngine {
         };
     }
 
-    public static Testable iget(final String vkey, final int vecid) {
+    public static Testable iget(final String vkey, final long vecid) {
         return new Testable() {
             @Override
             public void test(TestableCallback cb) {
@@ -355,7 +373,7 @@ public class TestEngine {
         };
     }
 
-    public static Testable iset(final String vkey, final int vecid, final int... pairs) {
+    public static Testable iset(final String vkey, final long vecid, final int... pairs) {
         return new Testable() {
             @Override
             public void test(TestableCallback cb) {
@@ -370,7 +388,7 @@ public class TestEngine {
         };
     }
 
-    public static Testable iadd(final String vkey, final int vecid, final int... pairs) {
+    public static Testable iadd(final String vkey, final long vecid, final int... pairs) {
         return new Testable() {
             @Override
             public void test(TestableCallback cb) {
@@ -385,7 +403,7 @@ public class TestEngine {
         };
     }
 
-    public static Testable iacc(final String vkey, final int vecid, final int... pairs) {
+    public static Testable iacc(final String vkey, final long vecid, final int... pairs) {
         return new Testable() {
             @Override
             public void test(TestableCallback cb) {
@@ -425,7 +443,7 @@ public class TestEngine {
         };
     }
 
-    public static Testable rget(final String vkeySource, final int vecid, final String vkeyTarget) {
+    public static Testable rget(final String vkeySource, final long vecid, final String vkeyTarget) {
         return new Testable() {
             @Override
             public void test(TestableCallback cb) {
@@ -435,7 +453,7 @@ public class TestEngine {
         };
     }
 
-    public static Testable rrec(final String vkeySource, final int vecid, final String vkeyTarget) {
+    public static Testable rrec(final String vkeySource, final long vecid, final String vkeyTarget) {
         return new Testable() {
             @Override
             public void test(TestableCallback cb) {
@@ -445,8 +463,8 @@ public class TestEngine {
         };
     }
 
-    public static Testable xacc(final String vkeyTarget, final int vecidTarget, final String vkeyOperand,
-            final int vecidOperand) {
+    public static Testable xacc(final String vkeyTarget, final long vecidTarget, final String vkeyOperand,
+            final long vecidOperand) {
         return new Testable() {
             @Override
             public void test(TestableCallback cb) {
@@ -461,8 +479,8 @@ public class TestEngine {
         };
     }
 
-    public static Testable xprd(final String vkeyTarget, final int vecidTarget, final String vkeyOperand,
-            final int... vecidOperands) {
+    public static Testable xprd(final String vkeyTarget, final long vecidTarget, final String vkeyOperand,
+            final long... vecidOperands) {
         return new Testable() {
             @Override
             public void test(TestableCallback cb) {

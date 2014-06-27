@@ -1,10 +1,11 @@
 package com.guokr.simbase.store;
 
 import gnu.trove.iterator.TIntIntIterator;
+import gnu.trove.iterator.TLongIntIterator;
 import gnu.trove.list.TFloatList;
 import gnu.trove.list.array.TFloatArrayList;
-import gnu.trove.map.TIntIntMap;
-import gnu.trove.map.hash.TIntIntHashMap;
+import gnu.trove.map.TLongIntMap;
+import gnu.trove.map.hash.TLongIntHashMap;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -20,8 +21,8 @@ public class DenseVectorSet implements VectorSet, BasisListener {
     String                          key;
 
     TFloatList                      data      = new TFloatArrayList();
-    TIntIntMap                      lengths   = new TIntIntHashMap();
-    TIntIntMap                      indexer   = new TIntIntHashMap();
+    TLongIntMap                     lengths   = new TLongIntHashMap();
+    TLongIntMap                     indexer   = new TLongIntHashMap();
 
     float                           accumuFactor;
     int                             sparseFactor;
@@ -65,22 +66,22 @@ public class DenseVectorSet implements VectorSet, BasisListener {
     }
 
     @Override
-    public boolean contains(int vecid) {
+    public boolean contains(long vecid) {
         return this.indexer.containsKey(vecid);
     }
 
     @Override
     public void clean() {
         TFloatList olddata = data;
-        TIntIntMap oldindexer = indexer;
+        TLongIntMap oldindexer = indexer;
         data = new TFloatArrayList(olddata.size());
-        indexer = new TIntIntHashMap(oldindexer.size());
+        indexer = new TLongIntHashMap(oldindexer.size());
 
         int pos = 0;
-        TIntIntIterator iter = oldindexer.iterator();
+        TLongIntIterator iter = oldindexer.iterator();
         while (iter.hasNext()) {
             iter.advance();
-            int vecid = iter.key();
+            long vecid = iter.key();
             int start = iter.value();
             int length = lengths.get(vecid);
 
@@ -95,12 +96,12 @@ public class DenseVectorSet implements VectorSet, BasisListener {
     }
 
     @Override
-    public int[] ids() {
+    public long[] ids() {
         return indexer.keys();
     }
 
     @Override
-    public void remove(int vecid) {
+    public void remove(long vecid) {
         if (indexer.containsKey(vecid)) {
             indexer.remove(vecid);
             lengths.remove(vecid);
@@ -114,11 +115,11 @@ public class DenseVectorSet implements VectorSet, BasisListener {
     }
 
     @Override
-    public int length(int vecid) {
+    public int length(long vecid) {
         return lengths.get(vecid);
     }
 
-    protected void get(int vecid, float[] result) {
+    protected void get(long vecid, float[] result) {
         int len = lengths.get(vecid);
         int start = indexer.get(vecid);
         data.toArray(result, start, len);
@@ -126,7 +127,7 @@ public class DenseVectorSet implements VectorSet, BasisListener {
     }
 
     @Override
-    public float[] get(int vecid) {
+    public float[] get(long vecid) {
         float[] result;
         if (indexer.containsKey(vecid)) {
             result = new float[this.base.size()];
@@ -138,7 +139,7 @@ public class DenseVectorSet implements VectorSet, BasisListener {
     }
 
     @Override
-    public void add(int vecid, float[] vector) {
+    public void add(long vecid, float[] vector) {
         if (!indexer.containsKey(vecid)) {
             int start = data.size();
             indexer.put(vecid, start);
@@ -156,7 +157,7 @@ public class DenseVectorSet implements VectorSet, BasisListener {
     }
 
     @Override
-    public void set(int vecid, float[] vector) {
+    public void set(long vecid, float[] vector) {
         if (indexer.containsKey(vecid)) {
             float[] old = get(vecid);
 
@@ -181,7 +182,7 @@ public class DenseVectorSet implements VectorSet, BasisListener {
     }
 
     @Override
-    public void accumulate(int vecid, float[] vector) {
+    public void accumulate(long vecid, float[] vector) {
         if (!indexer.containsKey(vecid)) {
             add(vecid, vector);
         } else {
@@ -232,13 +233,13 @@ public class DenseVectorSet implements VectorSet, BasisListener {
         }
     }
 
-    protected void _get(int vecid, float[] input, int[] result) {
+    protected void _get(long vecid, float[] input, int[] result) {
         get(vecid, input);
         Basis.sparsify(sparseFactor, input, result);
     }
 
     @Override
-    public int[] _get(int vecid) {
+    public int[] _get(long vecid) {
         int[] result = new int[this.base.size()];
         float[] input = new float[this.base.size()];
         _get(vecid, input, result);
@@ -246,17 +247,17 @@ public class DenseVectorSet implements VectorSet, BasisListener {
     }
 
     @Override
-    public void _add(int vecid, int[] pairs) {
+    public void _add(long vecid, int[] pairs) {
         this.add(vecid, Basis.densify(base.size(), sparseFactor, pairs));
     }
 
     @Override
-    public void _set(int vecid, int[] pairs) {
+    public void _set(long vecid, int[] pairs) {
         this.set(vecid, Basis.densify(base.size(), sparseFactor, pairs));
     }
 
     @Override
-    public void _accumulate(int vecid, int[] pairs) {
+    public void _accumulate(long vecid, int[] pairs) {
         this.accumulate(vecid, Basis.densify(base.size(), sparseFactor, pairs));
     }
 
@@ -266,13 +267,13 @@ public class DenseVectorSet implements VectorSet, BasisListener {
     }
 
     @Override
-    public void rescore(String key, int vecid, float[] vector, Recommendation rec) {
+    public void rescore(String key, long vecid, float[] vector, Recommendation rec) {
         rec.create(vecid);
-        TIntIntIterator iter = indexer.iterator();
+        TLongIntIterator iter = indexer.iterator();
         if (this == rec.source) {
             while (iter.hasNext()) {
                 iter.advance();
-                int tgtId = iter.key();
+                long tgtId = iter.key();
                 get(tgtId, fReuseList);
                 float score = rec.scoring.score(key, vecid, vector, this.key, tgtId, fReuseList);
                 rec.add(vecid, tgtId, score);
@@ -282,7 +283,7 @@ public class DenseVectorSet implements VectorSet, BasisListener {
         } else {
             while (iter.hasNext()) {
                 iter.advance();
-                int tgtId = iter.key();
+                long tgtId = iter.key();
                 get(tgtId, fReuseList);
                 float score = rec.scoring.score(key, vecid, vector, this.key, tgtId, fReuseList);
                 rec.add(vecid, tgtId, score);
@@ -291,14 +292,14 @@ public class DenseVectorSet implements VectorSet, BasisListener {
     }
 
     @Override
-    public void rescore(String key, int vecid, int[] vector, Recommendation rec) {
+    public void rescore(String key, long vecid, int[] vector, Recommendation rec) {
         rec.create(vecid);
-        TIntIntIterator iter = indexer.iterator();
+        TLongIntIterator iter = indexer.iterator();
         float[] input = new float[this.base.size()];
         if (this == rec.source) {
             while (iter.hasNext()) {
                 iter.advance();
-                int tgtId = iter.key();
+                long tgtId = iter.key();
                 _get(tgtId, input, iReuseList);
                 float score = rec.scoring.score(key, vecid, vector, vector.length, this.key, tgtId, iReuseList,
                         length(tgtId));
@@ -309,7 +310,7 @@ public class DenseVectorSet implements VectorSet, BasisListener {
         } else {
             while (iter.hasNext()) {
                 iter.advance();
-                int tgtId = iter.key();
+                long tgtId = iter.key();
                 _get(tgtId, input, iReuseList);
                 float score = rec.scoring.score(key, vecid, vector, vector.length, this.key, tgtId, iReuseList,
                         length(tgtId));

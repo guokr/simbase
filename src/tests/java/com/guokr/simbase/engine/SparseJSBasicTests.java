@@ -6,7 +6,7 @@ import static com.guokr.simbase.TestEngine.brev;
 import static com.guokr.simbase.TestEngine.del;
 import static com.guokr.simbase.TestEngine.execCmd;
 import static com.guokr.simbase.TestEngine.floatList;
-import static com.guokr.simbase.TestEngine.integerList;
+import static com.guokr.simbase.TestEngine.longList;
 import static com.guokr.simbase.TestEngine.ok;
 import static com.guokr.simbase.TestEngine.rlist;
 import static com.guokr.simbase.TestEngine.rmk;
@@ -87,8 +87,8 @@ public class SparseJSBasicTests {
 
     @Test
     public void testRec() throws Throwable {
-        execCmd(rrec("vtest", 13, "vtest"), integerList(7, 11, 5, 3, 2), //
-                rrec("vtest", 7, "vtest"), integerList(13, 3, 2, 11, 5));
+        execCmd(rrec("vtest", 13, "vtest"), longList(7, 11, 5, 3, 2), //
+                rrec("vtest", 7, "vtest"), longList(13, 3, 2, 11, 5));
     }
 
     @Test
@@ -109,14 +109,14 @@ public class SparseJSBasicTests {
 
     @Test
     public void testVrem() throws Throwable {
-        execCmd(rrec("vtest", 2, "vtest"), integerList(3, 5, 7, 11, 13), //
+        execCmd(rrec("vtest", 2, "vtest"), longList(3, 5, 7, 11, 13), //
                 vrem("vtest", 5), ok(), //
                 vrem("vtest", 7), ok(), //
-                rrec("vtest", 13, "vtest"), integerList(11, 3, 2),//
+                rrec("vtest", 13, "vtest"), longList(11, 3, 2),//
                 vadd("vtest", 5, 0.1f, 0.89f, 0.01f), ok(), //
-                rrec("vtest", 13, "vtest"), integerList(11, 5, 3, 2),//
+                rrec("vtest", 13, "vtest"), longList(11, 5, 3, 2),//
                 vadd("vtest", 7, 0.09f, 0f, 0.91f), ok(), //
-                rrec("vtest", 2, "vtest"), integerList(3, 5, 7, 11, 13)//
+                rrec("vtest", 2, "vtest"), longList(3, 5, 7, 11, 13)//
         );
     }
 
@@ -126,10 +126,10 @@ public class SparseJSBasicTests {
         // and then restore the original
         execCmd(vset("vtest", 2, 0.09f, 0f, 0.91f), ok(), //
                 vset("vtest", 7, 0.9f, 0.09f, 0.01f), ok(), //
-                rrec("vtest", 13, "vtest"), integerList(2, 11, 5, 3, 7), //
+                rrec("vtest", 13, "vtest"), longList(2, 11, 5, 3, 7), //
                 vset("vtest", 2, 0.9f, 0.09f, 0.01f), ok(), //
                 vset("vtest", 7, 0.09f, 0f, 0.91f), ok(), //
-                rrec("vtest", 13, "vtest"), integerList(7, 11, 5, 3, 2) //
+                rrec("vtest", 13, "vtest"), longList(7, 11, 5, 3, 2) //
         );
     }
 

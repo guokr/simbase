@@ -9,5 +9,6 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface SimCall {
     String signature() default "";
+
     String callback() default "";
 }

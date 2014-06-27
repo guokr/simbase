@@ -8,11 +8,11 @@ public class ISet extends SimCommand {
 
     @Override
     public String signature() {
-        return "siI";
+        return "slI";
     }
 
     @Override
-    public void invoke(SimEngine engine, String vkey, int vecid, int[] distr, SimCallback callback) {
+    public void invoke(SimEngine engine, String vkey, long vecid, int[] distr, SimCallback callback) {
         engine.iset(callback, vkey, vecid, distr);
     }
 

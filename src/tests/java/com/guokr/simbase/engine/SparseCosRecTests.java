@@ -3,7 +3,7 @@ package com.guokr.simbase.engine;
 import static com.guokr.simbase.TestEngine.bmk;
 import static com.guokr.simbase.TestEngine.del;
 import static com.guokr.simbase.TestEngine.execCmd;
-import static com.guokr.simbase.TestEngine.integerList;
+import static com.guokr.simbase.TestEngine.longList;
 import static com.guokr.simbase.TestEngine.ok;
 import static com.guokr.simbase.TestEngine.rmk;
 import static com.guokr.simbase.TestEngine.rrec;
@@ -86,8 +86,8 @@ public class SparseCosRecTests {
     public void testRec() throws Throwable {
         execCmd(rmk("vtest", "vtest", "cosinesq"), ok(), //
                 rmk("vtest", "vtest2", "cosinesq"), ok(), //
-                rrec("vtest", 13, "vtest"), integerList(7, 11, 3, 5, 2), //
-                rrec("vtest", 7, "vtest2"), integerList(7, 13, 3, 11, 2, 5));
+                rrec("vtest", 13, "vtest"), longList(7, 11, 3, 5, 2), //
+                rrec("vtest", 7, "vtest2"), longList(7, 13, 3, 11, 2, 5));
     }
 
     @Test
@@ -98,9 +98,9 @@ public class SparseCosRecTests {
                 vset("vtest2", 7, 0.1f, 8f, 0.1f), ok(), //
                 vset("vtest", 13, 0f, 0.09f, 0.91f), ok(), //
                 vset("vtest2", 7, 0.09f, 0f, 0.91f), ok(), //
-                rrec("vtest", 13, "vtest"), integerList(7, 11, 3, 5, 2), //
-                rrec("vtest", 7, "vtest2"), integerList(7, 13, 3, 11, 2, 5), //
-                rrec("vtest", 13, "vtest"), integerList(7, 11, 3, 5, 2), //
-                rrec("vtest", 7, "vtest2"), integerList(7, 13, 3, 11, 2, 5));
+                rrec("vtest", 13, "vtest"), longList(7, 11, 3, 5, 2), //
+                rrec("vtest", 7, "vtest2"), longList(7, 13, 3, 11, 2, 5), //
+                rrec("vtest", 13, "vtest"), longList(7, 11, 3, 5, 2), //
+                rrec("vtest", 7, "vtest2"), longList(7, 13, 3, 11, 2, 5));
     }
 }

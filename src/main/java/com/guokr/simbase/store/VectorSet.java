@@ -12,34 +12,34 @@ public interface VectorSet {
 
     public void clean();
 
-    public int[] ids();
+    public long[] ids();
 
-    public boolean contains(int vecid);
+    public boolean contains(long vecid);
 
-    public void remove(int vecid);
+    public void remove(long vecid);
 
-    public float[] get(int vecid);
+    public float[] get(long vecid);
 
-    public void add(int vecid, float[] vector);
+    public void add(long vecid, float[] vector);
 
-    public void set(int vecid, float[] vector);
+    public void set(long vecid, float[] vector);
 
-    public void accumulate(int vecid, float[] vector);
+    public void accumulate(long vecid, float[] vector);
 
-    public int[] _get(int vecid);
+    public int[] _get(long vecid);
 
-    public int length(int vecid);
+    public int length(long vecid);
 
-    void _add(int vecid, int[] pairs);
+    void _add(long vecid, int[] pairs);
 
-    void _set(int vecid, int[] pairs);
+    void _set(long vecid, int[] pairs);
 
-    void _accumulate(int vecid, int[] pairs);
+    void _accumulate(long vecid, int[] pairs);
 
     public void addListener(VectorSetListener listener);
 
-    public void rescore(String key, int vecid, float[] vector, Recommendation rec);
+    public void rescore(String key, long vecid, float[] vector, Recommendation rec);
 
-    public void rescore(String key, int vecid, int[] vector, Recommendation rec);
+    public void rescore(String key, long vecid, int[] vector, Recommendation rec);
 
 }

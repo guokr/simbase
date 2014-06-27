@@ -12,9 +12,9 @@ public interface SimScore extends VectorSetListener {
 
     public SortOrder order();
 
-    public float score(String srcVKey, int srcId, float[] source, String tgtVKey, int tgtId, float[] target);
+    public float score(String srcVKey, long srcId, float[] source, String tgtVKey, long tgtId, float[] target);
 
-    public float score(String srcVKey, int srcId, int[] source, int tgt, String tgtVKey, int tgtId, int[] target,
+    public float score(String srcVKey, long srcId, int[] source, int srclen, String tgtVKey, long tgtId, int[] target,
             int tgtlen);
 
     public void onAttached(String vkey);

@@ -50,14 +50,14 @@ public class ServerHandler implements IHandler {
                             sig = sig.substring(1);
                             if (sig.equals("s")) {
                                 command.invoke(engine, request.args(1), request.args(2), callback);
-                            } else if (sig.equals("i")) {
-                                command.invoke(engine, request.args(1), request.argi(2), callback);
+                            } else if (sig.equals("l")) {
+                                command.invoke(engine, request.args(1), request.argl(2), callback);
                             } else if (sig.equals("f")) {
                                 command.invoke(engine, request.args(1), request.argf(2), callback);
                             } else if (sig.equals("S")) {
                                 command.invoke(engine, request.args(1), request.argS(2), callback);
                             } else if (sig.equals("I")) {
-                                command.invoke(engine, request.args(1), request.argI(2), callback);
+                                command.invoke(engine, request.args(1), request.argl(2), callback);
                             } else if (sig.equals("F")) {
                                 command.invoke(engine, request.args(1), request.argF(2), callback);
                             }
@@ -66,48 +66,48 @@ public class ServerHandler implements IHandler {
                             sig = sig.substring(1);
                             if (sig.equals("ss")) {
                                 command.invoke(engine, request.args(1), request.args(2), request.args(3), callback);
-                            } else if (sig.equals("si")) {
-                                command.invoke(engine, request.args(1), request.args(2), request.argi(3), callback);
+                            } else if (sig.equals("sl")) {
+                                command.invoke(engine, request.args(1), request.args(2), request.argl(3), callback);
                             } else if (sig.equals("sf")) {
                                 command.invoke(engine, request.args(1), request.args(2), request.argf(3), callback);
                             } else if (sig.equals("sS")) {
                                 command.invoke(engine, request.args(1), request.args(2), request.argS(3), callback);
                             } else if (sig.equals("sI")) {
-                                command.invoke(engine, request.args(1), request.args(2), request.argI(3), callback);
+                                command.invoke(engine, request.args(1), request.args(2), request.argl(3), callback);
                             } else if (sig.equals("sF")) {
                                 command.invoke(engine, request.args(1), request.args(2), request.argF(3), callback);
-                            } else if (sig.equals("is")) {
-                                command.invoke(engine, request.args(1), request.argi(2), request.args(3), callback);
-                            } else if (sig.equals("ii")) {
-                                command.invoke(engine, request.args(1), request.argi(2), request.argi(3), callback);
-                            } else if (sig.equals("if")) {
-                                command.invoke(engine, request.args(1), request.argi(2), request.argf(3), callback);
-                            } else if (sig.equals("iS")) {
-                                command.invoke(engine, request.args(1), request.argi(2), request.argS(3), callback);
-                            } else if (sig.equals("iI")) {
-                                command.invoke(engine, request.args(1), request.argi(2), request.argI(3), callback);
-                            } else if (sig.equals("iF")) {
-                                command.invoke(engine, request.args(1), request.argi(2), request.argF(3), callback);
+                            } else if (sig.equals("ls")) {
+                                command.invoke(engine, request.args(1), request.argl(2), request.args(3), callback);
+                            } else if (sig.equals("ll")) {
+                                command.invoke(engine, request.args(1), request.argl(2), request.argl(3), callback);
+                            } else if (sig.equals("lf")) {
+                                command.invoke(engine, request.args(1), request.argl(2), request.argf(3), callback);
+                            } else if (sig.equals("lS")) {
+                                command.invoke(engine, request.args(1), request.argl(2), request.argS(3), callback);
+                            } else if (sig.equals("lI")) {
+                                command.invoke(engine, request.args(1), request.argl(2), request.argl(3), callback);
+                            } else if (sig.equals("lF")) {
+                                command.invoke(engine, request.args(1), request.argl(2), request.argF(3), callback);
                             } else if (sig.equals("fs")) {
                                 command.invoke(engine, request.args(1), request.argf(2), request.args(3), callback);
-                            } else if (sig.equals("fi")) {
-                                command.invoke(engine, request.args(1), request.argf(2), request.argi(3), callback);
+                            } else if (sig.equals("fl")) {
+                                command.invoke(engine, request.args(1), request.argf(2), request.argl(3), callback);
                             } else if (sig.equals("ff")) {
                                 command.invoke(engine, request.args(1), request.argf(2), request.argf(3), callback);
                             } else if (sig.equals("fS")) {
                                 command.invoke(engine, request.args(1), request.argf(2), request.argS(3), callback);
                             } else if (sig.equals("fI")) {
-                                command.invoke(engine, request.args(1), request.argf(2), request.argI(3), callback);
+                                command.invoke(engine, request.args(1), request.argf(2), request.argl(3), callback);
                             }
                             break;
                         case 4:
                             sig = sig.substring(1);
-                            if (sig.equals("sisi")) {
-                                command.invoke(engine, request.args(1), request.argi(2), request.args(3),
-                                        request.argi(4), callback);
-                            } else if (sig.equals("sisI")) {
-                                command.invoke(engine, request.args(1), request.argi(2), request.args(3),
-                                        request.argI(4), callback);
+                            if (sig.equals("slsl")) {
+                                command.invoke(engine, request.args(1), request.argl(2), request.args(3),
+                                        request.argl(4), callback);
+                            } else if (sig.equals("slsL")) {
+                                command.invoke(engine, request.args(1), request.argl(2), request.args(3),
+                                        request.argL(4), callback);
                             }
                             break;
                         }

@@ -82,6 +82,34 @@ public abstract class TestableCallback extends SimCallback {
         }
     }
 
+    public void isLongValue(long val) {
+        byte[] bytes = SimUtils.bytes(val);
+        byte[] size = SimUtils.size(bytes);
+        excepted = ByteBuffer.allocate(bytes.length + size.length + 5);
+        excepted.put(SimUtils.DOLLAR);
+        excepted.put(size);
+        excepted.put(SimUtils.CRLF);
+        excepted.put(bytes);
+        excepted.put(SimUtils.CRLF);
+    }
+
+    public void isLongList(long[] list) {
+        byte[] size = SimUtils.size(list.length);
+        excepted = ByteBuffer.allocate(1024 * list.length + 1024);
+        excepted.put(SimUtils.STAR);
+        excepted.put(size);
+        excepted.put(SimUtils.CRLF);
+        for (long val : list) {
+            byte[] bytes = SimUtils.bytes(val);
+            size = SimUtils.size(bytes);
+            excepted.put(SimUtils.DOLLAR);
+            excepted.put(size);
+            excepted.put(SimUtils.CRLF);
+            excepted.put(bytes);
+            excepted.put(SimUtils.CRLF);
+        }
+    }
+
     public void isFloatValue(float val) {
         byte[] bytes = SimUtils.bytes(val);
         byte[] size = SimUtils.size(bytes);

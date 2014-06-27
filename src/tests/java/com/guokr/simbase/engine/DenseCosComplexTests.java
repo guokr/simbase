@@ -8,7 +8,7 @@ import static com.guokr.simbase.TestEngine.bsave;
 import static com.guokr.simbase.TestEngine.del;
 import static com.guokr.simbase.TestEngine.execCmd;
 import static com.guokr.simbase.TestEngine.floatList;
-import static com.guokr.simbase.TestEngine.integerList;
+import static com.guokr.simbase.TestEngine.longList;
 import static com.guokr.simbase.TestEngine.ok;
 import static com.guokr.simbase.TestEngine.rlist;
 import static com.guokr.simbase.TestEngine.rmk;
@@ -116,9 +116,9 @@ public class DenseCosComplexTests {
     @Test
     public void testSaveLoad() throws Throwable {
         try {
-            execCmd(rrec("vtest", 2, "vtest"), integerList(3, 5, 7, 11, 13), //
-                    rrec("vtest", 2, "vtest2"), integerList(2, 3, 5, 7, 11, 13), //
-                    rrec("vtest", 11, "vtest2"), integerList(11, 5, 13, 7, 2, 3), //
+            execCmd(rrec("vtest", 2, "vtest"), longList(3, 5, 7, 11, 13), //
+                    rrec("vtest", 2, "vtest2"), longList(2, 3, 5, 7, 11, 13), //
+                    rrec("vtest", 11, "vtest2"), longList(11, 5, 13, 7, 2, 3), //
                     vrem("vtest", 3), ok(), //
                     vrem("vtest", 7), ok(), //
                     vrem("vtest2", 3), ok(), //
@@ -134,9 +134,9 @@ public class DenseCosComplexTests {
                     vadd("vtest2", 3, 0.89f, 0f, 0.11f), ok(), //
                     vadd("vtest", 7, 0.09f, 0f, 0.91f), ok(), //
                     vadd("vtest2", 7, 0.09f, 0f, 0.91f), ok(), //
-                    rrec("vtest", 2, "vtest"), integerList(3, 5, 7, 11, 13), //
-                    rrec("vtest", 2, "vtest2"), integerList(2, 3, 5, 7, 11, 13), //
-                    rrec("vtest", 11, "vtest2"), integerList(11, 5, 13, 7, 2, 3));
+                    rrec("vtest", 2, "vtest"), longList(3, 5, 7, 11, 13), //
+                    rrec("vtest", 2, "vtest2"), longList(2, 3, 5, 7, 11, 13), //
+                    rrec("vtest", 11, "vtest2"), longList(11, 5, 13, 7, 2, 3));
         } catch (Throwable t) {
             throw t;
         } finally {
@@ -150,8 +150,8 @@ public class DenseCosComplexTests {
      */
     @Test
     public void testVacc() throws Throwable {
-        execCmd(rrec("vtest", 2, "vtest"), integerList(3, 5, 7, 11, 13), //
-                rrec("vtest", 2, "vtest2"), integerList(2, 3, 5, 7, 11, 13), //
+        execCmd(rrec("vtest", 2, "vtest"), longList(3, 5, 7, 11, 13), //
+                rrec("vtest", 2, "vtest2"), longList(2, 3, 5, 7, 11, 13), //
                 vacc("vtest", 3, 0.2f, 0f, 0.8f), ok(), //
                 vacc("vtest", 3, 0.2f, 0f, 0.8f), ok(), //
                 vacc("vtest", 7, 0.4f, 0.41f, 0.19f), ok(), //
@@ -160,7 +160,7 @@ public class DenseCosComplexTests {
                 vacc("vtest", 11, 0.6f, 0.11f, 0.29f), ok(), //
                 vacc("vtest2", 7, 0.4f, 0.41f, 0.19f), ok(), //
                 vacc("vtest2", 7, 0.4f, 0.41f, 0.19f), ok(), //
-                rrec("vtest", 2, "vtest"), integerList(11, 3, 7, 5, 13), //
-                rrec("vtest", 2, "vtest2"), integerList(2, 3, 7, 5, 11, 13));
+                rrec("vtest", 2, "vtest"), longList(11, 3, 7, 5, 13), //
+                rrec("vtest", 2, "vtest2"), longList(2, 3, 7, 5, 11, 13));
     }
 }

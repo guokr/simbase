@@ -1,7 +1,7 @@
 package com.guokr.simbase.score;
 
-import gnu.trove.map.TIntFloatMap;
-import gnu.trove.map.hash.TIntFloatHashMap;
+import gnu.trove.map.TLongFloatMap;
+import gnu.trove.map.hash.TLongFloatHashMap;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -11,10 +11,10 @@ import com.guokr.simbase.store.VectorSet;
 
 public class JensenShannonDivergence implements SimScore {
 
-    private static final String              name   = "jensenshannon";
-    private static Map<String, TIntFloatMap> caches = new HashMap<String, TIntFloatMap>();
+    private static final String               name   = "jensenshannon";
+    private static Map<String, TLongFloatMap> caches = new HashMap<String, TLongFloatMap>();
 
-    private static final float               ratio  = (float) Math.log(2);
+    private static final float                ratio  = (float) Math.log(2);
 
     private static float lb(float val) {
         if (val > 0f) {
@@ -73,12 +73,12 @@ public class JensenShannonDivergence implements SimScore {
     }
 
     @Override
-    public float score(String srcVKey, int srcId, float[] source, String tgtVKey, int tgtId, float[] target) {
-        TIntFloatMap sourceInfoCache = caches.get(srcVKey);
-        TIntFloatMap targetInfoCache = caches.get(tgtVKey);
+    public float score(String srcVKey, long srcId, float[] source, String tgtVKey, long tgtId, float[] target) {
+        TLongFloatMap sourceInfoCache = caches.get(srcVKey);
+        TLongFloatMap targetInfoCache = caches.get(tgtVKey);
 
-        TIntFloatMap sourceSumCache = caches.get("length:" + srcVKey);
-        TIntFloatMap targetSumCache = caches.get("length:" + tgtVKey);
+        TLongFloatMap sourceSumCache = caches.get("length:" + srcVKey);
+        TLongFloatMap targetSumCache = caches.get("length:" + tgtVKey);
         float srcSum = sourceSumCache.get(srcId);
         float tgtSum = targetSumCache.get(tgtId);
 
@@ -96,13 +96,13 @@ public class JensenShannonDivergence implements SimScore {
     }
 
     @Override
-    public float score(String srcVKey, int srcId, int[] source, int srclen, String tgtVKey, int tgtId, int[] target,
+    public float score(String srcVKey, long srcId, int[] source, int srclen, String tgtVKey, long tgtId, int[] target,
             int tgtlen) {
-        TIntFloatMap sourceInfoCache = caches.get(srcVKey);
-        TIntFloatMap targetInfoCache = caches.get(tgtVKey);
+        TLongFloatMap sourceInfoCache = caches.get(srcVKey);
+        TLongFloatMap targetInfoCache = caches.get(tgtVKey);
 
-        TIntFloatMap sourceSumCache = caches.get("length:" + srcVKey);
-        TIntFloatMap targetSumCache = caches.get("length:" + tgtVKey);
+        TLongFloatMap sourceSumCache = caches.get("length:" + srcVKey);
+        TLongFloatMap targetSumCache = caches.get("length:" + tgtVKey);
         float srcSum = sourceSumCache.get(srcId);
         float tgtSum = targetSumCache.get(tgtId);
 
@@ -138,59 +138,59 @@ public class JensenShannonDivergence implements SimScore {
     }
 
     public void onAttached(String vkey) {
-        caches.put(vkey, new TIntFloatHashMap());
-        caches.put("length:" + vkey, new TIntFloatHashMap());
+        caches.put(vkey, new TLongFloatHashMap());
+        caches.put("length:" + vkey, new TLongFloatHashMap());
     }
 
-    public void onUpdated(String vkey, int vid, float[] vector) {
+    public void onUpdated(String vkey, long vecid, float[] vector) {
         float sum = fsum(vector);
-        caches.get("length:" + vkey).put(vid, sum);
-        caches.get(vkey).put(vid, finfo(vector, sum));
+        caches.get("length:" + vkey).put(vecid, sum);
+        caches.get(vkey).put(vecid, finfo(vector, sum));
     }
 
-    public void onUpdated(String vkey, int vid, int[] vector) {
+    public void onUpdated(String vkey, long vecid, int[] vector) {
         float sum = isum(vector);
-        caches.get("length:" + vkey).put(vid, sum);
-        caches.get(vkey).put(vid, iinfo(vector, sum));
+        caches.get("length:" + vkey).put(vecid, sum);
+        caches.get(vkey).put(vecid, iinfo(vector, sum));
     }
 
-    public void onRemoved(String vkey, int vid) {
-        caches.get(vkey).remove(vid);
-        caches.get("length:" + vkey).remove(vid);
+    public void onRemoved(String vkey, long vecid) {
+        caches.get(vkey).remove(vecid);
+        caches.get("length:" + vkey).remove(vecid);
     }
 
     @Override
-    public void onVectorAdded(VectorSet evtSrc, int vecid, float[] vector) {
+    public void onVectorAdded(VectorSet evtSrc, long vecid, float[] vector) {
         onUpdated(evtSrc.key(), vecid, vector);
     }
 
     @Override
-    public void onVectorAdded(VectorSet evtSrc, int vecid, int[] vector) {
+    public void onVectorAdded(VectorSet evtSrc, long vecid, int[] vector) {
         onUpdated(evtSrc.key(), vecid, vector);
     }
 
     @Override
-    public void onVectorSetted(VectorSet evtSrc, int vecid, float[] old, float[] vector) {
+    public void onVectorSetted(VectorSet evtSrc, long vecid, float[] old, float[] vector) {
         onUpdated(evtSrc.key(), vecid, vector);
     }
 
     @Override
-    public void onVectorSetted(VectorSet evtSrc, int vecid, int[] old, int[] vector) {
+    public void onVectorSetted(VectorSet evtSrc, long vecid, int[] old, int[] vector) {
         onUpdated(evtSrc.key(), vecid, vector);
     }
 
     @Override
-    public void onVectorAccumulated(VectorSet evtSrc, int vecid, float[] vector, float[] accumulated) {
+    public void onVectorAccumulated(VectorSet evtSrc, long vecid, float[] vector, float[] accumulated) {
         onUpdated(evtSrc.key(), vecid, accumulated);
     }
 
     @Override
-    public void onVectorAccumulated(VectorSet evtSrc, int vecid, int[] vector, int[] accumulated) {
+    public void onVectorAccumulated(VectorSet evtSrc, long vecid, int[] vector, int[] accumulated) {
         onUpdated(evtSrc.key(), vecid, accumulated);
     }
 
     @Override
-    public void onVectorRemoved(VectorSet evtSrc, int vecid) {
+    public void onVectorRemoved(VectorSet evtSrc, long vecid) {
         onRemoved(evtSrc.key(), vecid);
     }
 

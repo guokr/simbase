@@ -1,8 +1,8 @@
 package com.guokr.simbase.store;
 
-import gnu.trove.iterator.TIntIntIterator;
-import gnu.trove.iterator.TIntObjectIterator;
-import gnu.trove.map.TIntIntMap;
+import gnu.trove.iterator.TLongIntIterator;
+import gnu.trove.iterator.TLongObjectIterator;
+import gnu.trove.map.TLongIntMap;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -84,12 +84,12 @@ public class SerializerHelper {
             kryo.writeObject(output, vectorSet.accumuFactor);
             kryo.writeObject(output, vectorSet.sparseFactor);
 
-            TIntIntMap indexer = vectorSet.indexer;
-            TIntIntIterator iter = indexer.iterator();
+            TLongIntMap indexer = vectorSet.indexer;
+            TLongIntIterator iter = indexer.iterator();
             kryo.writeObject(output, indexer.size());
             while (iter.hasNext()) {
                 iter.advance();
-                int vecid = iter.key();
+                long vecid = iter.key();
                 int start = iter.value();
                 int length = vectorSet.length(vecid);
                 kryo.writeObject(output, vecid);
@@ -151,12 +151,12 @@ public class SerializerHelper {
             kryo.writeObject(output, vectorSet.accumuFactor);
             kryo.writeObject(output, vectorSet.sparseFactor);
 
-            TIntIntMap indexer = vectorSet.indexer;
-            TIntIntIterator iter = indexer.iterator();
+            TLongIntMap indexer = vectorSet.indexer;
+            TLongIntIterator iter = indexer.iterator();
             kryo.writeObject(output, indexer.size());
             while (iter.hasNext()) {
                 iter.advance();
-                int vecid = iter.key();
+                long vecid = iter.key();
                 int start = iter.value();
                 int length = vectorSet.length(vecid);
                 kryo.writeObject(output, vecid);
@@ -209,10 +209,10 @@ public class SerializerHelper {
 
             while (sortersSize > 0) {
                 int size = kryo.readObject(input, int.class);
-                int srcId = kryo.readObject(input, int.class);
+                long srcId = kryo.readObject(input, long.class);
                 float waterline = kryo.readObject(input, float.class);
                 while (size > 0) {
-                    int tgtId = kryo.readObject(input, int.class);
+                    long tgtId = kryo.readObject(input, long.class);
                     float score = kryo.readObject(input, float.class);
                     rec.add(srcId, tgtId, score);
                     size--;
@@ -234,7 +234,7 @@ public class SerializerHelper {
             kryo.writeObject(output, recommend.limit);
             kryo.writeObject(output, recommend.sorters.size());
 
-            TIntObjectIterator<Sorter> iter = recommend.sorters.iterator();
+            TLongObjectIterator<Sorter> iter = recommend.sorters.iterator();
             while (iter.hasNext()) {
                 iter.advance();
                 Sorter sorter = iter.value();

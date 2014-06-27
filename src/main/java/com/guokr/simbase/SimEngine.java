@@ -36,35 +36,35 @@ public interface SimEngine {
 
     public void vids(SimCallback callback, String vkey);
 
-    public void vget(SimCallback callback, String vkey, int vecid);
+    public void vget(SimCallback callback, String vkey, long vecid);
 
-    public void vadd(SimCallback callback, String vkey, int vecid, float[] vector);
+    public void vadd(SimCallback callback, String vkey, long vecid, float[] vector);
 
-    public void vset(SimCallback callback, String vkey, int vecid, float[] vector);
+    public void vset(SimCallback callback, String vkey, long vecid, float[] vector);
 
-    public void vacc(SimCallback callback, String vkey, int vecid, float[] vector);
+    public void vacc(SimCallback callback, String vkey, long vecid, float[] vector);
 
-    public void vrem(SimCallback callback, String vkey, int vecid);
+    public void vrem(SimCallback callback, String vkey, long vecid);
 
-    public void iget(SimCallback callback, String vkey, int vecid);
+    public void iget(SimCallback callback, String vkey, long vecid);
 
-    public void iset(SimCallback callback, String vkey, int vecid, int[] pairs);
+    public void iset(SimCallback callback, String vkey, long vecid, int[] pairs);
 
-    public void iadd(SimCallback callback, String vkey, int vecid, int[] pairs);
+    public void iadd(SimCallback callback, String vkey, long vecid, int[] pairs);
 
-    public void iacc(SimCallback callback, String vkey, int vecid, int[] pairs);
+    public void iacc(SimCallback callback, String vkey, long vecid, int[] pairs);
 
     public void rlist(SimCallback callback, String vkey);
 
     public void rmk(SimCallback callback, String vkeySource, String vkeyTarget, String funcscore);
 
-    public void rget(SimCallback callback, String vkeySource, int vecid, String vkeyTarget);
+    public void rget(SimCallback callback, String vkeySource, long vecid, String vkeyTarget);
 
-    public void rrec(SimCallback callback, String vkeySource, int vecid, String vkeyTarget);
+    public void rrec(SimCallback callback, String vkeySource, long vecid, String vkeyTarget);
 
-    public void xacc(SimCallback callback, String vkeyTarget, int vecidTarget, String vkeyOperand, int vecidOperand);
+    public void xacc(SimCallback callback, String vkeyTarget, long vecidTarget, String vkeyOperand, long vecidOperand);
 
-    public void xprd(SimCallback callback, String vkeyTarget, int vecidTarget, String vkeyOperand, int[] vecidOperands);
+    public void xprd(SimCallback callback, String vkeyTarget, long vecidTarget, String vkeyOperand, long[] vecidOperands);
 
     public void listen(String bkey, BasisListener listener);
 

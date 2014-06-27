@@ -8,7 +8,7 @@ import static com.guokr.simbase.TestEngine.bsave;
 import static com.guokr.simbase.TestEngine.del;
 import static com.guokr.simbase.TestEngine.execCmd;
 import static com.guokr.simbase.TestEngine.floatList;
-import static com.guokr.simbase.TestEngine.integerList;
+import static com.guokr.simbase.TestEngine.longList;
 import static com.guokr.simbase.TestEngine.ok;
 import static com.guokr.simbase.TestEngine.rlist;
 import static com.guokr.simbase.TestEngine.rmk;
@@ -105,8 +105,8 @@ public class DenseCosGeneralTests {
     @Test
     public void testSaveLoad() throws Throwable {
         try {
-            execCmd(rrec("vtest", 2, "vtest"), integerList(3, 5, 7, 11, 13), //
-                    rrec("vtest", 11, "vtest"), integerList(5, 13, 7, 2, 3), //
+            execCmd(rrec("vtest", 2, "vtest"), longList(3, 5, 7, 11, 13), //
+                    rrec("vtest", 11, "vtest"), longList(5, 13, 7, 2, 3), //
                     vrem("vtest", 3), ok(), //
                     vrem("vtest", 7), ok(), //
                     bsave("btest"), ok(), //
@@ -118,8 +118,8 @@ public class DenseCosGeneralTests {
                     rlist("vtest"), stringList("vtest"), //
                     vadd("vtest", 3, 0.89f, 0f, 0.11f), ok(), //
                     vadd("vtest", 7, 0.09f, 0f, 0.91f), ok(), //
-                    rrec("vtest", 2, "vtest"), integerList(3, 5, 7, 11, 13), //
-                    rrec("vtest", 11, "vtest"), integerList(5, 13, 7, 2, 3));
+                    rrec("vtest", 2, "vtest"), longList(3, 5, 7, 11, 13), //
+                    rrec("vtest", 11, "vtest"), longList(5, 13, 7, 2, 3));
         } catch (Throwable t) {
             throw t;
         } finally {

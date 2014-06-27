@@ -143,43 +143,43 @@ public class SimBasis {
         return this.vectorSets.get(vkey).size();
     }
 
-    public int[] vids(String vkey) {
+    public long[] vids(String vkey) {
         return this.vectorSets.get(vkey).ids();
     }
 
-    public float[] vget(String vkey, int vecid) {
+    public float[] vget(String vkey, long vecid) {
         return this.vectorSets.get(vkey).get(vecid);
     }
 
-    public void vadd(String vkey, int vecid, float[] distr) {
+    public void vadd(String vkey, long vecid, float[] distr) {
         this.vectorSets.get(vkey).add(vecid, distr);
     }
 
-    public void vset(String vkey, int vecid, float[] distr) {
+    public void vset(String vkey, long vecid, float[] distr) {
         this.vectorSets.get(vkey).set(vecid, distr);
     }
 
-    public void vacc(String vkey, int vecid, float[] distr) {
+    public void vacc(String vkey, long vecid, float[] distr) {
         this.vectorSets.get(vkey).accumulate(vecid, distr);
     }
 
-    public void vrem(String vkey, int vecid) {
+    public void vrem(String vkey, long vecid) {
         this.vectorSets.get(vkey).remove(vecid);
     }
 
-    public int[] iget(String vkey, int vecid) {
+    public int[] iget(String vkey, long vecid) {
         return this.vectorSets.get(vkey)._get(vecid);
     }
 
-    public void iadd(String vkey, int vecid, int[] pairs) {
+    public void iadd(String vkey, long vecid, int[] pairs) {
         this.vectorSets.get(vkey)._add(vecid, pairs);
     }
 
-    public void iset(String vkey, int vecid, int[] pairs) {
+    public void iset(String vkey, long vecid, int[] pairs) {
         this.vectorSets.get(vkey)._set(vecid, pairs);
     }
 
-    public void iacc(String vkey, int vecid, int[] pairs) {
+    public void iacc(String vkey, long vecid, int[] pairs) {
         this.vectorSets.get(vkey)._accumulate(vecid, pairs);
     }
 
@@ -210,13 +210,13 @@ public class SimBasis {
         }
 
         if (source.type().equals("dense")) {
-            for (int srcVecId : source.ids()) {
+            for (long srcVecId : source.ids()) {
                 rec.create(srcVecId);
                 float[] vector = source.get(srcVecId);
                 target.rescore(source.key(), srcVecId, vector, rec);
             }
         } else {
-            for (int srcVecId : source.ids()) {
+            for (long srcVecId : source.ids()) {
                 rec.create(srcVecId);
                 int[] vector = source._get(srcVecId);
                 target.rescore(source.key(), srcVecId, vector, rec);
@@ -228,11 +228,11 @@ public class SimBasis {
         this.recommendations.remove(vkey);
     }
 
-    public String[] rget(String vkeySource, int vecid, String vkeyTarget) {
+    public String[] rget(String vkeySource, long vecid, String vkeyTarget) {
         return this.recommendations.get(rkey(vkeySource, vkeyTarget)).get(vecid);
     }
 
-    public int[] rrec(String vkeySource, int vecid, String vkeyTarget) {
+    public long[] rrec(String vkeySource, long vecid, String vkeyTarget) {
         return this.recommendations.get(rkey(vkeySource, vkeyTarget)).rec(vecid);
     }
 

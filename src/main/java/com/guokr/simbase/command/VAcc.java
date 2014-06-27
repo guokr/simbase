@@ -8,11 +8,11 @@ public class VAcc extends SimCommand {
 
     @Override
     public String signature() {
-        return "siF";
+        return "slF";
     }
 
     @Override
-    public void invoke(SimEngine engine, String vkey, int vecid, float[] distr, SimCallback callback) {
+    public void invoke(SimEngine engine, String vkey, long vecid, float[] distr, SimCallback callback) {
         engine.vacc(callback, vkey, vecid, distr);
     }
 

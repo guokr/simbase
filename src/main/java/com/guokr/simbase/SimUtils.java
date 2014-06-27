@@ -62,6 +62,10 @@ public class SimUtils {
         return String.format("%d", val).getBytes(UTF_8);
     }
 
+    public static byte[] bytes(long val) {
+        return String.format("%d", val).getBytes(UTF_8);
+    }
+
     public static byte[] bytes(float val) {
         if (val == (int) val)
             return String.format("%d", (int) val).getBytes(UTF_8);

@@ -8,11 +8,11 @@ public class VRem extends SimCommand {
 
     @Override
     public String signature() {
-        return "si";
+        return "sl";
     }
 
     @Override
-    public void invoke(SimEngine engine, String vkey, int vecid, SimCallback callback) {
+    public void invoke(SimEngine engine, String vkey, long vecid, SimCallback callback) {
         engine.vrem(callback, vkey, vecid);
     }
 
