@@ -10,7 +10,6 @@ import static com.guokr.simbase.TestEngine.longList;
 import static com.guokr.simbase.TestEngine.ok;
 import static com.guokr.simbase.TestEngine.rlist;
 import static com.guokr.simbase.TestEngine.rmk;
-import static com.guokr.simbase.TestEngine.rget;
 import static com.guokr.simbase.TestEngine.rrec;
 import static com.guokr.simbase.TestEngine.stringList;
 import static com.guokr.simbase.TestEngine.vacc;

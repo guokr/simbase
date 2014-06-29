@@ -1,7 +1,6 @@
 package com.guokr.simbase.score;
 
 import gnu.trove.map.TLongFloatMap;
-import gnu.trove.map.TLongFloatMap;
 import gnu.trove.map.hash.TLongFloatHashMap;
 
 import java.util.HashMap;

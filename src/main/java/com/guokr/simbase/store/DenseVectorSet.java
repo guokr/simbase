@@ -1,6 +1,5 @@
 package com.guokr.simbase.store;
 
-import gnu.trove.iterator.TIntIntIterator;
 import gnu.trove.iterator.TLongIntIterator;
 import gnu.trove.list.TFloatList;
 import gnu.trove.list.array.TFloatArrayList;
