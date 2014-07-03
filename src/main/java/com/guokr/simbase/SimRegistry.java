@@ -14,6 +14,7 @@ public class SimRegistry {
     }
 
     public SimCommand get(String key) {
+        key = key.toLowerCase();
         SimCommand command = registry.get(key);
         if (command == null) {
             throw new SimCommandException(String.format("Unknown command '%s'", key));
