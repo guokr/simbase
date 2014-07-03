@@ -8,7 +8,7 @@ public interface SimEngine {
 
     public String version = "v0.1.0-beta2";
 
-    public String[] info();
+    public void info(SimCallback callback);
 
     public void load(SimCallback callback);
 

@@ -13,8 +13,7 @@ public class Info extends SimCommand {
 
     @Override
     public void invoke(SimEngine engine, SimCallback callback) {
-        callback.stringList(engine.info());
-        callback.response();
+        engine.info(callback);
     }
 
 }

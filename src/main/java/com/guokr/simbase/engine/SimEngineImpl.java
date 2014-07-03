@@ -3,6 +3,7 @@ package com.guokr.simbase.engine;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -16,6 +17,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,7 +40,9 @@ public class SimEngineImpl implements SimEngine, SimBasisListener {
         BASIS, VECTORS, RECOMM
     };
 
-    private static final Logger logger = LoggerFactory.getLogger(SimEngineImpl.class);
+    private static final Logger logger         = LoggerFactory.getLogger(SimEngineImpl.class);
+
+    private final AtomicInteger commandCounter = new AtomicInteger();
 
     public abstract class AsyncSafeRunner implements Runnable {
         String scope;
@@ -53,6 +57,7 @@ public class SimEngineImpl implements SimEngine, SimBasisListener {
         public void run() {
             try {
                 invoke();
+                commandCounter.incrementAndGet();
             } catch (Throwable ex) {
                 logger.error(ex.getMessage(), ex);
             }
@@ -74,6 +79,7 @@ public class SimEngineImpl implements SimEngine, SimBasisListener {
         public void run() {
             try {
                 invoke();
+                commandCounter.incrementAndGet();
             } catch (Throwable ex) {
                 String errMsg = ex.getMessage();
                 logger.error(errMsg, ex);
@@ -111,6 +117,7 @@ public class SimEngineImpl implements SimEngine, SimBasisListener {
     private final Map<String, Integer>         counters    = new HashMap<String, Integer>();
     private final int                          bycount;
     private final String                       savePath;
+    private final long                         startTime   = new Date().getTime();
 
     public SimEngineImpl(SimContext simContext) {
         String separator = System.getProperty("file.separator");
@@ -186,10 +193,6 @@ public class SimEngineImpl implements SimEngine, SimBasisListener {
         return new StringBuilder().append(vkeySource).append("_").append(vkeyTarget).toString();
     }
 
-    public String[] info() {
-        return new String[] { "version:" + version };
-    }
-
     public void startCron() {
         final int saveInterval = this.context.getInt("saveinterval");
 
@@ -201,6 +204,40 @@ public class SimEngineImpl implements SimEngine, SimBasisListener {
             }
         };
         cron.schedule(savetask, saveInterval, saveInterval);
+    }
+
+    @Override
+    @SimCall
+    public void info(final SimCallback callback) {
+        long curTime = new Date().getTime();
+        final long disTime = curTime - startTime;
+
+        Runtime runtime = Runtime.getRuntime();
+        long allocatedMemory = runtime.totalMemory();
+        final String usedMemory = String.valueOf(allocatedMemory);
+
+        List<String> bkeys = new ArrayList<String>(bases.keySet());
+        int tempCount = 0;
+        for (String bkey : bkeys) {
+
+            List<String> vkeys = vectorsOf.get(bkey);
+            if (vkeys != null) {
+                for (String vkey : vkeys) {
+                    tempCount += bases.get(bkey).vlen(vkey);
+                }
+            }
+        }
+        final int keyCount = tempCount;
+
+        mngmExec.execute(new SafeRunner("info", callback) {
+            @Override
+            public void invoke() {
+                String infos = String.format(
+                        "version:%s\nuptime:%s\nused_memory:%s\nvectorKeys:%s\ntotal_command_processed:%s\n", version,
+                        disTime / 1000, usedMemory, keyCount, commandCounter.get());
+                callback.stringValue(infos);
+            }
+        });
     }
 
     @Override
