@@ -102,10 +102,10 @@ public class ServerHandler implements IHandler {
                             break;
                         case 4:
                             sig = sig.substring(1);
-                            if (sig.equals("slsl")) {
+                            if (sig.equals("lsl")) {
                                 command.invoke(engine, request.args(1), request.argl(2), request.args(3),
                                         request.argl(4), callback);
-                            } else if (sig.equals("slsL")) {
+                            } else if (sig.equals("lsL")) {
                                 command.invoke(engine, request.args(1), request.argl(2), request.args(3),
                                         request.argL(4), callback);
                             }

@@ -27,6 +27,13 @@ public abstract class SimCallback {
         buffer.put(SimUtils.CRLF);
     }
 
+    public void nil() {
+        buffer = ByteBuffer.allocate(5);
+        buffer.put(SimUtils.DOLLAR);
+        buffer.put(SimUtils.NIL);
+        buffer.put(SimUtils.CRLF);
+    }
+
     public void error(String msg) {
         byte[] bytes = SimUtils.bytes(msg);
         buffer = ByteBuffer.allocate(bytes.length + 3);

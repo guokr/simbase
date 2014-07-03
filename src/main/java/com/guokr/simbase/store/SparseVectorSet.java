@@ -138,8 +138,13 @@ public class SparseVectorSet implements VectorSet, BasisListener {
 
     @Override
     public float[] get(long vecid) {
-        float[] result = new float[base.size()];
-        Basis.densify(base.size(), sparseFactor, _get(vecid), result);
+        float[] result;
+        if (indexer.containsKey(vecid)) {
+            result = new float[base.size()];
+            Basis.densify(base.size(), sparseFactor, _get(vecid), result);
+        } else {
+            result = new float[0];
+        }
         return result;
     }
 
@@ -172,8 +177,13 @@ public class SparseVectorSet implements VectorSet, BasisListener {
 
     @Override
     public int[] _get(long vecid) {
-        int[] result = new int[lengths.get(vecid)];
-        _get(vecid, result);
+        int[] result;
+        if (indexer.containsKey(vecid)) {
+            result = new int[lengths.get(vecid)];
+            _get(vecid, result);
+        } else {
+            result = new int[0];
+        }
         return result;
     }
 

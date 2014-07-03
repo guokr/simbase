@@ -553,7 +553,12 @@ public class SimEngineImpl implements SimEngine, SimBasisListener {
         readerPool.submit(new SafeRunner("vget", callback) {
             @Override
             public void invoke() {
-                callback.floatList(bases.get(bkey).vget(vkey, vecid));
+                float[] result = bases.get(bkey).vget(vkey, vecid);
+                if (result.length == 0) {
+                    callback.nil();
+                } else {
+                    callback.floatList(result);
+                }
             }
         });
     }
@@ -857,15 +862,17 @@ public class SimEngineImpl implements SimEngine, SimBasisListener {
             public void invoke() {
                 SimBasis base = bases.get(bkey);
                 float[] vector = base.vget(vkeyOperand, vecidOperand);
-                base.vacc(vkeyTarget, vecidTarget, vector);
+                if (vector.length != 0) {
+                    base.vacc(vkeyTarget, vecidTarget, vector);
 
-                if (!counters.containsKey(vkeyTarget)) {
-                    counters.put(vkeyTarget, 0);
-                }
-                int counter = counters.get(vkeyTarget) + 1;
-                counters.put(vkeyTarget, counter);
-                if (counter % bycount == 0) {
-                    logger.info(String.format("acculmulating dense vectors %d to %s", counter, vkeyTarget));
+                    if (!counters.containsKey(vkeyTarget)) {
+                        counters.put(vkeyTarget, 0);
+                    }
+                    int counter = counters.get(vkeyTarget) + 1;
+                    counters.put(vkeyTarget, counter);
+                    if (counter % bycount == 0) {
+                        logger.info(String.format("acculmulating dense vectors %d to %s", counter, vkeyTarget));
+                    }
                 }
             }
         });

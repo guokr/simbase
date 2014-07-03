@@ -239,9 +239,14 @@ public class DenseVectorSet implements VectorSet, BasisListener {
 
     @Override
     public int[] _get(long vecid) {
-        int[] result = new int[this.base.size()];
-        float[] input = new float[this.base.size()];
-        _get(vecid, input, result);
+        int[] result;
+        if (indexer.containsKey(vecid)) {
+            result = new int[this.base.size()];
+            float[] input = new float[this.base.size()];
+            _get(vecid, input, result);
+        } else {
+            result = new int[0];
+        }
         return result;
     }
 
